@@ -4,6 +4,9 @@ import sys
 sys.path.append(r"\\filer16l\PV160L\Project\VP.D1339\34_ViPy\Visum16\ViPy_V00_07")
 import vipy.visum
 import os
+from xml.dom import minidom
+from xml.etree import ElementTree
+import xml.dom.minidom as xml
 
 
 def map_id(_id, mapper):
@@ -135,8 +138,8 @@ def to_xml(transit, path):
 
     with open(os.path.join(path,"network.xml"), 'w') as f:
         f.write('<?xml version="1.0" encoding="UTF-8" ?>')
-        f.write('<!DOCTYPE network SYSTEM "http://matsim.org/files/dtd/network_v1.dtd">')
-        ET.ElementTree(network).write(f, 'utf-8')
+        f.write('<!DOCTYPE network SYSTEM "http://matsim.org/files/dtd/network_v1.dtd">\n')
+        f.write(prettify(network))
 
     transit = ET.Element("transitSchedule")
     xml_stops = ET.Element("transitStops")
@@ -181,8 +184,8 @@ def to_xml(transit, path):
 
     with open(os.path.join(path,"transitschedule.xml"), 'w') as f:
         f.write('<?xml version="1.0" encoding="UTF-8" ?>')
-        f.write('<!DOCTYPE transitSchedule SYSTEM "http://www.matsim.org/files/dtd/transitSchedule_v1.dtd">')
-        ET.ElementTree(transit).write(f, 'utf-8')
+        f.write('<!DOCTYPE transitSchedule SYSTEM "http://www.matsim.org/files/dtd/transitSchedule_v1.dtd">\n')
+        f.write(prettify(transit))
 
     vehicles = ET.Element("vehicleDefinitions", attrib={"xmlns": "http://www.matsim.org/files/dtd",
                                                         "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
@@ -204,7 +207,18 @@ def to_xml(transit, path):
         vehicles.append(ET.Element("vehicle", attrib={"id": v_id, "type": "1"}))
 
     with open(os.path.join(path,"transitvehicle.xml"), 'w') as f:
-        ET.ElementTree(vehicles).write(f, 'utf-8')
+        f.write(prettify(vehicles))
+
+
+def prettify(elem):
+    """Return a pretty-printed XML string for the Element.
+    """
+    doc = xml.Document()
+
+    declaration = doc.toxml()
+    rough_string = ElementTree.tostring(elem, 'utf-8')
+    reparsed = minidom.parseString(rough_string)
+    return reparsed.toprettyxml(indent="  ")[len(declaration):]
 
 
 if __name__ == "__main__":
