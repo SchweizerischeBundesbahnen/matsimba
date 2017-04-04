@@ -202,7 +202,7 @@ def to_xml(transit, path):
     capacity.append(ET.Element("seats", attrib={"persons": "10000"}))
     capacity.append(ET.Element("standingRoom", attrib={"persons": "10000"}))
     v_type.append(capacity)
-    v_type.append(ET.Element("length", attrib={"meter": "100"}))
+    v_type.append(ET.Element("length", attrib={"meter": "10"}))
 
     vehicles.append(v_type)
 
