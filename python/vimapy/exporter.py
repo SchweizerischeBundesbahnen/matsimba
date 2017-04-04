@@ -128,11 +128,11 @@ def to_xml(transit, path):
     for link_id, link in links.iteritems():
         xml_links.append(ET.Element(tag="link", attrib={"id": str(link_id),
                                                 "from": str(link["from"]),
-                                                "length": str(link["length"]),
+                                                "length": str(link["length"]*1000),
                                                 "oneway": "1",
                                                 "permlanes": "1.0",
-                                                "capacity": "1.0",
-                                                "freespeed": "1.0",
+                                                "capacity": "100000",
+                                                "freespeed": "10.0",
                                                 "modes": "pt",
                                                 "to": str(link["to"])}))
 
