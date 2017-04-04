@@ -24,6 +24,9 @@ def make_link(from_node_id, to_node_id, links, nodes, visum_com, mapper):
     :param mapper: Map the ids to new values
     :return: link_id
     """
+    from_node_id = int(float(from_node_id))
+    to_node_id = int(float(to_node_id))
+
     link_id = "%i_%i" % (int(float(from_node_id)), int(float(to_node_id)))
     link_id = map_id(link_id, mapper)
     if link_id not in links:
