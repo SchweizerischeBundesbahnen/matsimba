@@ -55,7 +55,7 @@ def export_pt(v):
 
     schedule = {}
 
-    for fzp in v.apl.hole_fahrzeitprofile()[:20]:
+    for fzp in v.apl.hole_fahrzeitprofile():
         for fpf in fzp.hole_fahrplanfahrten():
 
             mapper = lambda _id: "%s_%s" % (str(_id), fzp.nummer())
@@ -228,7 +228,16 @@ if __name__ == "__main__":
     path = r"\\V00925\Simba\20_Modelle\80_MatSim\14_senozon_RailFit\30_validierung_oev_umlegung\01_Visum_Versionen\REF_STEP2030_M_mPM_mCeva_UML_DWV_01_UeL_BAV_v05.ver"
     v = vipy.visum.Visum()
     v.lade_version(path)
-    export_pt(v)
+
+    datas = export_pt(v)
+
+    del datas["schedule"]["007-D-15191"]
+    del datas["schedule"]["003-D-15021"]
+    del datas["schedule"]["003-D-15022"]
+
+    to_xml(datas, r"D:/tmp")
+
+
 
 
 
