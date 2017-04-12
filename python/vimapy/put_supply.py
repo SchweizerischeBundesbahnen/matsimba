@@ -252,5 +252,5 @@ if __name__ == "__main__":
     v.lade_version(path)
 
     set_projection(v, config)
-    export(v, folder="D:\tmp", config=config)
+    export(v, folder=r"D:\tmp", config=config)
 
