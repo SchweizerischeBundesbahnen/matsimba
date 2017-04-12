@@ -235,9 +235,9 @@ def prettify(elem):
 def export(v, folder, config):
     datas = export_supply_and_network(v, config=config)
 
-    del datas["schedule"]["007-D-15191"]
-    del datas["schedule"]["003-D-15021"]
-    del datas["schedule"]["003-D-15022"]
+    for line in ["007-D-15191", "003-D-15021", "003-D-15022"]:
+        if line in datas:
+            del datas[line]
 
     to_xml(datas, folder=folder, config=config)
 
