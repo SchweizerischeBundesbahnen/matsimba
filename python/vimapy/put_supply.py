@@ -7,13 +7,14 @@ import os
 from xml.dom import minidom
 from xml.etree import ElementTree
 import xml.dom.minidom as xml
+import ConfigParser
 
 
 def map_id(_id, mapper):
     return mapper(_id)
 
 
-def make_link(from_node_id, to_node_id, links, nodes, visum_com, mapper):
+def make_link(from_node_id, to_node_id, links, nodes, visum_com, mapper, speed=10):
     """
 
     :param from_node_id:
@@ -40,14 +41,17 @@ def make_link(from_node_id, to_node_id, links, nodes, visum_com, mapper):
         else:
             link = visum_com.Net.Links.ItemByKey(fromNode=from_node_id, toNode=to_node_id)
             length = link.AttValue("length")
-        links[link_id] = {"from": from_node_id, "to": to_node_id, "length": length}
+        links[link_id] = {"from": from_node_id, "to": to_node_id, "length": length, "speed": speed}
     return link_id
 
 
-def export_pt(v):
-    v.visum_com.Net.SetAttValue("ConcatMaxLen", 2147483647.0)
-    proj = u'PROJCS["CH1903_LV03",GEOGCS["GCS_CH1903",DATUM["D_CH1903",SPHEROID["Bessel_1841",6377397.155,299.1528128]],PRIMEM["Greenwich",0],UNIT["Degree",0.0174532925199432955]],PROJECTION["Hotine_Oblique_Mercator_Azimuth_Center"],PARAMETER["False_Easting",600000],PARAMETER["False_Northing",200000],PARAMETER["Scale_Factor",1],PARAMETER["Azimuth",90],PARAMETER["Longitude_Of_Center",7.439583333333333],PARAMETER["Latitude_Of_Center",46.95240555555556],UNIT["Meter",1]]'
+def set_projection(v, config):
+    v.visum_com.Net.SetAttValue("ConcatMaxLen", config.get("Visum", "maxlength"))
+    proj = config.get("Visum", "projection")
     v.visum_com.Net.SetProjection(newProjection=proj, calculate=True)
+
+
+def export_supply_and_network(v, config):
 
     stopFacilities = {}
     links = {}
@@ -70,6 +74,11 @@ def export_pt(v):
                 route = []
                 stops = []
                 for fzpe in fzp.hole_verlaufe():
+                    try:
+                        speed = fzpe.com_objekt.AttValue("PostLength")*1000.0/fzpe.com_objekt.AttValue("PostRunTime")
+                    except ZeroDivisionError:
+                        speed = 1000
+
                     stop_id = int(fzpe.com_objekt.AttValue("LineRouteItem\StopPoint\No"))
                     stop_id = map_id(stop_id, mapper)
 
@@ -81,7 +90,7 @@ def export_pt(v):
                             from_node = to_node
 
                         link_id = make_link(from_node, to_node, links=links, nodes=nodes,
-                                            visum_com=v.visum_com, mapper=mapper)
+                                            visum_com=v.visum_com, mapper=mapper, speed=speed)
 
                         stopFacilities[stop_id] = {'x': fzpe.com_objekt.AttValue("LineRouteItem\StopPoint\Xcoord"),
                                                    'y': fzpe.com_objekt.AttValue("LineRouteItem\StopPoint\Ycoord"),
@@ -97,13 +106,12 @@ def export_pt(v):
                     if from_node_ids != [""]:
                         for from_node_id, to_node_id in zip(from_node_ids, to_node_ids):
                             link_id = make_link(from_node_id, to_node_id, links=links, nodes=nodes,
-                                                visum_com=v.visum_com, mapper=mapper)
+                                                visum_com=v.visum_com, mapper=mapper, speed=speed)
                             route.append(link_id)
                     else:
                         link_id = make_link(from_node, to_node, links=links, nodes=nodes,
-                                            visum_com=v.visum_com, mapper=mapper)
+                                            visum_com=v.visum_com, mapper=mapper, speed=speed)
                         route.append(link_id)
-
 
                 schedule[fzp.linename()][key] = {"departures": [],
                                                  "route": route,
@@ -113,7 +121,7 @@ def export_pt(v):
     return {"schedule": schedule, "stopFacilities": stopFacilities, "nodes": nodes, "links": links}
 
 
-def to_xml(transit, path):
+def to_xml(transit, folder, config):
     schedule = transit["schedule"]
     stop_facilities = transit["stopFacilities"]
     nodes = transit["nodes"]
@@ -132,14 +140,14 @@ def to_xml(transit, path):
                                                 "oneway": "1",
                                                 "permlanes": "1.0",
                                                 "capacity": "100000",
-                                                "freespeed": "10.0",
+                                                "freespeed": str(link["speed"]),
                                                 "modes": "pt",
                                                 "to": str(link["to"])}))
 
     network.append(xml_nodes)
     network.append(xml_links)
 
-    with open(os.path.join(path,"network.xml"), 'w') as f:
+    with open(os.path.join(folder, "network.xml"), 'w') as f:
         f.write('<?xml version="1.0" encoding="UTF-8" ?>')
         f.write('<!DOCTYPE network SYSTEM "http://matsim.org/files/dtd/network_v1.dtd">\n')
         f.write(prettify(network))
@@ -185,7 +193,7 @@ def to_xml(transit, path):
             xml_transit_line.append(xml_transit_route)
         transit.append(xml_transit_line)
 
-    with open(os.path.join(path,"transitschedule.xml"), 'w') as f:
+    with open(os.path.join(folder, "transitschedule.xml"), 'w') as f:
         f.write('<?xml version="1.0" encoding="UTF-8" ?>')
         f.write('<!DOCTYPE transitSchedule SYSTEM "http://www.matsim.org/files/dtd/transitSchedule_v1.dtd">\n')
         f.write(prettify(transit))
@@ -209,7 +217,7 @@ def to_xml(transit, path):
     for v_id in vehicles_ids:
         vehicles.append(ET.Element("vehicle", attrib={"id": v_id, "type": "1"}))
 
-    with open(os.path.join(path,"transitvehicle.xml"), 'w') as f:
+    with open(os.path.join(folder, "transitvehicle.xml"), 'w') as f:
         f.write(prettify(vehicles))
 
 
@@ -224,21 +232,25 @@ def prettify(elem):
     return reparsed.toprettyxml(indent="  ")[len(declaration):]
 
 
+def export(v, folder, config):
+    datas = export_supply_and_network(v, config=config)
+
+    for line in ["007-D-15191", "003-D-15021", "003-D-15022"]:
+        if line in datas:
+            del datas[line]
+
+    to_xml(datas, folder=folder, config=config)
+
+
 if __name__ == "__main__":
-    path = r"\\V00925\Simba\20_Modelle\80_MatSim\14_senozon_RailFit\30_validierung_oev_umlegung\01_Visum_Versionen\REF_STEP2030_M_mPM_mCeva_UML_DWV_01_UeL_BAV_v05.ver"
+    config = ConfigParser.ConfigParser()
+    config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.ini")
+    config.read(config_path)
+
+    path = config.get("VisumVersions", "demo")
     v = vipy.visum.Visum()
     v.lade_version(path)
 
-    datas = export_pt(v)
-
-    del datas["schedule"]["007-D-15191"]
-    del datas["schedule"]["003-D-15021"]
-    del datas["schedule"]["003-D-15022"]
-
-    to_xml(datas, r"D:/tmp")
-
-
-
-
-
+    set_projection(v, config)
+    export(v, folder=r"D:\tmp", config=config)
 
