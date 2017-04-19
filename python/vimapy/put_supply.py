@@ -8,6 +8,7 @@ from xml.dom import minidom
 from xml.etree import ElementTree
 import xml.dom.minidom as xml
 import ConfigParser
+import logging
 
 
 def map_id(_id, mapper):
@@ -59,7 +60,17 @@ def export_supply_and_network(v, config):
 
     schedule = {}
 
+    v.apl.go_offline(mit_fzps=True, mit_fpfs=True, mit_fzpes=True, params={"fzpes": ["PostLength", "PostRunTime", "LineRouteItem\\StopPoint\\No",
+                                                                                     'LineRouteItem\\OutLink\\FromNodeNo',
+                                                                                     'LineRouteItem\\OutLink\\ToNodeNo',
+                                                                                     'LineRouteItem\\StopPoint\\Xcoord',
+                                                                                     'Concatenate:UsedLineRouteItems\\OutLink\\FromNodeNo',
+                                                                                     'Concatenate:UsedLineRouteItems\\OutLink\\ToNodeNo',
+                                                                                     'LineRouteItem\\InLink\\ToNodeNo',
+    'LineRouteItem\\StopPoint\\Ycoord']})
+
     for fzp in v.apl.hole_fahrzeitprofile():
+        logging.getLogger(__name__).info("%s" % fzp)
         for fpf in fzp.hole_fahrplanfahrten():
 
             mapper = lambda _id: "%s_%s" % (str(_id), fzp.nummer())
