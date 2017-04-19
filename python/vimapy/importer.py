@@ -97,10 +97,10 @@ $VERSION:VERSNR;FILETYPE;LANGUAGE;UNIT
                      weg_index,
                      index,
                      1.0,
-                     fzp.linename(),
-                     fzp.lineroutename(),
-                     fzp.richtung(),
-                     fzp.name(),
+                     fzp.com_objekt.AttValue("LineName").encode("cp1252"),
+                     fzp.com_objekt.AttValue("LineRouteName").encode("cp1252"),
+                     fzp.com_objekt.AttValue("DIRECTIONCODE").encode("cp1252"),
+                     fzp.com_objekt.AttValue("Name").encode("cp1252"),
                      1,
                      secs2HHMMSS(int(row["start_time"])),
                      hsnr_von]
@@ -116,8 +116,9 @@ $VERSION:VERSNR;FILETYPE;LANGUAGE;UNIT
 if __name__ == "__main__":
     folder_in = r"..\..\data_in\test"
     folder_out = r"..\..\data_out\test"
-    # path_trips_file = os.path.join(folder_in, 'matsim_trips.txt')
-    path_trips_file = r"\\v00925\80_MatSim\14_senozon_RailFit\30_validierung_oev_umlegung\01_Visum_Versionen\AnalyseZufRunden\matsim_trips.txt"
+    path_trips_file = os.path.join(folder_in, 'matsim_trips.txt')
+    # path_trips_file = r"\\v00925\80_MatSim\14_senozon_RailFit\30_validierung_oev_umlegung\01_Visum_Versionen\AnalyseZufRunden\matsim_trips.txt"
     path_visum_version = r"\\v00925\80_MatSim\14_senozon_RailFit\30_validierung_oev_umlegung\01_Visum_Versionen\REF_STEP2030_M_mPM_mCeva_UML_DWV_01_UeL_BAV_v05_intMatrix.ver"
-    path_out_trips_for_visum = os.path.join(folder_out, 'matsim_trips_for_visum.csv')
+    # path_out_trips_for_visum = os.path.join(folder_out, 'matsim_trips_for_visum.csv')
+    path_out_trips_for_visum = os.path.join(folder_out, 'matsim_trips_for_visum_test.csv')
     import_trips_in_visum(path_trips_file, path_visum_version, path_out_trips_for_visum)
