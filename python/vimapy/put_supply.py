@@ -223,6 +223,11 @@ def to_xml(transit, folder, config):
     capacity.append(ET.Element("standingRoom", attrib={"persons": "10000"}))
     v_type.append(capacity)
     v_type.append(ET.Element("length", attrib={"meter": "10"}))
+    v_type.append(ET.Element("maximumVelocity", attrib={"meterPerSecond": "99999.9"}))
+    v_type.append(ET.Element("accessTime", attrib={"secondsPerPerson": "0.0"}))
+    v_type.append(ET.Element("egressTime", attrib={"secondsPerPerson": "0.0"}))
+    v_type.append(ET.Element("doorOperation", attrib={"mode": "serial"}))
+    v_type.append(ET.Element("passengerCarEquivalents", attrib={"pce": "1.0"}))
 
     vehicles.append(v_type)
 
