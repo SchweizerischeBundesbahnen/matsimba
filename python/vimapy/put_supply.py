@@ -244,11 +244,13 @@ def prettify(elem):
 
 
 def export(v, folder, config):
+
     datas = export_supply_and_network(v, config=config)
 
     for line in ["007-D-15191", "003-D-15021", "003-D-15022"]:
-        if line in datas:
-            del datas[line]
+        if line in datas["schedule"].keys():
+            logging.getLogger(__name__).info("Delete line %s, Spitzkehre not yet supported" % line)
+            del datas["schedule"][line]
 
     to_xml(datas, folder=folder, config=config)
 
