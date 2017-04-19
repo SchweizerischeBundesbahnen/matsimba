@@ -14,6 +14,7 @@ sys.path.append(r"C:\Program Files\PTV Vision\PTV Visum 16\Exe\PythonModules")
 from VisumPy.helpers import secs2HHMMSS
 from helpers import get_csv_line
 
+SECONDS_PER_DAY = 86400 # = 24 * 60 * 60
 
 def import_trips_in_visum(path_trips_file, path_visum_version, path_out_trips_for_visum):
     """
@@ -91,6 +92,7 @@ $VERSION:VERSNR;FILETYPE;LANGUAGE;UNIT
                 hpnr_bis = int(row["alighting_stop"].split("_")[0])
                 fzpid = int(row["route"].split("_")[0])
                 fzp = fzp_pro_id[fzpid]
+                time_sec = int(row["start_time"]) % SECONDS_PER_DAY # < SECONDES_PER_DAY wird von Visum beim Einlesen gefordert!
                 l = [hsnr_von,
                      hsnr_pro_hpnr[hpnr_bis],
                      journey_id,
@@ -102,7 +104,7 @@ $VERSION:VERSNR;FILETYPE;LANGUAGE;UNIT
                      fzp.com_objekt.AttValue("DIRECTIONCODE").encode("cp1252"),
                      fzp.com_objekt.AttValue("Name").encode("cp1252"),
                      1,
-                     secs2HHMMSS(int(row["start_time"])),
+                     secs2HHMMSS(time_sec),
                      hsnr_von]
                 trips_for_visum.write(get_csv_line(l))
                 index += 1
@@ -114,11 +116,7 @@ $VERSION:VERSNR;FILETYPE;LANGUAGE;UNIT
 
 
 if __name__ == "__main__":
-    folder_in = r"..\..\data_in\test"
-    folder_out = r"..\..\data_out\test"
-    path_trips_file = os.path.join(folder_in, 'matsim_trips.txt')
-    # path_trips_file = r"\\v00925\80_MatSim\14_senozon_RailFit\30_validierung_oev_umlegung\01_Visum_Versionen\AnalyseZufRunden\matsim_trips.txt"
-    path_visum_version = r"\\v00925\80_MatSim\14_senozon_RailFit\30_validierung_oev_umlegung\01_Visum_Versionen\REF_STEP2030_M_mPM_mCeva_UML_DWV_01_UeL_BAV_v05_intMatrix.ver"
-    # path_out_trips_for_visum = os.path.join(folder_out, 'matsim_trips_for_visum.csv')
-    path_out_trips_for_visum = os.path.join(folder_out, 'matsim_trips_for_visum_test.csv')
+    path_trips_file = r"\\V00925\80_MatSim\30_TopDown\visum\00_Fahrgastmodul\matsim_trips.txt"
+    path_visum_version = r"\\V00925\80_MatSim\30_TopDown\visum\REF_STEP2030_M_mPM_mCeva_UML_DWV_01_UeL_BAV_v05_intMatrix.ver"
+    path_out_trips_for_visum = r"\\V00925\80_MatSim\30_TopDown\visum\00_Fahrgastmodul\matsim_trips_for_visum.txt"
     import_trips_in_visum(path_trips_file, path_visum_version, path_out_trips_for_visum)
