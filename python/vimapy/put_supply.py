@@ -186,7 +186,8 @@ def to_xml(transit, folder, config):
             for stop in schedule[transit_line][transit_route]["routeProfile"]:
                 route_profile.append(ET.Element("stop", attrib={"refId": str(stop["refId"]),
                                                                 "arrivalOffset": stop["arrivalOffset"],
-                                                                "departureOffset": stop["departureOffset"]}))
+                                                                "departureOffset": stop["departureOffset"],
+                                                                'awaitDeparture': "true"}))
             xml_transit_route.append(route_profile)
 
             route = ET.Element("route")
