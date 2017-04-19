@@ -12,8 +12,7 @@ import vipy.visum
 
 sys.path.append(r"C:\Program Files\PTV Vision\PTV Visum 16\Exe\PythonModules")
 from VisumPy.helpers import secs2HHMMSS
-
-from python.vimapy.helpers import get_csv_line
+from helpers import get_csv_line
 
 
 def import_trips_in_visum(path_trips_file, path_visum_version, path_out_trips_for_visum):
@@ -103,8 +102,6 @@ $VERSION:VERSNR;FILETYPE;LANGUAGE;UNIT
             journey_id_old = journey_id
 
     logging.info("trips gelesen und geschrieben")
-
-
 
 
 if __name__ == "__main__":
