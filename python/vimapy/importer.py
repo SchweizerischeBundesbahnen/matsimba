@@ -5,11 +5,6 @@ python_path.load()
 
 import csv
 import logging
-import os
-
-import sys
-
-import vipy
 import vipy.visum
 import datetime
 from helpers import get_csv_line
