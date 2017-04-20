@@ -68,6 +68,7 @@ def export_supply_and_network(v, config):
                                                                                      'Concatenate:UsedLineRouteItems\\OutLink\\FromNodeNo',
                                                                                      'Concatenate:UsedLineRouteItems\\OutLink\\ToNodeNo',
                                                                                      'LineRouteItem\\InLink\\ToNodeNo',
+                                                                                     'LineRouteItem\\NodeNo',
     'LineRouteItem\\StopPoint\\Ycoord']})
 
     for fzp in v.apl.hole_fahrzeitprofile():
