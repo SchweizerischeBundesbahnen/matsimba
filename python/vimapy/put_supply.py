@@ -15,7 +15,7 @@ def map_id(_id, mapper):
     return mapper(_id)
 
 
-def make_link(from_node_id, to_node_id, links, nodes, visum_com, mapper, speed=10):
+def make_link(from_node_id, to_node_id, links, nodes, visum_com, mapper, speed=10, length=None):
     """
 
     :param from_node_id:
@@ -39,9 +39,10 @@ def make_link(from_node_id, to_node_id, links, nodes, visum_com, mapper, speed=1
 
         if from_node_id == to_node_id:
             length = 0.0
-        else:
+        elif length is None:
             link = visum_com.Net.Links.ItemByKey(fromNode=from_node_id, toNode=to_node_id)
             length = link.AttValue("length")
+
         links[link_id] = {"from": from_node_id, "to": to_node_id, "length": length, "speed": speed}
     return link_id
 
@@ -85,23 +86,22 @@ def export_supply_and_network(v, config):
                 route = []
                 stops = []
                 for fzpe in fzp.hole_verlaufe():
+                    length = fzpe.com_objekt.AttValue("PostLength")*1000.0
                     try:
-                        speed = fzpe.com_objekt.AttValue("PostLength")*1000.0/fzpe.com_objekt.AttValue("PostRunTime")
+                        speed = length/(fzpe.com_objekt.AttValue("PostRunTime")-2.0)
                     except ZeroDivisionError:
-                        speed = 1000
+                        speed = 10000000
 
                     stop_id = int(fzpe.com_objekt.AttValue("LineRouteItem\StopPoint\No"))
                     stop_id = map_id(stop_id, mapper)
 
                     if stop_id not in stopFacilities:
-                        from_node = fzpe.com_objekt.AttValue("LineRouteItem\OutLink\FromNodeNo")
-                        to_node = fzpe.com_objekt.AttValue("LineRouteItem\OutLink\ToNodeNo")
-                        if from_node is None:
-                            to_node = fzpe.com_objekt.AttValue("LineRouteItem\InLink\ToNodeNo")
-                            from_node = to_node
+                        node_id = fzpe.com_objekt.AttValue("LineRouteItem\NodeNo")
 
-                        link_id = make_link(from_node, to_node, links=links, nodes=nodes,
-                                            visum_com=v.visum_com, mapper=mapper, speed=speed)
+                        link_id = make_link(node_id, node_id, links=links, nodes=nodes,
+                                            visum_com=v.visum_com, mapper=mapper, speed=10000000)
+
+                        route.append(link_id)
 
                         stopFacilities[stop_id] = {'x': fzpe.com_objekt.AttValue("LineRouteItem\StopPoint\Xcoord"),
                                                    'y': fzpe.com_objekt.AttValue("LineRouteItem\StopPoint\Ycoord"),
@@ -115,14 +115,14 @@ def export_supply_and_network(v, config):
                     t2 = time.strftime('%H:%M:%S', time.gmtime( fzpe.ankunft() ))
                     stops.append({'refId': stop_id, 'departureOffset': t1 , 'arrivalOffset': t2})
                     if from_node_ids != [""]:
-                        for from_node_id, to_node_id in zip(from_node_ids, to_node_ids):
-                            link_id = make_link(from_node_id, to_node_id, links=links, nodes=nodes,
-                                                visum_com=v.visum_com, mapper=mapper, speed=speed)
-                            route.append(link_id)
-                    else:
-                        link_id = make_link(from_node, to_node, links=links, nodes=nodes,
-                                            visum_com=v.visum_com, mapper=mapper, speed=speed)
+                        link_id = make_link(from_node_ids[0], to_node_ids[-1], links=links, nodes=nodes,
+                                                visum_com=v.visum_com, mapper=mapper, speed=speed, length=length/1000.0)
                         route.append(link_id)
+
+#                        for from_node_id, to_node_id in zip(from_node_ids, to_node_ids):
+#                            link_id = make_link(from_node_id, to_node_id, links=links, nodes=nodes,
+#                                                visum_com=v.visum_com, mapper=mapper, speed=speed)
+#                            route.append(link_id)
 
                 schedule[fzp.linename()][key] = {"departures": [],
                                                  "route": route,
