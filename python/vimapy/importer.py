@@ -11,10 +11,7 @@ import sys
 
 import vipy
 import vipy.visum
-
-
-sys.path.append(r"C:\Program Files\PTV Vision\PTV Visum 16\Exe\PythonModules")
-from VisumPy.helpers import secs2HHMMSS
+import datetime
 from helpers import get_csv_line
 
 SECONDS_PER_DAY = 86400 # = 24 * 60 * 60
@@ -107,7 +104,7 @@ $VERSION:VERSNR;FILETYPE;LANGUAGE;UNIT
                      fzp.com_objekt.AttValue("DIRECTIONCODE").encode("cp1252"),
                      fzp.com_objekt.AttValue("Name").encode("cp1252"),
                      1,
-                     secs2HHMMSS(time_sec),
+                     str(datetime.timedelta(seconds=time_sec)),
                      hsnr_von]
                 trips_for_visum.write(get_csv_line(l))
                 index += 1
