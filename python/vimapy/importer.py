@@ -19,9 +19,6 @@ def import_trips_in_visum(path_trips_file, path_visum_version, path_out_trips_fo
     :param path_out_trips_for_visum: path to the text-file in which the trips are written for importing in Visum by the Fahrgastmodul
     :return: 
     """
-    logging.basicConfig(level=logging.INFO,
-                        filename='',  # log to this file
-                        format='%(asctime)s %(message)s')
     logging.info("pfad trips-file: {}".format(path_trips_file))
     logging.info("pfad visum-version: {}".format(path_visum_version))
     logging.info("pfad trips-file-for-visum-out: {}".format(path_out_trips_for_visum))
