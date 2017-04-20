@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: cp1252-*-
+import python_path
+python_path.load()
+
 import csv
 import logging
 import os
