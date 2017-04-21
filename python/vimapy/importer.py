@@ -85,7 +85,7 @@ $VERSION:VERSNR;FILETYPE;LANGUAGE;UNIT
                 hpnr_bis = int(row["alighting_stop"].split("_")[0])
                 fzpid = int(row["route"].split("_")[0])
                 fzp = fzp_pro_id[fzpid]
-                time_sec = int(row["start_time"]) % SECONDS_PER_DAY # < SECONDES_PER_DAY wird von Visum beim Einlesen gefordert!
+                time_sec = int(row["departure_time"]) % SECONDS_PER_DAY # < SECONDES_PER_DAY wird von Visum beim Einlesen gefordert!
                 l = [hsnr_von,
                      hsnr_pro_hpnr[hpnr_bis],
                      journey_id,
