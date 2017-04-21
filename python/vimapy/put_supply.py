@@ -80,11 +80,16 @@ def export_supply_and_network(v, config):
 
             key = "%i_%i_%i" % (fzp.nummer(), fpf.von_fahrzeitprofilelement_index(),
             fpf.bis_fahrzeitprofilelement_index())
+
+            delta = fzp.hole_element(fpf.von_fahrzeitprofilelement_index()).abfahrt()
+
             if key not in schedule[fzp.linename()]:
 
                 route = []
                 stops = []
                 for fzpe in fzp.hole_verlaufe():
+                    if fpf.von_fahrzeitprofilelement_index() > fzpe.index() or fzpe.index() > fpf.bis_fahrzeitprofilelement_index():
+                        continue
                     try:
                         speed = fzpe.com_objekt.AttValue("PostLength")*1000.0/fzpe.com_objekt.AttValue("PostRunTime")
                     except ZeroDivisionError:
@@ -111,8 +116,8 @@ def export_supply_and_network(v, config):
                     from_node_ids = fzpe.com_objekt.AttValue("Concatenate:UsedLineRouteItems\OutLink\FromNodeNo").split(",")
                     to_node_ids = fzpe.com_objekt.AttValue("Concatenate:UsedLineRouteItems\OutLink\ToNodeNo").split(",")
 
-                    t1 = time.strftime('%H:%M:%S', time.gmtime( fzpe.abfahrt() ))
-                    t2 = time.strftime('%H:%M:%S', time.gmtime( fzpe.ankunft() ))
+                    t1 = time.strftime('%H:%M:%S', time.gmtime(max(fzpe.abfahrt() - delta, 0)))
+                    t2 = time.strftime('%H:%M:%S', time.gmtime(max(fzpe.ankunft() - delta, 0)))
                     stops.append({'refId': stop_id, 'departureOffset': t1 , 'arrivalOffset': t2})
                     if from_node_ids != [""]:
                         for from_node_id, to_node_id in zip(from_node_ids, to_node_ids):
