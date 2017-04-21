@@ -13,6 +13,9 @@ public 	 class Trip extends TravelComponent {
 	private Id boardingStop;
 	private Id alightingStop;
 	private double distance;
+	private double PtDepartureTime;
+	private double PtDepartureDelay;
+	private boolean departureTimeIsSet = false;
 
 	public String toString() {
 		return String
@@ -82,6 +85,28 @@ public 	 class Trip extends TravelComponent {
 
 	public void setOrig(Coord orig) {
 		this.orig = orig;
+	}
+
+	public void setPtDepartureTime(double time){
+		if (!this.departureTimeIsSet){
+			this.PtDepartureTime = time;
+			this.departureTimeIsSet = true;
+		}
+	}
+
+	public void setDepartureDelay(double delay){
+		if (!this.departureTimeIsSet){
+			this.PtDepartureDelay = delay;
+			this.departureTimeIsSet = true;
+		}
+	}
+
+	public double getDepartureDelay(){
+		return this.PtDepartureDelay;
+	}
+
+	public double getPtDepartureTime(){
+		return this.PtDepartureTime;
 	}
 
 	public void incrementDistance(double linkLength) {
