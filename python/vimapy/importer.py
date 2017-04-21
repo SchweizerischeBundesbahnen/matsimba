@@ -1,20 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: cp1252-*-
+import python_path
+python_path.load()
+
 import csv
 import logging
-import os
-
-import sys
-
-import vipy
 import vipy.visum
-
-
-sys.path.append(r"C:\Program Files\PTV Vision\PTV Visum 16\Exe\PythonModules")
-from VisumPy.helpers import secs2HHMMSS
+import datetime
 from helpers import get_csv_line
 
 SECONDS_PER_DAY = 86400 # = 24 * 60 * 60
+
 
 def import_trips_in_visum(path_trips_file, path_visum_version, path_out_trips_for_visum):
     """
@@ -24,9 +20,6 @@ def import_trips_in_visum(path_trips_file, path_visum_version, path_out_trips_fo
     :param path_out_trips_for_visum: path to the text-file in which the trips are written for importing in Visum by the Fahrgastmodul
     :return: 
     """
-    logging.basicConfig(level=logging.INFO,
-                        filename='',  # log to this file
-                        format='%(asctime)s %(message)s')
     logging.info("pfad trips-file: {}".format(path_trips_file))
     logging.info("pfad visum-version: {}".format(path_visum_version))
     logging.info("pfad trips-file-for-visum-out: {}".format(path_out_trips_for_visum))
@@ -44,7 +37,7 @@ def import_trips_in_visum(path_trips_file, path_visum_version, path_out_trips_fo
     hsnr_pro_hpnr = {}
     for hp in hps:
         hpnr = int(hp.nummer())
-        hsnr = int(vipy.angebot.helper.hole_setze_attribut(hp.com_objekt, "STOPAREA\STOP\NO"))
+        hsnr = int(hp.com_objekt.AttValue("STOPAREA\STOP\NO"))
         hsnr_pro_hpnr[hpnr] = hsnr
     logging.info("hp und hs verarbeitet. anz hps: {}".format(len(hsnr_pro_hpnr)))
 
@@ -104,7 +97,7 @@ $VERSION:VERSNR;FILETYPE;LANGUAGE;UNIT
                      fzp.com_objekt.AttValue("DIRECTIONCODE").encode("cp1252"),
                      fzp.com_objekt.AttValue("Name").encode("cp1252"),
                      1,
-                     secs2HHMMSS(time_sec),
+                     str(datetime.timedelta(seconds=time_sec)),
                      hsnr_von]
                 trips_for_visum.write(get_csv_line(l))
                 index += 1

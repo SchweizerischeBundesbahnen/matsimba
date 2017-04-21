@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from python.vimapy.importer import import_trips_in_visum
+from importer import import_trips_in_visum
 
 
 class TestTripImportVisum(unittest.TestCase):
