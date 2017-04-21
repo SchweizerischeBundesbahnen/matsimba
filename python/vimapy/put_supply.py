@@ -75,7 +75,6 @@ def export_supply_and_network(v, config):
         logging.getLogger(__name__).info("%s" % fzp)
         for fpf in fzp.hole_fahrplanfahrten():
 
-            mapper = lambda _id: "%s_%s" % (str(_id), fzp.nummer())
 
             if fzp.linename() not in schedule:
                 schedule[fzp.linename()] = {}
@@ -87,6 +86,7 @@ def export_supply_and_network(v, config):
                 route = []
                 stops = []
                 for fzpe in fzp.hole_verlaufe():
+                    mapper = lambda _id: "%s_%s_%s_%s_%s" % (str(_id), fzp.nummer(), fpf.von_fahrzeitprofilelement_index(), fpf.bis_fahrzeitprofilelement_index(), fzpe.index())
                     length = fzpe.com_objekt.AttValue("PostLength")*1000.0
                     try:
                         speed = length/(fzpe.com_objekt.AttValue("PostRunTime")-2.0)
@@ -150,7 +150,7 @@ def to_xml(transit, folder, config):
                                                 "from": str(link["from"]),
                                                 "length": str(link["length"]*1000),
                                                 "oneway": "1",
-                                                "permlanes": "1.0",
+                                                "permlanes": "10000.0",
                                                 "capacity": "100000",
                                                 "freespeed": str(link["speed"]),
                                                 "modes": "pt",
