@@ -11,8 +11,10 @@ import org.matsim.contrib.travelsummary.events2traveldiaries.travelcomponents.*;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.api.experimental.events.TeleportationArrivalEvent;
 import org.matsim.core.api.experimental.events.VehicleArrivesAtFacilityEvent;
+import org.matsim.core.api.experimental.events.VehicleDepartsAtFacilityEvent;
 import org.matsim.core.api.experimental.events.handler.TeleportationArrivalEventHandler;
 import org.matsim.core.api.experimental.events.handler.VehicleArrivesAtFacilityEventHandler;
+import org.matsim.core.api.experimental.events.handler.VehicleDepartsAtFacilityEventHandler;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.events.EventsUtils;
@@ -32,12 +34,15 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * @author pieterfourie, sergioo
@@ -54,7 +59,8 @@ public class EventsToTravelDiaries implements
         PersonArrivalEventHandler, ActivityStartEventHandler,
         ActivityEndEventHandler, PersonStuckEventHandler,
         LinkEnterEventHandler, LinkLeaveEventHandler,
-        TeleportationArrivalEventHandler, VehicleArrivesAtFacilityEventHandler {
+        TeleportationArrivalEventHandler, VehicleArrivesAtFacilityEventHandler,
+        VehicleDepartsAtFacilityEventHandler {
 
     private final Network network;
     private double walkSpeed;
@@ -384,6 +390,23 @@ public class EventsToTravelDiaries implements
     }
 
     @Override
+    public void handleEvent(VehicleDepartsAtFacilityEvent event) {
+        try {
+            PTVehicle pt_vehicle = ptVehicles.get(event.getVehicleId());
+            for (Id passenger_id: pt_vehicle.getPassengersId()){
+                TravellerChain chain = chains.get(passenger_id);
+                Trip trip = chain.getJourneys().getLast().getTrips().getLast();
+                trip.setPtDepartureTime(event.getTime());
+                trip.setDepartureDelay(event.getDelay());
+            }
+
+        } catch (Exception e) {
+            System.err.println(e.getStackTrace());
+            System.err.println(event.toString());
+        }
+    }
+
+    @Override
     public void handleEvent(VehicleArrivesAtFacilityEvent event) {
         try {
             ptVehicles.get(event.getVehicleId()).lastStop = event
@@ -440,7 +463,7 @@ public class EventsToTravelDiaries implements
         BufferedWriter tripWriter = IOUtils.getBufferedWriter(path + "/" + tripTableName);
         tripWriter.write("trip_id\tjourney_id\tstart_time\tend_time\t" +
                 "distance\tmode\tline\troute\tboarding_stop\t" +
-                "alighting_stop\tsample_selector\n");
+                "alighting_stop\tdeparture_time\tdeparture_delay\tsample_selector\n");
 
         BufferedWriter transferWriter = IOUtils.getBufferedWriter(path + "/" + transferTableName);
         transferWriter.write("transfer_id\tjourney_id\tstart_time\t" +
@@ -497,7 +520,7 @@ public class EventsToTravelDiaries implements
                     if (!(journey.isCarJourney() || journey.isTeleportJourney())) {
                         for (Trip trip : journey.getTrips()) {
                             tripWriter.write(String.format(
-                                    "%d\t%d\t%d\t%d\t%.3f\t%s\t%s\t%s\t%s\t%s\t%f\n",
+                                    "%d\t%d\t%d\t%d\t%.3f\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%f\n",
                                     trip.getElementId(),
                                     journey.getElementId(),
                                     (int) trip.getStartTime(),
@@ -505,7 +528,7 @@ public class EventsToTravelDiaries implements
                                     trip.getDistance(),
                                     trip.getMode(), trip.getLine(),
                                     trip.getRoute(), trip.getBoardingStop(),
-                                    trip.getAlightingStop(),
+                                    trip.getAlightingStop(), (int) trip.getPtDepartureTime(), (int) trip.getDepartureDelay(),
                                     MatsimRandom.getRandom().nextDouble()));
                             counter.incCounter();
                         }
@@ -533,13 +556,13 @@ public class EventsToTravelDiaries implements
                         for (Trip trip : journey.getTrips()) {
 
                             tripWriter.write(String.format(
-                                    "%d\t%d\t%d\t%d\t%.3f\t%s\t%s\t%s\t%s\t%s\t%f\n",
+                                    "%d\t%d\t%d\t%d\t%.3f\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%f\n",
                                     trip.getElementId(),
                                     journey.getElementId(),
                                     (int) trip.getStartTime(),
                                     (int) trip.getEndTime(),
                                     trip.getDistance(),
-                                    trip.getMode(), "", "", "", "",
+                                    trip.getMode(), "", "", "", "", "", "",
                                     MatsimRandom.getRandom().nextDouble()
 
                             ));
@@ -589,6 +612,10 @@ public class EventsToTravelDiaries implements
         // Methods
         public void incDistance(double linkDistance) {
             distance += linkDistance;
+        }
+
+        public Set<Id> getPassengersId(){
+            return passengers.keySet();
         }
 
         public void addPassenger(Id passengerId) {
