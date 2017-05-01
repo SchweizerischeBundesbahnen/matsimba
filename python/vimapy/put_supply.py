@@ -1,7 +1,5 @@
 import xml.etree.ElementTree as ET
 import time
-import sys
-import vipy.visum
 import os
 from xml.dom import minidom
 from xml.etree import ElementTree
@@ -271,6 +269,10 @@ if __name__ == "__main__":
     config = ConfigParser.ConfigParser()
     config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.ini")
     config.read(config_path)
+
+    import python_path
+    python_path.load()
+    import vipy.visum
 
     path = config.get("VisumVersions", "demo")
     v = vipy.visum.Visum()

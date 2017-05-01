@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: cp1252-*-
-
 import csv
 import logging
 import datetime

@@ -2,7 +2,6 @@ import os
 import ConfigParser
 import numpy as np
 import time
-import vipy.visum
 from put_supply import set_projection
 import logging
 
@@ -66,6 +65,10 @@ if __name__ == "__main__":
     config = ConfigParser.ConfigParser()
     config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.ini")
     config.read(config_path)
+
+    import python_path
+    python_path.load()
+    import vipy.visum
 
     v = vipy.visum.Visum()
     v.lade_version(config.get("VisumVersions", "demo"))
