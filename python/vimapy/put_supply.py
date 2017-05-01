@@ -1,7 +1,6 @@
 import xml.etree.ElementTree as ET
 import time
 import sys
-sys.path.append(r"\\filer16l\PV160L\Project\VP.D1339\34_ViPy\Visum16\ViPy_V00_07")
 import vipy.visum
 import os
 from xml.dom import minidom
