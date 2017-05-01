@@ -40,7 +40,7 @@ def make_pupulation(matrizen, bezirke_dict, path):
             indices = data >= 1.0
 
             end_time = time.strftime('%H:%M:%S', time.gmtime(m.nummer() * 10 * 60))
-            end_time2 = time.strftime('%H:%M:%S', time.gmtime(24 * 60 * 60.0))
+            end_time2 = "30:00:00" #time.strftime('%H:%M:%S', time.gmtime(30 * 60 * 60.0))
 
             for q, z, n_trips in zip(quelle_v[indices], ziel_v[indices], data[indices]):
                 origin = bezirke_dict[q]
