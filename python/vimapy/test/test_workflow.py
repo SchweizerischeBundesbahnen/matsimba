@@ -13,6 +13,8 @@ config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 config.read(config_path)
 
 output_path = os.path.abspath("../../data_out")
+if not os.path.exists(output_path):
+    os.mkdir(output_path)
 
 
 class TestDelete(unittest.TestCase):
