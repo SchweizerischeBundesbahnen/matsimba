@@ -9,7 +9,12 @@ import logging
 def export(v, path):
     bezirke_dict = {}
     for b in v.netz.hole_bezirke():
-        bezirke_dict[b.nummer()] = [b.com_objekt.AttValue("XCoord"), b.com_objekt.AttValue("YCoord")]
+        xs = b.com_objekt.AttValue(r"Concatenate:OrigConnectors\Node\XCoord").split(",")
+        ys = b.com_objekt.AttValue(r"Concatenate:OrigConnectors\Node\YCoord").split(",")
+        if len(xs) > 1:
+            logging.getLogger(__name__).warn("%s has more than one OrigConnector (%s). I will take only the first one" % (b.name(), len(xs)))
+
+        bezirke_dict[b.nummer()] = [xs[0], ys[0]]
 
     matrizen = v.nachfrage.hole_matrizen()
     make_pupulation(matrizen, bezirke_dict, path)
