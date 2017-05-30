@@ -67,6 +67,6 @@ def export_to_csv(v, path):
 
                     conwriter.writerow(
                         [d[0], d[1], start_stop, end_stop, start_link, end_link, linename, route, time, wait_time])
-                elif start_stop != "" and end_stop != "":
+                else:
                     conwriter.writerow([d[0], d[1], "", "", "", "", "", "", time, wait_time])
 
