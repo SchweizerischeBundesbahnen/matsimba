@@ -1,11 +1,11 @@
-import xml.etree.ElementTree as ET
-import time
-import os
-from xml.dom import minidom
-from xml.etree import ElementTree
-import xml.dom.minidom as xml
 import ConfigParser
 import logging
+import os
+import time
+import xml.dom.minidom as xml
+import xml.etree.ElementTree as ET
+from xml.dom import minidom
+from xml.etree import ElementTree
 
 
 def map_id(_id, mapper):

@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: cp1252-*-
 import csv
-import logging
 import datetime
+import logging
+
 from helpers import get_csv_line
 
 SECONDS_PER_DAY = 86400 # = 24 * 60 * 60
