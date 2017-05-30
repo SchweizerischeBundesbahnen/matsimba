@@ -21,6 +21,19 @@ def export(v, path):
     make_pupulation(matrizen, bezirke_dict, path)
 
 
+def export(v, path):
+    v.visum_com.Net.SetAttValue("ConcatMaxLen", 2147483647.0)
+    proj = u'PROJCS["CH1903_LV03",GEOGCS["GCS_CH1903",DATUM["D_CH1903",SPHEROID["Bessel_1841",6377397.155,299.1528128]],PRIMEM["Greenwich",0],UNIT["Degree",0.0174532925199432955]],PROJECTION["Hotine_Oblique_Mercator_Azimuth_Center"],PARAMETER["False_Easting",600000],PARAMETER["False_Northing",200000],PARAMETER["Scale_Factor",1],PARAMETER["Azimuth",90],PARAMETER["Longitude_Of_Center",7.439583333333333],PARAMETER["Latitude_Of_Center",46.95240555555556],UNIT["Meter",1]]'
+    v.visum_com.Net.SetProjection(newProjection=proj, calculate=True)
+
+    bezirke_dict = {}
+    for b in v.netz.hole_bezirke():
+        bezirke_dict[b.nummer()] = [b.com_objekt.AttValue("XCoord"), b.com_objekt.AttValue("YCoord")]
+
+    matrizen = v.nachfrage.hole_matrizen()
+    make_pupulation(matrizen, bezirke_dict, path)
+
+
 def make_pupulation(matrizen, bezirke_dict, path):
     person_id = 1
 
@@ -37,10 +50,8 @@ def make_pupulation(matrizen, bezirke_dict, path):
 
         for m in matrizen:
             if m.nummer() == 200:
-                logging.getLogger(__name__).info("Skipping Matrix %i" % m.nummer())
                 continue
-
-            logging.getLogger(__name__).info("Matrix %i" % m.nummer())
+            print m.name()
             data = m.hole_data().flatten()
             indices = data >= 1.0
 
@@ -81,3 +92,4 @@ if __name__ == "__main__":
 
     set_projection(v, config=config)
     export(v, r"D:\tmp\population.xml")
+
