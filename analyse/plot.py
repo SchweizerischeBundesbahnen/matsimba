@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import os
 import pandas as pd
 import numpy as np
+import glob
 
 
 def set_matplotlib_params():
@@ -11,6 +12,31 @@ def set_matplotlib_params():
     plt.style.use('ggplot')
     mpl.rcParams['axes.color_cycle'] = ["EB0000", "4C4C4C","2D327D", "348ABD", "7A68A6", "A60628", "467821", "CF4457", "188487", "E24A33", "FFFF00", "FF1DD8", "00FF8D"]
     mpl.rcParams['lines.linewidth'] = 2.5
+
+
+def plot_score(folder):
+    for file in glob.glob(os.path.join(folder, "*corestats.txt")):
+        pd.read_csv(file, sep="\t", index_col=0).plot()
+
+
+def plot_cumulative_mode(df, var="distance"):
+    cats = np.linspace(0, 20000, 20)
+    cats = np.insert(cats, 0, -1)
+    cats = np.append(cats, 1000000000)
+    df["cat"] = pd.cut(df[var], cats, include_lowest=True, right=True)
+
+    fig, ax = plt.subplots(figsize=(16, 5))
+    for mode in df["mode"].unique():
+        _trips = df[df["mode"] == mode]
+        grouped_trips = _trips.groupby(["cat"])
+        a = grouped_trips.distance.count()
+        a = a.cumsum()
+        a = a.divide(len(_trips))
+        a.plot(x="cat", ax=ax, label=mode)
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+    ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    ax.set_ybound([0, 1.1])
 
 
 def make_all_plots(trips, journeys, activities, output_folder):
