@@ -26,11 +26,14 @@ def config_maker(config_path, value):
 
 def work(i, cmd, config_path):
 
+    print "..."
+    path_dir =  os.path.dirname(os.path.abspath(config_path))
+    os.chdir(path_dir)
+    print path_dir
     c = config_maker(config_path, i)
     cmd2 = cmd+" %s" % c
     print cmd2
-    os.chdir(os.path.dirname(path))
-    my_tool_subprocess = subprocess.Popen(cmd2,shell=True,  stderr=STDOUT, stdout=subprocess.PIPE)
+    my_tool_subprocess = subprocess.Popen(cmd2,shell=True, stdout=subprocess.PIPE)
 
     while True:
         line = my_tool_subprocess.stdout.readline()
@@ -50,8 +53,8 @@ if __name__ == '__main__':
     config_path = args.config
     cmd = args.cmd
 
-    tp = ThreadPool(5)
-    for i in [1, 2]:
+    tp = ThreadPool(3)
+    for i in [-1, -2, -3]:
         tp.apply_async(work, (i,cmd, config_path))
 
     tp.close()
