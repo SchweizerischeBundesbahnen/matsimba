@@ -14,7 +14,7 @@ def config_maker(config_path, value):
     with open(config_path, "r") as f:
         data = Template(f.read())
 
-        new_name = os.path.basename(config_path)[:-4]+"_%i" % value
+        new_name = os.path.basename(config_path)[:-4]+"_%f" % value
 
         new_data = data.substitute({"output_dir": "./output/"+new_name, "pt_constant": str(value)})
         config_path = os.path.join(os.path.dirname(config_path), new_name+".xml")
@@ -36,7 +36,7 @@ def work(i, cmd, config_path):
     while True:
         line = my_tool_subprocess.stdout.readline()
         if line != '':
-            pass #print line.rstrip()
+            pass
         else:
             break
 
@@ -46,14 +46,21 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process some integers.')
     parser.add_argument('cmd', type=str, help='java cmd')
     parser.add_argument('config', type=str, help='config')
+    parser.add_argument('list', type=float, help='config', nargs="+")
+    parser.add_argument("-n", type=int)
     args = parser.parse_args()
 
     config_path = args.config
     cmd = args.cmd
 
-    tp = ThreadPool(3)
-    for i in [-1, -2, -3]:
-        tp.apply_async(work, (i,cmd, config_path))
+    n = 5
+
+    if args.n:
+        n = int(args.n)
+
+    tp = ThreadPool(n)
+    for i in args.list:
+        tp.apply_async(work, (i, cmd, config_path))
 
     tp.close()
     tp.join()
