@@ -25,9 +25,7 @@ def config_maker(config_path, value):
 
 
 def work(i, cmd, config_path):
-
-    print "..."
-    path_dir =  os.path.dirname(os.path.abspath(config_path))
+    path_dir = os.path.dirname(os.path.abspath(config_path))
     os.chdir(path_dir)
     print path_dir
     c = config_maker(config_path, i)
