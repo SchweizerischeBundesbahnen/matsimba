@@ -30,7 +30,7 @@ def work(i, cmd, config_path):
     cmd2 = cmd+" %s" % c
     print cmd2
     os.chdir(os.path.dirname(path))
-    my_tool_subprocess = subprocess.Popen(cmd2,shell=True, stdout=subprocess.PIPE)
+    my_tool_subprocess = subprocess.Popen(cmd2,shell=True,  stderr=STDOUT, stdout=subprocess.PIPE)
 
     while True:
         line = my_tool_subprocess.stdout.readline()
