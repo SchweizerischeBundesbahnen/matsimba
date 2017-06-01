@@ -19,13 +19,14 @@ def plot_score(folder):
         pd.read_csv(file, sep="\t", index_col=0).plot()
 
 
-def plot_cumulative_mode(df, var="distance", max_value=10000):
+def plot_cumulative_mode(df, var="distance", max_value=10000, ax=None):
     cats = np.linspace(0, max_value, 20)
     cats = np.insert(cats, 0, -1)
     cats = np.append(cats, 1000000000)
     df["cat"] = pd.cut(df[var], cats, include_lowest=True, right=True)
 
-    fig, ax = plt.subplots(figsize=(16, 5))
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(16, 5))
     for mode in df["mode"].unique():
         _trips = df[df["mode"] == mode]
         grouped_trips = _trips.groupby(["cat"])
@@ -37,7 +38,7 @@ def plot_cumulative_mode(df, var="distance", max_value=10000):
     ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
     ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
     ax.set_ybound([0, 1.1])
-
+    return ax
 
 def plot_leg_histogram(folder, var="departures_all", iters=None):
     folder = os.path.join(folder, "ITERS")
