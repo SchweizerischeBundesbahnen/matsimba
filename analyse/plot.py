@@ -40,6 +40,23 @@ def plot_cumulative_mode(df, var="distance", max_value=10000, ax=None):
     ax.set_ybound([0, 1.1])
     return ax
 
+
+def plot_timing(folder):
+    filename = glob.glob(os.path.join(folder, "*stopwatch.txt"))[0]
+    stopwatch = pd.DataFrame.from_csv(filename, sep="\t")
+
+    columns = ["replanning", "beforeMobsimListeners", "mobsim", "afterMobsimListeners", "scoring", "dump all plans",
+               "compare with counts",
+               "iterationEndsListeners"
+               ]
+    for c in columns:
+        stopwatch.loc[stopwatch[c].isnull(), c] = "00:00:00"
+
+        stopwatch[c] = stopwatch[c].map(
+            lambda x: int(x.split(":")[0]) * 3600 + int(x.split(":")[1]) * 60 + int(x.split(":")[2]))
+    stopwatch[columns].plot(kind="bar", stacked=True)
+
+
 def plot_leg_histogram(folder, var="departures_all", iters=None):
     folder = os.path.join(folder, "ITERS")
     if iters is None:
