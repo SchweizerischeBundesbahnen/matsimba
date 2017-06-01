@@ -19,8 +19,8 @@ def plot_score(folder):
         pd.read_csv(file, sep="\t", index_col=0).plot()
 
 
-def plot_cumulative_mode(df, var="distance"):
-    cats = np.linspace(0, 20000, 20)
+def plot_cumulative_mode(df, var="distance", max_value=10000):
+    cats = np.linspace(0, max_value, 20)
     cats = np.insert(cats, 0, -1)
     cats = np.append(cats, 1000000000)
     df["cat"] = pd.cut(df[var], cats, include_lowest=True, right=True)
@@ -37,6 +37,26 @@ def plot_cumulative_mode(df, var="distance"):
     ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
     ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
     ax.set_ybound([0, 1.1])
+
+
+def plot_leg_histogram(folder, var="departures_all", iters=None):
+    folder = os.path.join(folder, "ITERS")
+    if iters is None:
+        iters = []
+        for it in glob.glob(os.path.join(folder, "*")):
+            iters.append(int(it.split(".")[-1]))
+
+    iters.sort()
+
+    fig, ax = plt.subplots(figsize=(16, 5))
+
+    for it in iters:
+        _path = glob.glob(os.path.join(folder, "it.%i" % it, "*legHist*"))
+        if len(_path) > 0:
+            df = pd.DataFrame.from_csv(_path[0], sep="\t")
+            df[var].plot(ax=ax, label=it)
+    ax.legend()
+    ax.set_title(var)
 
 
 def make_all_plots(trips, journeys, activities, output_folder):
