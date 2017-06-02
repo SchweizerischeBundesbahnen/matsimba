@@ -69,7 +69,7 @@ if __name__ == '__main__':
 
     vars1 = args.var1
     vars2 = [None]
-    if args.vars2:
+    if args.var2:
         vars2 = args.var2
 
     for var1 in vars1:
