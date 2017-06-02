@@ -38,7 +38,7 @@ def work(var1, var2, cmd, config_path):
     c = config_maker(config_path, var1, var2)
     cmd2 = cmd+" %s" % c
     print cmd2
-    my_tool_subprocess = subprocess.Popen(cmd2,shell=True, stdout=subprocess.PIPE)
+    my_tool_subprocess = subprocess.Popen(cmd2, shell=True)
 
     while True:
         line = my_tool_subprocess.stdout.readline()
