@@ -14,9 +14,13 @@ def set_matplotlib_params():
     mpl.rcParams['lines.linewidth'] = 2.5
 
 
-def plot_score(folder):
+def get_score(folder):
     for file in glob.glob(os.path.join(folder, "*corestats.txt")):
-        pd.read_csv(file, sep="\t", index_col=0).plot()
+        return pd.read_csv(file, sep="\t", index_col=0)
+
+
+def plot_score(folder):
+    return get_score(folder).plot()
 
 
 def plot_cumulative_mode(df, var="distance", max_value=10000, ax=None):
