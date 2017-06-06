@@ -46,7 +46,7 @@ def get_timing(folder):
     stopwatch = pd.DataFrame.from_csv(filename, sep="\t")
 
     columns = ["replanning", "beforeMobsimListeners", "mobsim", "afterMobsimListeners", "scoring", "dump all plans",
-               "compare with counts", "iterationEndsListeners"]
+               "compare with counts", "iterationEndsListeners", "iteration"]
     for c in columns:
         stopwatch.loc[stopwatch[c].isnull(), c] = "00:00:00"
 
@@ -57,6 +57,8 @@ def get_timing(folder):
 
 def plot_timing(folder):
     stopwatch = get_timing(folder)
+    columns = ["replanning", "beforeMobsimListeners", "mobsim", "afterMobsimListeners", "scoring", "dump all plans",
+               "compare with counts", "iterationEndsListeners"]
     return stopwatch[columns].plot(kind="bar", stacked=True)
 
 
