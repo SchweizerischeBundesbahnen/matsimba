@@ -4,9 +4,12 @@ import subprocess
 import time
 import xml.etree.ElementTree as ET
 from multiprocessing import Pool
-from multiprocessing.pool import ThreadPool
+from multiprocessing.pool import ThreadPool, TimeoutError
 import argparse
 from string import Template
+import itertools
+import signal
+
 
 
 def config_maker(config_path, var1, var2):
@@ -31,18 +34,24 @@ def config_maker(config_path, var1, var2):
         return config_path
 
 
-def work(var1, var2, cmd, config_path):
+def work(a):
+    var1 = a[0]
+    var2 = a[1]
+    cmd = a[2]
+    config_path = a[3]
     path_dir = os.path.dirname(os.path.abspath(config_path))
     os.chdir(path_dir)
     print path_dir
     c = config_maker(config_path, var1, var2)
-    cmd2 = cmd+" %s" % c
+    cmd2 = cmd +" %s" % c
     print cmd2
-    my_tool_subprocess = subprocess.Popen(cmd2, shell=True)
+    my_tool_subprocess = subprocess.Popen(cmd2, shell=True, stdout=subprocess.PIPE)
 
+    print my_tool_subprocess.pid
     while True:
         line = my_tool_subprocess.stdout.readline()
         if line != '':
+	    print line
             pass
         else:
             break
@@ -65,16 +74,29 @@ if __name__ == '__main__':
     if args.n:
         n = int(args.n)
 
+
     tp = ThreadPool(n)
+
 
     vars1 = args.var1
     vars2 = [None]
     if args.var2:
         vars2 = args.var2
 
-    for var1 in vars1:
-        for var2 in vars2:
-            tp.apply_async(work, (var1, var2, cmd, config_path))
+    try:
+        res = tp.map_async(work, list(itertools.product(vars1, vars2, [cmd], [config_path])))
+        print "Waiting for results"
+        res.get(60*60*24*30)
+    except KeyboardInterrupt:
+	print "KeyboardIntterupt"
+	tp.terminate()
 
-    tp.close()
+    except TimeoutError:
+	print "timeout reached"
+	tp.close()
+	tp.terminate()
+    else:
+	tp.close()
+
+
     tp.join()
