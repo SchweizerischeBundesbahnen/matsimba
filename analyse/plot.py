@@ -54,7 +54,7 @@ def plot_timing(folder):
 
         stopwatch[c] = stopwatch[c].map(
             lambda x: int(x.split(":")[0]) * 3600 + int(x.split(":")[1]) * 60 + int(x.split(":")[2]))
-    stopwatch[columns].plot(kind="bar", stacked=True)
+    return stopwatch[columns].plot(kind="bar", stacked=True)
 
 
 def plot_leg_histogram(folder, var="departures_all", iters=None):

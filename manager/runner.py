@@ -11,7 +11,6 @@ import itertools
 import signal
 
 
-
 def config_maker(config_path, var1, var2):
 
     with open(config_path, "r") as f:
@@ -76,7 +75,6 @@ if __name__ == '__main__':
 
 
     tp = ThreadPool(n)
-
 
     vars1 = args.var1
     vars2 = [None]
