@@ -4,7 +4,7 @@ import subprocess
 import time
 import xml.etree.ElementTree as ET
 from multiprocessing import Pool
-from multiprocessing.pool import ThreadPool, TimeoutError
+from multiprocessing.pool import TimeoutError
 import argparse
 from string import Template
 import itertools
@@ -50,7 +50,7 @@ def work(a):
     while True:
         line = my_tool_subprocess.stdout.readline()
         if line != '':
-	    print line
+	    #print line
             pass
         else:
             break
@@ -74,7 +74,7 @@ if __name__ == '__main__':
         n = int(args.n)
 
 
-    tp = ThreadPool(n)
+    tp = Pool(n)
 
     vars1 = args.var1
     vars2 = [None]
