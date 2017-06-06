@@ -17,10 +17,10 @@ def config_maker(config_path, var1, var2):
         data = Template(f.read())
         new_name = os.path.basename(config_path)[:-4]
         if var2 is None:
-            new_name = new_name+"_%f" % var1
+            new_name = new_name+"_%s" % var1
 
         else:
-            new_name = new_name+"_%f_%f" % (var1, var2)
+            new_name = new_name+"_%s_%s" % (var1, var2)
 
         new_data = data.substitute({"output_dir": "./output/"+new_name,
                                     "var1": str(var1),
@@ -61,8 +61,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process some integers.')
     parser.add_argument('cmd', type=str, help='java cmd')
     parser.add_argument('config', type=str, help='config')
-    parser.add_argument('-var1', type=float, help='list of type float. Occurrence of $var2 is replaces by this value ', nargs="+")
-    parser.add_argument('-var2', type=float, help='list of type float. Occurrence of $var2 is replaces by this value ', nargs="+")
+    parser.add_argument('-var1', type=str, help='list of type float. Occurrence of $var2 is replaces by this value ', nargs="+")
+    parser.add_argument('-var2', type=str, help='list of type float. Occurrence of $var2 is replaces by this value ', nargs="+")
     parser.add_argument("-n", type=int)
     args = parser.parse_args()
 
