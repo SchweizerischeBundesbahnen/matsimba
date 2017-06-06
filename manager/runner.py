@@ -50,7 +50,7 @@ def work(a):
     while True:
         line = my_tool_subprocess.stdout.readline()
         if line != '':
-	    #print line
+	    print line
             pass
         else:
             break
