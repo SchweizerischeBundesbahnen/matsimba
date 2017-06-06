@@ -34,10 +34,15 @@ def plot_cumulative_mode(df, var="distance", max_value=10000, ax=None):
         a = a.cumsum()
         a = a.divide(len(_trips))
         a.plot(x="cat", ax=ax, label=mode)
+    ax = move_legend(ax)
+    ax.set_ybound([0, 1.1])
+    return ax
+
+
+def move_legend(ax):
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
     ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-    ax.set_ybound([0, 1.1])
     return ax
 
 
