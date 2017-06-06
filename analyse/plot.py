@@ -41,19 +41,22 @@ def plot_cumulative_mode(df, var="distance", max_value=10000, ax=None):
     return ax
 
 
-def plot_timing(folder):
+def get_timing(folder):
     filename = glob.glob(os.path.join(folder, "*stopwatch.txt"))[0]
     stopwatch = pd.DataFrame.from_csv(filename, sep="\t")
 
     columns = ["replanning", "beforeMobsimListeners", "mobsim", "afterMobsimListeners", "scoring", "dump all plans",
-               "compare with counts",
-               "iterationEndsListeners"
-               ]
+               "compare with counts", "iterationEndsListeners"]
     for c in columns:
         stopwatch.loc[stopwatch[c].isnull(), c] = "00:00:00"
 
         stopwatch[c] = stopwatch[c].map(
             lambda x: int(x.split(":")[0]) * 3600 + int(x.split(":")[1]) * 60 + int(x.split(":")[2]))
+    return stopwatch
+
+
+def plot_timing(folder):
+    stopwatch = get_timing(folder)
     return stopwatch[columns].plot(kind="bar", stacked=True)
 
 
