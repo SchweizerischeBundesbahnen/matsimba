@@ -2,7 +2,7 @@ import csv
 
 
 def get_stop_id(stop_id, fzp_nummer, fpf_von_index, fpf_bis_index, fzpe_index):
-    return "%s_%s_%s_%s_%s" % (stop_id, fzp_nummer, fpf_von_index, fpf_bis_index, fzpe_index)
+    return "%i_%s_%i_%i_%i" % (stop_id, fzp_nummer, fpf_von_index, fpf_bis_index, fzpe_index)
 
 
 def get_route_id(fzp_nummer, fpf_von_index, fpf_bis_index):
@@ -10,7 +10,7 @@ def get_route_id(fzp_nummer, fpf_von_index, fpf_bis_index):
 
 
 def get_link_id_for_stop(node_id, fzp_nummer, fpf_von_index, fpf_bis_index, fzpe_index):
-    return "%i_%i_%s_%s_%s_%s" % (
+    return "%i_%i_%s_%i_%i_%i" % (
     int(float(node_id)), int(float(node_id)), fzp_nummer, fpf_von_index, fpf_bis_index, fzpe_index)
 
 
@@ -66,7 +66,7 @@ def export_to_csv(v, path):
                     route = get_route_id(fzp_nummer, von_index, nach_index)
 
                     conwriter.writerow(
-                        [d[0], d[1], start_stop, end_stop, start_link, end_link, linename, route, time, wait_time])
+                        [int(d[0]), int(d[1]), start_stop, end_stop, start_link, end_link, linename, route, time, wait_time])
                 else:
-                    conwriter.writerow([d[0], d[1], "", "", "", "", "", "", time, wait_time])
+                    conwriter.writerow([int(d[0]), int(d[1]), "", "", "", "", "", "", time, wait_time])
 
