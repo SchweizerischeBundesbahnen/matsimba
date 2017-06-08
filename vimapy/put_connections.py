@@ -33,6 +33,8 @@ def export_to_csv(v, path):
     put_connections.AddColumn("EndVehJourneyItem\TimeProfileItem\Index")
     put_connections.AddColumn("StartNode\No")
     put_connections.AddColumn("EndNode\No")
+    put_connections.AddColumn("Dep", Format=3)
+    put_connections.AddColumn("Arr", Format=3)
 
     chunk = 200
     n = put_connections.NumActiveElements
@@ -66,7 +68,7 @@ def export_to_csv(v, path):
                     route = get_route_id(fzp_nummer, von_index, nach_index)
 
                     conwriter.writerow(
-                        [int(d[0]), int(d[1]), start_stop, end_stop, start_link, end_link, linename, route, time, wait_time])
+                        [int(d[0]), int(d[1]), start_stop, end_stop, start_link, end_link, linename, route, time, wait_time, int(d[14]), int(d[15])])
                 else:
-                    conwriter.writerow([int(d[0]), int(d[1]), "", "", "", "", "", "", time, wait_time])
+                    conwriter.writerow([int(d[0]), int(d[1]), "", "", "", "", "", "", time, wait_time, int(d[14]), int(d[15])])
 
