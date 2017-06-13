@@ -27,12 +27,12 @@ def export_to_csv(v, path):
     put_connections.AddColumn("StartVehJourneyItem\VehJourney\FromTProfItemIndex")
     put_connections.AddColumn("StartVehJourneyItem\VehJourney\ToTProfItemIndex")
     put_connections.AddColumn("TimeProfile\ID")
-    put_connections.AddColumn("Time")
-    put_connections.AddColumn("WaitTime")
+    put_connections.AddColumn("Time", Format=3)
+    put_connections.AddColumn("WaitTime", Format=3)
     put_connections.AddColumn("StartVehJourneyItem\TimeProfileItem\Index")
     put_connections.AddColumn("EndVehJourneyItem\TimeProfileItem\Index")
-    put_connections.AddColumn("StartNode\No")
-    put_connections.AddColumn("EndNode\No")
+    put_connections.AddColumn("StartVehJourneyItem\TimeProfileItem\LineRouteItem\StopPoint\Node\No")
+    put_connections.AddColumn("EndVehJourneyItem\TimeProfileItem\LineRouteItem\StopPoint\Node\No")
     put_connections.AddColumn("Dep", Format=3)
     put_connections.AddColumn("Arr", Format=3)
 
@@ -70,5 +70,5 @@ def export_to_csv(v, path):
                     conwriter.writerow(
                         [int(d[0]), int(d[1]), start_stop, end_stop, start_link, end_link, linename, route, time, wait_time, int(d[14]), int(d[15])])
                 else:
-                    conwriter.writerow([int(d[0]), int(d[1]), "", "", "", "", "", "", time, wait_time, int(d[14]), int(d[15])])
+                    conwriter.writerow([int(d[0]), int(d[1]), "", "", "", "", "", "", int(time), int(time), int(d[14]), int(d[15])])
 
