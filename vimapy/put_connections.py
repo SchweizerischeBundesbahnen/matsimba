@@ -2,7 +2,7 @@ import csv
 
 
 def get_stop_id(stop_id, fzp_nummer, fpf_von_index, fpf_bis_index, fzpe_index):
-    return "%s_%s_%s_%s_%s" % (stop_id, fzp_nummer, fpf_von_index, fpf_bis_index, fzpe_index)
+    return "%i_%s_%i_%i_%i" % (stop_id, fzp_nummer, fpf_von_index, fpf_bis_index, fzpe_index)
 
 
 def get_route_id(fzp_nummer, fpf_von_index, fpf_bis_index):
@@ -10,7 +10,7 @@ def get_route_id(fzp_nummer, fpf_von_index, fpf_bis_index):
 
 
 def get_link_id_for_stop(node_id, fzp_nummer, fpf_von_index, fpf_bis_index, fzpe_index):
-    return "%i_%i_%s_%s_%s_%s" % (
+    return "%i_%i_%s_%i_%i_%i" % (
     int(float(node_id)), int(float(node_id)), fzp_nummer, fpf_von_index, fpf_bis_index, fzpe_index)
 
 
@@ -27,12 +27,14 @@ def export_to_csv(v, path):
     put_connections.AddColumn("StartVehJourneyItem\VehJourney\FromTProfItemIndex")
     put_connections.AddColumn("StartVehJourneyItem\VehJourney\ToTProfItemIndex")
     put_connections.AddColumn("TimeProfile\ID")
-    put_connections.AddColumn("Time")
-    put_connections.AddColumn("WaitTime")
+    put_connections.AddColumn("Time", Format=3)
+    put_connections.AddColumn("WaitTime", Format=3)
     put_connections.AddColumn("StartVehJourneyItem\TimeProfileItem\Index")
     put_connections.AddColumn("EndVehJourneyItem\TimeProfileItem\Index")
-    put_connections.AddColumn("StartNode\No")
-    put_connections.AddColumn("EndNode\No")
+    put_connections.AddColumn("StartVehJourneyItem\TimeProfileItem\LineRouteItem\StopPoint\Node\No")
+    put_connections.AddColumn("EndVehJourneyItem\TimeProfileItem\LineRouteItem\StopPoint\Node\No")
+    put_connections.AddColumn("Dep", Format=3)
+    put_connections.AddColumn("Arr", Format=3)
 
     chunk = 200
     n = put_connections.NumActiveElements
@@ -66,7 +68,7 @@ def export_to_csv(v, path):
                     route = get_route_id(fzp_nummer, von_index, nach_index)
 
                     conwriter.writerow(
-                        [d[0], d[1], start_stop, end_stop, start_link, end_link, linename, route, time, wait_time])
+                        [int(d[0]), int(d[1]), start_stop, end_stop, start_link, end_link, linename, route, time, wait_time, int(d[14]), int(d[15])])
                 else:
-                    conwriter.writerow([d[0], d[1], "", "", "", "", "", "", time, wait_time])
+                    conwriter.writerow([int(d[0]), int(d[1]), "", "", "", "", "", "", int(time), int(time), int(d[14]), int(d[15])])
 
