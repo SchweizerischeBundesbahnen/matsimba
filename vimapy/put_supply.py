@@ -96,14 +96,13 @@ def export_supply_and_network(v, config):
 
                     stop_no = int(fzpe.com_objekt.AttValue("LineRouteItem\StopPoint\No"))
                     stop_code = fzpe.com_objekt.AttValue("LineRouteItem\StopPoint\Code")
-                    stop_id = get_id_stop(fzp_id=fzp.nummer(), no=stop_no, code=stop_code)
+                    stop_id = get_id_stop(no=stop_no, code=stop_code)
 
                     node_no = fzpe.com_objekt.AttValue("LineRouteItem\NodeNo")
-                    link_id = make_link(fzp_id=fzp.nummer(), from_node_no=node_no, to_node_no=node_no, links=links, nodes=nodes, visum_com=v.visum_com, speed=10000000)
+                    link_id = make_link(fzp_id=0, from_node_no=node_no, to_node_no=node_no, links=links, nodes=nodes, visum_com=v.visum_com, speed=10000000)
                     route.append(link_id)
 
                     if stop_id not in stopFacilities:
-
 
                         stopFacilities[stop_id] = {'x': fzpe.com_objekt.AttValue("LineRouteItem\StopPoint\Xcoord"),
                                                    'y': fzpe.com_objekt.AttValue("LineRouteItem\StopPoint\Ycoord"),

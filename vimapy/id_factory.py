@@ -15,5 +15,5 @@ def get_id_node(no, code):
     return "%i_%s" % (int(no), code)
 
 
-def get_id_stop(fzp_id, no, code):
-    return "%i_%s_[%i]" % (int(no), code, int(fzp_id))
+def get_id_stop(no, code):
+    return "%i_%s" % (int(no), code)
