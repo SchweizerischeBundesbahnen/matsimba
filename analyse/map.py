@@ -4,6 +4,7 @@ import matplotlib.cm as cmx
 import matplotlib as mpl
 from matplotlib import cm
 import shapely.geometry as sg
+import numpy as np
 
 
 class MplColorHelper:
