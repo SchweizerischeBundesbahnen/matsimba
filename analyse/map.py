@@ -36,7 +36,8 @@ class MplColorHelper:
         return ax
 
 
-def choropleth(geojson, data, title_legend="Value", property="GMDNAME", coloumn="activity_id", alpha=1.0):
+def choropleth(geojson, data, title_legend="Value", property="GMDNAME", coloumn="activity_id", alpha=1.0, cmap="jet", vmin=1, vmax=30000):
+    mmm = MplColorHelper(cmap, vmin, vmax)
 
     fig = plt.figure()
     axs = fig.add_subplot(111)
