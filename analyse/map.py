@@ -38,22 +38,22 @@ class MplColorHelper:
         return ax
 
 
-def map_journeys(geojson, data, property, color="#F6F6F6"):
+def map_journeys(geojson, data, property="GMDNAME", color="#F6F6F6"):
     coordinates = {}
 
     for feature in geojson["features"]:
         geo = feature["geometry"]
-        new_shape = sg.shape(geo)
+        shape = sg.shape(geo)
 
-        coordinates[feature["properties"][property]] = [geo.centroid.x, geo.centroid.y]
+        coordinates[feature["properties"][property]] = [shape.centroid.x, shape.centroid.y]
 
-        if new_shape.type == "MultiPolygon":
-            for geo in new_shape.geoms:
+        if shape.type == "MultiPolygon":
+            for geo in shape.geoms:
                 xs, ys = geo.exterior.xy
                 axs.fill(xs, ys, alpha=alpha, fc=color, ec='k')
 
         else:
-            xs, ys = new_shape.exterior.xy
+            xs, ys = shape.exterior.xy
             axs.fill(xs, ys, alpha=alpha, fc=color, ec='k')
 
     fig.set_size_inches(15, 9)
