@@ -39,6 +39,8 @@ class MplColorHelper:
 
 
 def map_journeys(geojson, data, property="GMDNAME", color="#F6F6F6"):
+    fig = plt.figure()
+    axs = fig.add_subplot(111)
     coordinates = {}
 
     for feature in geojson["features"]:
