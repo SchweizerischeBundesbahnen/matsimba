@@ -38,6 +38,41 @@ class MplColorHelper:
         return ax
 
 
+def map_journeys(geojson, data, property, color="#F6F6F6"):
+    coordinates = {}
+
+    for feature in geojson["features"]:
+        geo = feature["geometry"]
+        new_shape = sg.shape(geo)
+
+        coordinates[feature["properties"][property]] = [geo.centroid.x, geo.centroid.y]
+
+        if new_shape.type == "MultiPolygon":
+            for geo in new_shape.geoms:
+                xs, ys = geo.exterior.xy
+                axs.fill(xs, ys, alpha=alpha, fc=color, ec='k')
+
+        else:
+            xs, ys = new_shape.exterior.xy
+            axs.fill(xs, ys, alpha=alpha, fc=color, ec='k')
+
+    fig.set_size_inches(15, 9)
+    axs.axis('off')
+
+    for od in data.index:
+        o = od[0]
+        d = od[1]
+        from_coord = coordinates[o]
+        to_coord = coordinates[d]
+
+        axs.arrow(from_coord[0], from_coord[1],
+                  to_coord[0] - from_coord[0], to_coord[1] - from_coord[1],
+                  head_width=3000,
+                  head_length=3000, fc='k', ec='k', lw=2, alpha=1.0)
+
+    return axs
+
+
 def choropleth(geojson, data, title_legend="Value", property="GMDNAME", coloumn="activity_id", alpha=1.0, cmap="jet", vmin=1, vmax=30000):
     mmm = MplColorHelper(cmap, vmin, vmax)
 
@@ -71,4 +106,4 @@ def choropleth(geojson, data, title_legend="Value", property="GMDNAME", coloumn=
     # fig.set_facecolor('#F6F6F6')
     ax_ = fig.add_axes([0.1, 0.9, 0.2, 0.02])
     mmm.plot_bar(title_legend, alpha=alpha, ax=ax_)
-    return ax
+    return axs
