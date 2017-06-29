@@ -71,4 +71,4 @@ def choropleth(geojson, data, title_legend="Value", property="GMDNAME", coloumn=
     # fig.set_facecolor('#F6F6F6')
     ax_ = fig.add_axes([0.1, 0.9, 0.2, 0.02])
     mmm.plot_bar(title_legend, alpha=alpha, ax=ax_)
-    plt.show()
+    return ax
