@@ -72,7 +72,7 @@ def map_journeys(geojson, data, property="GMDNAME", color="#F6F6F6"):
                   head_width=3000,
                   head_length=3000, fc='k', ec='k', lw=2, alpha=1.0)
 
-    return axs
+    return fig, axs
 
 
 def choropleth(geojson, data, title_legend="Value", property="GMDNAME", coloumn="activity_id", alpha=1.0, cmap="jet", vmin=1, vmax=30000):
@@ -108,4 +108,4 @@ def choropleth(geojson, data, title_legend="Value", property="GMDNAME", coloumn=
     # fig.set_facecolor('#F6F6F6')
     ax_ = fig.add_axes([0.1, 0.9, 0.2, 0.02])
     mmm.plot_bar(title_legend, alpha=alpha, ax=ax_)
-    return axs
+    return fig, axs
