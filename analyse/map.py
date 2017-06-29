@@ -52,11 +52,11 @@ def map_journeys(geojson, data, property="GMDNAME", color="#F6F6F6"):
         if shape.type == "MultiPolygon":
             for geo in shape.geoms:
                 xs, ys = geo.exterior.xy
-                axs.fill(xs, ys, alpha=alpha, fc=color, ec='k')
+                axs.fill(xs, ys, fc=color, ec='k')
 
         else:
             xs, ys = shape.exterior.xy
-            axs.fill(xs, ys, alpha=alpha, fc=color, ec='k')
+            axs.fill(xs, ys, fc=color, ec='k')
 
     fig.set_size_inches(15, 9)
     axs.axis('off')
