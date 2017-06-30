@@ -38,7 +38,7 @@ class MplColorHelper:
         return ax
 
 
-def map_journeys(geojson, data, property="GMDNAME", color="#F6F6F6"):
+def map_journeys(geojson, data, property="GMDNAME", color="#F6F6F6", lims=None):
     fig = plt.figure()
     axs = fig.add_subplot(111)
     coordinates = {}
@@ -58,7 +58,15 @@ def map_journeys(geojson, data, property="GMDNAME", color="#F6F6F6"):
             xs, ys = shape.exterior.xy
             axs.fill(xs, ys, fc=color, ec='k')
 
-    fig.set_size_inches(15, 9)
+    if lims is not None:
+        axs.set_xlim(lims[0])
+        axs.set_ylim(lims[1])
+
+    w = axs.get_xbound()[1]-axs.get_xbound()[0]
+    h = axs.get_ybound()[1]-axs.get_ybound()[0]
+
+    fig.set_size_inches(width, h/w*width
+
     axs.axis('off')
 
     for od in data.index:
@@ -104,13 +112,12 @@ def choropleth(geojson, data, title_legend="Value", property="GMDNAME", coloumn=
             axs.fill(xs, ys, alpha=alpha, fc=c, ec='k')
 
     if lims is not None:
-    	axs.set_xlim(lims[0])
-    	axs.set_ylim(lims[1])
+        axs.set_xlim(lims[0])
+        axs.set_ylim(lims[1])
 
     w = axs.get_xbound()[1]-axs.get_xbound()[0]
     h = axs.get_ybound()[1]-axs.get_ybound()[0]
 
-    width = 15
     fig.set_size_inches(width, h/w*width )
     axs.axis('off')
     # fig.set_facecolor('#F6F6F6')
