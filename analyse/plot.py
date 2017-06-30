@@ -166,8 +166,10 @@ def make_all_plots(trips, journeys, activities, output_folder):
 
 
 def plot_time_hist(_df):
-    open = pd.concat([pd.Series(1, _df["start_time"]), pd.Series(-1, _df["end_time"])]).resample("10Min",
-                                                                                                 how="sum").cumsum()
+    start_time = _df.start_time.apply(lambda x: datetime.datetime.fromtimestamp(x))
+    end_time = _df.end_time.apply(lambda x: datetime.datetime.fromtimestamp(x))
+
+    open = pd.concat([pd.Series(1, start_time), pd.Series(-1, end_time)]).resample("10Min", how="sum").cumsum()
     ax = open.plot(kind="bar")
     xticks = ax.get_xticks()
     xticklabels = ax.get_xticklabels()
