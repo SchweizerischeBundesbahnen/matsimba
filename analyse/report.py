@@ -14,7 +14,7 @@ def insert_fig(worksheet, fig, row, col, kwargs):
         return t.name
 
 
-def make_report(path, acts):
+def make_report(path, acts, geojson):
     to_delete = []
     try:
 
