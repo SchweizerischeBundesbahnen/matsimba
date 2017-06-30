@@ -32,8 +32,7 @@ def make_report(path, acts, geojson, rect=None):
         to_delete.append(insert_fig(worksheet, fig, 1, 5, {"options": {'x_scale': 0.5, 'y_scale': 0.5}}))
         plt.close(fig)
 
-        acts["duration"] = (acts.end_time - acts.start_time) / 60. / 60.
-        ax = acts.boxplot(column=["duration"], by=["type"], vert=False, figsize=(14, 10))
+        analyse.plot.plot_boxplot_duration(acts)
         fig = ax.get_figure()
         to_delete.append(insert_fig(worksheet, fig, 15, 5, {"options": {'x_scale': 0.5, 'y_scale': 0.5}}))
         plt.close(fig)

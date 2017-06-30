@@ -179,3 +179,9 @@ def plot_time_hist(_df):
 
     ax.set_xticklabels([tl.get_text().split(" ")[1][:-3] for tl in xticklabels][::4])
     return ax
+
+
+def plot_boxplot_duration(df):
+    df["duration"] = (df.end_time - df.start_time) / 60. / 60.
+    ax = df.boxplot(column=["duration"], by=["type"], vert=False, figsize=(14, 10))
+    return ax
