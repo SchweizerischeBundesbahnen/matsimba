@@ -163,3 +163,16 @@ def make_all_plots(trips, journeys, activities, output_folder):
     merged_journeys.groupby([merged_journeys.type_toact, merged_journeys.main_mode]).distance.sum().divide(
         journeys.distance.sum()).unstack().plot(kind="barh", by="main_mode", ax=ax, stacked=True)
     fig.savefig(os.path.join(output_folder, "modal_split_to_act_distance.png"))
+
+
+def plot_time_hist(_df):
+    open = pd.concat([pd.Series(1, _df["start_time"]), pd.Series(-1, _df["end_time"])]).resample("10Min",
+                                                                                                 how="sum").cumsum()
+    ax = open.plot(kind="bar")
+    xticks = ax.get_xticks()
+    xticklabels = ax.get_xticklabels()
+
+    ax.set_xticks(xticks[::4])
+
+    ax.set_xticklabels([tl.get_text().split(" ")[1][:-3] for tl in xticklabels][::4])
+    return ax
