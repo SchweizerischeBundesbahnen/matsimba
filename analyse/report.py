@@ -3,6 +3,8 @@ import xlsxwriter
 import pandas as pd
 import os
 import matplotlib.pyplot as plt
+import analyse.plot
+import analyse.map
 
 
 def insert_fig(worksheet, fig, row, col, kwargs):
@@ -40,7 +42,7 @@ def make_report(path, acts):
             print act
 
             worksheet = workbook.add_worksheet(act)
-            ax = plot_time_hist(acts[acts["type"] == act])
+            ax = analyse.plot.plot_time_hist(acts[acts["type"] == act])
             fig = ax.get_figure()
             to_delete.append(insert_fig(worksheet, fig, 1, 1, {"options": {'x_scale': 0.5, 'y_scale': 0.5}}))
             plt.close(fig)
