@@ -2,6 +2,7 @@ import tempfile
 import xlsxwriter
 import pandas as pd
 import os
+import matplotlib.pyplot as plt
 
 
 def insert_fig(worksheet, fig, row, col, kwargs):
