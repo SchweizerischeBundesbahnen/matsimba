@@ -75,7 +75,7 @@ def map_journeys(geojson, data, property="GMDNAME", color="#F6F6F6"):
     return fig, axs
 
 
-def choropleth(geojson, data, title_legend="Value", property="GMDNAME", coloumn="activity_id", alpha=1.0, cmap="jet", vmin=1, vmax=30000):
+def choropleth(geojson, data, title_legend="Value", property="GMDNAME", coloumn="activity_id", alpha=1.0, cmap="jet", vmin=1, vmax=30000, width=15, lims=None):
     mmm = MplColorHelper(cmap, vmin, vmax)
 
     fig = plt.figure()
@@ -103,7 +103,15 @@ def choropleth(geojson, data, title_legend="Value", property="GMDNAME", coloumn=
             xs, ys = new_shape.exterior.xy
             axs.fill(xs, ys, alpha=alpha, fc=c, ec='k')
 
-    fig.set_size_inches(15, 9)
+    if lims is not None:
+    	axs.set_xlim(lims[0])
+    	axs.set_ylim(lims[1])
+
+    w = axs.get_xbound()[1]-axs.get_xbound()[0]
+    h = axs.get_ybound()[1]-axs.get_ybound()[0]
+
+    width = 15
+    fig.set_size_inches(width, h/w*width )
     axs.axis('off')
     # fig.set_facecolor('#F6F6F6')
     ax_ = fig.add_axes([0.1, 0.9, 0.2, 0.02])
