@@ -65,7 +65,7 @@ def map_journeys(geojson, data, property="GMDNAME", color="#F6F6F6", lims=None):
     w = axs.get_xbound()[1]-axs.get_xbound()[0]
     h = axs.get_ybound()[1]-axs.get_ybound()[0]
 
-    fig.set_size_inches(width, h/w*width
+    fig.set_size_inches(width, h/w*width )
 
     axs.axis('off')
 
