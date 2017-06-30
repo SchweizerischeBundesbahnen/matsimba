@@ -1,5 +1,6 @@
 import tempfile
 import xlsxwriter
+import pandas as pd
 
 
 def insert_fig(worksheet, fig, row, col, kwargs):
