@@ -38,7 +38,7 @@ class MplColorHelper:
         return ax
 
 
-def map_journeys(geojson, data, property="GMDNAME", color="#F6F6F6", width=15, lims=None):
+def map_journeys(geojson, data, property="GMDNAME", color="#F6F6F6", width=15, head_size=3000, lims=None):
     fig = plt.figure()
     axs = fig.add_subplot(111)
     coordinates = {}
@@ -77,8 +77,8 @@ def map_journeys(geojson, data, property="GMDNAME", color="#F6F6F6", width=15, l
 
         axs.arrow(from_coord[0], from_coord[1],
                   to_coord[0] - from_coord[0], to_coord[1] - from_coord[1],
-                  head_width=3000,
-                  head_length=3000, fc='k', ec='k', lw=2, alpha=1.0)
+                  head_width=head_size,
+                  head_length=head_size, fc='k', ec='k', lw=2, alpha=1.0)
 
     return fig, axs
 
