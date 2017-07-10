@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import glob
 import datetime
+import analyse.compare
 
 
 def set_matplotlib_params():
