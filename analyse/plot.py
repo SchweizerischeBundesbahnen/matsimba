@@ -59,10 +59,13 @@ def get_timing(folder):
     columns = ["replanning", "beforeMobsimListeners", "mobsim", "afterMobsimListeners", "scoring", "dump all plans",
                "compare with counts", "iterationEndsListeners", "iteration"]
     for c in columns:
-        stopwatch.loc[stopwatch[c].isnull(), c] = "00:00:00"
+        try:
+            stopwatch.loc[stopwatch[c].isnull(), c] = "00:00:00"
 
-        stopwatch[c] = stopwatch[c].map(
-            lambda x: int(x.split(":")[0]) * 3600 + int(x.split(":")[1]) * 60 + int(x.split(":")[2]))
+            stopwatch[c] = stopwatch[c].map(
+                lambda x: int(x.split(":")[0]) * 3600 + int(x.split(":")[1]) * 60 + int(x.split(":")[2]))
+        except:
+            pass
     return stopwatch
 
 
