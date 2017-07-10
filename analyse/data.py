@@ -2,6 +2,42 @@ import glob
 import os
 import pandas as pd
 import numpy as np
+import gzip
+
+
+def get_persons(folder):
+    attributes_file = glob.glob(os.path.join(folder, "*personAttributes.xml.gz"))[0]
+    with gzip.open(attributes_file, 'rb') as f:
+        file_content = f.read()
+        tree_attributes = ET.fromstring(file_content)
+
+        attributes_dict = {}
+        for d in tree_attributes.findall("object"):
+            _id = d.attrib["id"]
+            attributes_dict[_id] = {}
+            for dd in d.findall("attribute"):
+                attributes_dict[_id][dd.attrib["name"]] = dd.text
+
+        persons_file = glob.glob(os.path.join(folder, "*plans.xml.gz"))[0]
+        with gzip.open(persons_file, 'rb') as f:
+            file_content = f.read()
+            tree = ET.fromstring(file_content)
+
+            persons = []
+            for p in tree.findall("person"):
+                d = p.attrib
+                score = None
+                if d["id"] in attributes_dict:
+                    d = dict(d.items() + attributes_dict[d["id"]].items())
+
+                for a in p.findall("plan"):
+                    if a.attrib["selected"] == "yes":
+                        score = a.attrib["score"]
+
+                d["score"] = score
+                persons.append(d)
+
+            return pd.DataFrame.from_dict(persons)
 
 
 def get_activities(folder):
