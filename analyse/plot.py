@@ -185,3 +185,26 @@ def plot_boxplot_duration(df):
     df["duration"] = (df.end_time - df.start_time) / 60. / 60.
     ax = df.boxplot(column=["duration"], by=["type"], vert=False, figsize=(14, 10))
     return ax
+
+
+def plot_departures_sum(folder,  iters=None, var_list=["departures_bike", "departures_car","departures_pt", "departures_ride", "departures_walk"]):
+    folder = os.path.join(folder, "ITERS")
+    if iters is None:
+        iters = []
+        for it in glob.glob(os.path.join(folder, "*")):
+            iters.append(int(it.split(".")[-1]))
+
+    iters.sort()
+
+    dfs = []
+    names = []
+    for it in iters:
+        _path = glob.glob(os.path.join(folder, "it.%i" % it, "*legHist*"))
+        if len(_path) > 0:
+            df = pd.DataFrame.from_csv(_path[0], sep="\t")
+            dfs.append(df)
+            names.append(it)
+    df = analyse.compare.concat(dfs, names)
+    df2 = pd.DataFrame(df.sum()).swaplevel(0, 1).unstack()[0]
+    cols = [col for col in df2.columns if col in var_list]
+    return df2[cols].plot(legend=True)
