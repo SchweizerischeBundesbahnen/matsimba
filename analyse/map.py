@@ -38,7 +38,7 @@ class MplColorHelper:
         return ax
 
 
-def map_journeys(geojson, data, property="GMDNAME", color="#F6F6F6", width=15, head_size=3000, cmap="jet", vmin=1, vmax=100, lims=None):
+def map_journeys(geojson, data, property="GMDNAME", color="#F6F6F6", width=15, head_size=3000, cmap="jet", vmin=1, vmax=100, title_legend="bla", lims=None, alpha=1.0):
     mmm = MplColorHelper(cmap, vmin, vmax)
     fig = plt.figure()
     axs = fig.add_subplot(111)
@@ -76,10 +76,12 @@ def map_journeys(geojson, data, property="GMDNAME", color="#F6F6F6", width=15, h
         from_coord = coordinates[o]
         to_coord = coordinates[d]
 
+	value = data.loc[od]["person_id"]
+        c = mmm.get_rgb(value)
         axs.arrow(from_coord[0], from_coord[1],
                   to_coord[0] - from_coord[0], to_coord[1] - from_coord[1],
                   head_width=head_size,
-                  head_length=head_size, fc='k', ec='k', lw=2, alpha=1.0)
+                  head_length=head_size, fc=c, ec=c, lw=2, alpha=alpha)
 
 
     ax_ = fig.add_axes([0.1, 0.9, 0.2, 0.02])
