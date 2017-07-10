@@ -38,7 +38,7 @@ class MplColorHelper:
         return ax
 
 
-def map_journeys(geojson, data, property="GMDNAME", color="#F6F6F6", width=15, head_size=3000, cmap="jet", vmin=1, vmax=100 lims=None):
+def map_journeys(geojson, data, property="GMDNAME", color="#F6F6F6", width=15, head_size=3000, cmap="jet", vmin=1, vmax=100, lims=None):
     mmm = MplColorHelper(cmap, vmin, vmax)
     fig = plt.figure()
     axs = fig.add_subplot(111)
