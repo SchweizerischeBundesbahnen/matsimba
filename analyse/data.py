@@ -6,6 +6,7 @@ import gzip
 import xml.etree.ElementTree as ET
 
 
+<<<<<<< b374873cb0c59824f600f4c842392ffc2a8dbf22
 def get_stops(folder):
     transitfile = glob.glob(os.path.join(folder, "*transitSchedule.xml.gz"))[0]
     
@@ -20,8 +21,9 @@ def get_stops(folder):
 
         return pd.DataFrame.from_dict(stops)
 
-def get_persons(folder):
-    attributes_file = glob.glob(os.path.join(folder, "*personAttributes.xml.gz"))[0]
+def get_persons(folder, attribute_file=None, persons_file=None):
+    if attribute_file is None:
+        attributes_file = glob.glob(os.path.join(folder, "*Attributes.xml.gz"))[0]
     with gzip.open(attributes_file, 'rb') as f:
         file_content = f.read()
         tree_attributes = ET.fromstring(file_content)
@@ -33,7 +35,8 @@ def get_persons(folder):
             for dd in d.findall("attribute"):
                 attributes_dict[_id][dd.attrib["name"]] = dd.text
 
-        persons_file = glob.glob(os.path.join(folder, "*plans.xml.gz"))[0]
+        if persons_file is None:
+            persons_file = glob.glob(os.path.join(folder, "*plans.xml.gz"))[0]
         with gzip.open(persons_file, 'rb') as f:
             file_content = f.read()
             tree = ET.fromstring(file_content)
