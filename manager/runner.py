@@ -50,7 +50,7 @@ def work(a):
     while True:
         line = my_tool_subprocess.stdout.readline()
         if line != '':
-	    print line
+            print line
             pass
         else:
             break
@@ -73,7 +73,6 @@ if __name__ == '__main__':
     if args.n:
         n = int(args.n)
 
-
     tp = Pool(n)
 
     vars1 = args.var1
@@ -86,15 +85,13 @@ if __name__ == '__main__':
         print "Waiting for results"
         res.get(60*60*24*30)
     except KeyboardInterrupt:
-	print "KeyboardIntterupt"
-	tp.terminate()
-
+        print "KeyboardIntterupt"
+        tp.terminate()
     except TimeoutError:
-	print "timeout reached"
-	tp.close()
-	tp.terminate()
+        print "timeout reached"
+        tp.close()
+        tp.terminate()
     else:
-	tp.close()
-
+        tp.close()
 
     tp.join()
