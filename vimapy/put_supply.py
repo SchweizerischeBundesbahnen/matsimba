@@ -124,10 +124,11 @@ def export_supply_and_network(v, config):
                                                 visum_com=v.visum_com, speed=speed, length=length/1000.0)
                         route.append(link_id)
 
-                schedule[line_id][lineroute_id] = {"departures": [], "route": route, "routeProfile": stops}
+                schedule[line_id][lineroute_id] = {"departures": [], "route": route, "routeProfile": stops, "vehicleJourneyNr": []}
 
             t = time.strftime('%H:%M:%S', time.gmtime(fpf.abfahrt()))
             schedule[line_id][lineroute_id]["departures"].append(t)
+            schedule[line_id][lineroute_id]["vehicleJourneyNr"].append(fpf.nummer())
     return {"schedule": schedule, "stopFacilities": stopFacilities, "nodes": nodes, "links": links}
 
 
@@ -196,7 +197,8 @@ def to_xml(transit, folder, config):
 
             departures = ET.Element("departures")
             for i, d in enumerate(schedule[transit_line][transit_route]["departures"]):
-                v_id = transit_line+"_"+transit_route+"_"+str(i)
+                fpfnr = schedule[transit_line][transit_route]["vehicleJourneyNr"][i]
+                v_id = transit_line+"_"+transit_route+"_"+str(i)+"_"+str(fpfnr)
                 vehicles_ids.append(v_id)
                 departures.append(ET.Element("departure", attrib={"id": str(i), 'departureTime': d, "vehicleRefId": str(v_id)}))
             xml_transit_route.append(departures)
