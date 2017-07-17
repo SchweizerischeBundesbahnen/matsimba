@@ -212,3 +212,42 @@ def plot_departures_sum(folder,  iters=None, var_list=["departures_bike", "depar
     df2 = pd.DataFrame(df.sum()).swaplevel(0, 1).unstack()[0]
     cols = [col for col in df2.columns if col in var_list]
     return df2[cols].plot(legend=True)
+
+
+def plot_plans(df, person_id="993307400", end_time=35 * 60 * 60):
+    plan_ids = df[df.person_id == person_id].plan_id.unique()
+    n = len(plan_ids)
+    f = plt.figure(figsize=(20, n * 1.0))
+    ax = f.add_subplot(2, 1, 1)
+
+    ax2 = f.add_subplot(2, 1, 2)
+    for i, plan_id in enumerate(plan_ids):
+        times = []
+        pes = []
+        for index, b in aaa[np.logical_and(df.person_id == person_id, df.plan_id == plan_id)].iterrows():
+            if b["type"] == "activity":
+                pes.append(b["activity_type"])
+                times.append(b["start_time"])
+                times.append(b["end_time"])
+            else:
+                pes.append(b["mode"])
+        for j, t in enumerate(times[1:-1:2]):
+            ii = times.index(t)
+            t0 = float(times[ii - 1])
+            t1 = float(times[ii])
+            ax.plot([t0, t0], [0.4 + i, 0.7 + i], c="k")
+            ax.plot([t1, t1], [0.4 + i, 0.7 + i], c="k")
+            ax.plot([t0, t1], [0.5 + i, 0.5 + i], c="k")
+
+        t0 = float(times[-2])
+        t1 = end_time
+        ax.plot([t0, t0], [0.4 + i, 0.7 + i], c="k")
+        ax.plot([t1, t1], [0.4 + i, 0.7 + i], c="k")
+        ax.plot([t0, t1], [0.5 + i, 0.5 + i], c="k")
+        text = " -> ".join([p.rjust(12) for p in pes]) + "  " + str(b["plan_score"]) + "  " + str(b["selected"])
+        ax2.text(0, 1.0 - i / float(n), text, fontsize=14, verticalalignment='center', horizontalalignment='left')
+
+    ax.axis('off')
+    ax2.axis('off')
+    f.tight_layout()
+    return ax
