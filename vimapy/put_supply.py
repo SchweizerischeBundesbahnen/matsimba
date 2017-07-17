@@ -68,7 +68,7 @@ def export_supply_and_network(v, config):
     for fzp in v.apl.hole_fahrzeitprofile():
         logging.getLogger(__name__).info("%s" % fzp)
 
-        line_id = get_id_line(linename=fzp.linename(), lineroutename=fzp.lineroutename(), direction=fzp.richtung(), timeprofilename=fzp.name())
+        line_id = get_id_line(linename=fzp.linename(), lineroutename=fzp.lineroutename(), direction=fzp.richtung(), timeprofilename=fzp.nummer())
         if line_id not in schedule:
             schedule[line_id] = {}
 
