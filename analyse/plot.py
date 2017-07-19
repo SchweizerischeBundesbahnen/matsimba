@@ -21,8 +21,18 @@ def get_score(folder):
         return pd.read_csv(file, sep="\t", index_col=0)
 
 
-def plot_score(folder):
-    return get_score(folder).plot()
+def plot_score(folder, names=None):
+    """
+    Plot score of MATSim run. Folder must be path of the output folder
+    :param folder: either list or single path to output folder
+    :param names: if folder is a list, should be the corresponding names
+    :return: ax
+    """
+    if isinstance(folder, list):
+        ax = analyse.compare.concat(folder, names).plot()
+    else:
+        ax = get_score(folder).plot()
+    return move_legend(ax)
 
 
 def plot_cumulative_mode(df, var="distance", max_value=10000, ax=None):
@@ -191,12 +201,11 @@ def plot_boxplot_duration(df):
     return ax
 
 
-def plot_departures_sum(folder,  iters=None, var_list=["departures_bike", "departures_car","departures_pt", "departures_ride", "departures_walk"]):
+def _get_departures_sum(folder):
     folder = os.path.join(folder, "ITERS")
-    if iters is None:
-        iters = []
-        for it in glob.glob(os.path.join(folder, "*")):
-            iters.append(int(it.split(".")[-1]))
+    iters = []
+    for it in glob.glob(os.path.join(folder, "*")):
+        iters.append(int(it.split(".")[-1]))
 
     iters.sort()
 
@@ -209,9 +218,30 @@ def plot_departures_sum(folder,  iters=None, var_list=["departures_bike", "depar
             dfs.append(df)
             names.append(it)
     df = analyse.compare.concat(dfs, names)
-    df2 = pd.DataFrame(df.sum()).swaplevel(0, 1).unstack()[0]
-    cols = [col for col in df2.columns if col in var_list]
-    return df2[cols].plot(legend=True)
+    return pd.DataFrame(df.sum()).swaplevel(0, 1).unstack()[0]
+
+
+def plot_departures_sum(folder, var_list=["departures_bike", "departures_car","departures_pt", "departures_ride", "departures_walk"], names=[]):
+    """
+    :param folder: path or list of paths of output folders
+    :param names: names for dataframes if folder is a list
+    :param var_list: Columns to be plotted
+    :return: ax
+    """
+
+    if not isinstance(folder, list):
+        df = _get_departures_sum(folder)
+        cols = [col for col in df.columns if col in var_list]
+        ax = df[cols].plot(legend=True)
+    else:
+        dfs = []
+        for f in folder:
+            dfs.append(_get_departures_sum(f))
+
+        cols = [col for col in dfs[0].columns if col in var_list]
+        ax = dfs[cols].plot(legend=True)
+
+    return move_legend(ax)
 
 
 def plot_plans(df, person_id="993307400", end_time=35 * 60 * 60):
