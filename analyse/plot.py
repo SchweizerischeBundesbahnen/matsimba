@@ -238,8 +238,8 @@ def plot_departures_sum(folder, var_list=["departures_bike", "departures_car","d
         for f in folder:
             dfs.append(_get_departures_sum(f))
 
-        cols = [col for col in dfs[0].columns if col in var_list]
-        ax = dfs[cols].plot(legend=True)
+        dfs = analyse.compare.concat(dfs, names=names)
+        ax = dfs[var_list].plot(legend=True)
 
     return move_legend(ax)
 
