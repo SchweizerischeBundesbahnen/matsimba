@@ -218,7 +218,7 @@ def _get_departures_sum(folder):
             dfs.append(df)
             names.append(it)
     df = analyse.compare.concat(dfs, names)
-    return pd.DataFrame(df.sum()).swaplevel(0, 1).unstack()[0]
+    return pd.DataFrame(pd.DataFrame(df.sum()).swaplevel(0, 1).unstack()[0])
 
 
 def plot_departures_sum(folder, var_list=["departures_bike", "departures_car","departures_pt", "departures_ride", "departures_walk"], names=[]):
