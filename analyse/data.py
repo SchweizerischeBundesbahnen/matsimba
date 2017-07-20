@@ -15,12 +15,21 @@ def get_stops(folder):
 
         stops = []
         for a in tree.findall("transitStops"):
-	    for stop in a.findall("stopFacility"):
-	        stops.append(stop.attrib)
+            for stop in a.findall("stopFacility"):
+                stops.append(stop.attrib)
 
         return pd.DataFrame.from_dict(stops)
 
-def get_persons(folder, attributes_file=None, persons_file=None):
+
+def get_persons(folder):
+    return pd.read_csv(os.path.join(folder, "agents.csv"), sep=";")
+
+
+def get_planelements(folder):
+    return pd.read_csv(os.path.join(folder, "plan_elements.csv"), sep=";")
+
+
+def get_persons_from_xml(folder, attributes_file=None, persons_file=None):
     if attributes_file is None:
         attributes_file = glob.glob(os.path.join(folder, "*Attributes.xml.gz"))[0]
     with gzip.open(attributes_file, 'rb') as f:
@@ -60,13 +69,6 @@ def get_persons(folder, attributes_file=None, persons_file=None):
 def get_activities(folder):
     filename = os.path.join(folder, "matsim_activities.txt")
     return pd.DataFrame.from_csv(filename, sep="\t")
-
-
-def get_legs(folder):
-    filename = os.path.join(folder, "matsim_trips.txt")
-    legs = pd.DataFrame.from_csv(filename, sep="\t")
-    legs["duration"] = legs.end_time-legs.start_time
-    return legs
 
 
 def get_trips(folder):

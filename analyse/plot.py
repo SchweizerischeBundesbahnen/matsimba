@@ -29,7 +29,10 @@ def plot_score(folder, names=None):
     :return: ax
     """
     if isinstance(folder, list):
-        ax = analyse.compare.concat(folder, names).plot()
+        datas = []
+        for f in folder:
+            datas.append(get_score(f))
+        ax = analyse.compare.concat(datas, names).plot()
     else:
         ax = get_score(folder).plot()
     return move_legend(ax)
@@ -83,7 +86,8 @@ def plot_timing(folder):
     stopwatch = get_timing(folder)
     columns = ["replanning", "beforeMobsimListeners", "mobsim", "afterMobsimListeners", "scoring", "dump all plans",
                "compare with counts", "iterationEndsListeners"]
-    return stopwatch[columns].plot(kind="bar", stacked=True)
+    ax = stopwatch[columns].plot(kind="bar", stacked=True)
+    return move_legend(ax)
 
 
 def plot_leg_histogram(folder, var="departures_all", iters=None):
@@ -104,6 +108,18 @@ def plot_leg_histogram(folder, var="departures_all", iters=None):
             df[var].plot(ax=ax, label=it)
     ax.legend()
     ax.set_title(var)
+
+
+def plot_modalsplit(trips):
+    fig = plt.figure(figsize=(15, 4.5))
+    ax = fig.add_subplot(1, 3, 1)
+    trips.groupby("mode").distance.count().rename(columns={"distance": "count"}).plot(kind="pie", ax=ax)
+    ax = fig.add_subplot(1, 3, 2)
+    trips.groupby("mode").distance.sum().plot(kind="pie", ax=ax)
+    ax = fig.add_subplot(1, 3, 3)
+    trips["duration"] = trips.end_time-trips.start_time
+    trips.groupby("mode").duration.sum().plot(kind="pie", ax=ax)
+    return fig
 
 
 def make_all_plots(trips, journeys, activities, output_folder):
@@ -218,10 +234,11 @@ def _get_departures_sum(folder):
             dfs.append(df)
             names.append(it)
     df = analyse.compare.concat(dfs, names)
-    return pd.DataFrame(pd.DataFrame(df.sum()).swaplevel(0, 1).unstack()[0])
+    return pd.DataFrame(df.sum()).swaplevel(0, 1).unstack()[0]
 
 
-def plot_departures_sum(folder, var_list=["departures_bike", "departures_car","departures_pt", "departures_ride", "departures_walk"], names=[]):
+def plot_departures_sum(folder, var_list=("departures_bike", "departures_car", "departures_pt",
+                                          "departures_ride", "departures_walk"), names=None):
     """
     :param folder: path or list of paths of output folders
     :param names: names for dataframes if folder is a list
@@ -237,24 +254,23 @@ def plot_departures_sum(folder, var_list=["departures_bike", "departures_car","d
         dfs = []
         for f in folder:
             dfs.append(_get_departures_sum(f))
-
-        dfs = analyse.compare.concat(dfs, names=names)
-        ax = dfs[var_list].plot(legend=True)
+        _dfs = analyse.compare.concat(dfs=dfs, names=names)
+        ax = _dfs[list(var_list)].plot(legend=True)
 
     return move_legend(ax)
 
 
-def plot_plans(df, person_id="993307400", end_time=35 * 60 * 60):
-    plan_ids = df[df.person_id == person_id].plan_id.unique()
+def plot_plans(planelements, end_time=35 * 60 * 60):
+    plan_ids = planelements.plan_id.unique()
+
     n = len(plan_ids)
     f = plt.figure(figsize=(20, n * 1.0))
-    ax = f.add_subplot(2, 1, 1)
-
-    ax2 = f.add_subplot(2, 1, 2)
+    ax = f.add_subplot(1, 1, 1)
+    text = []
     for i, plan_id in enumerate(plan_ids):
         times = []
         pes = []
-        for index, b in aaa[np.logical_and(df.person_id == person_id, df.plan_id == plan_id)].iterrows():
+        for index, b in planelements[planelements.plan_id==plan_id].iterrows():
             if b["type"] == "activity":
                 pes.append(b["activity_type"])
                 times.append(b["start_time"])
@@ -274,10 +290,8 @@ def plot_plans(df, person_id="993307400", end_time=35 * 60 * 60):
         ax.plot([t0, t0], [0.4 + i, 0.7 + i], c="k")
         ax.plot([t1, t1], [0.4 + i, 0.7 + i], c="k")
         ax.plot([t0, t1], [0.5 + i, 0.5 + i], c="k")
-        text = " -> ".join([p.rjust(12) for p in pes]) + "  " + str(b["plan_score"]) + "  " + str(b["selected"])
-        ax2.text(0, 1.0 - i / float(n), text, fontsize=14, verticalalignment='center', horizontalalignment='left')
+        text.append([p for p in pes] + [b["plan_score"], b["selected"]])
 
     ax.axis('off')
-    ax2.axis('off')
     f.tight_layout()
-    return ax
+    return ax, pd.DataFrame(text)
