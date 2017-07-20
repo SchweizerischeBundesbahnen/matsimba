@@ -86,7 +86,7 @@ def plot_timing(folder):
     stopwatch = get_timing(folder)
     columns = ["replanning", "beforeMobsimListeners", "mobsim", "afterMobsimListeners", "scoring", "dump all plans",
                "compare with counts", "iterationEndsListeners"]
-    ax = stopwatch[columns].plot(kind="bar", stacked=True)
+    ax = stopwatch[[c for c in columns if c in stopwatch.columns]].plot(kind="bar", stacked=True)
     return move_legend(ax)
 
 
