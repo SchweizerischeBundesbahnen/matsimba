@@ -15,17 +15,27 @@ def number_trips(runs, by=None):
 
 
 def number_trips_by(runs, by, function=None):
+    return compare_by(runs, by=by, get_data=lambda r: r.get_trips(), title="#trips", values="person_id",
+               aggfunc="count", function=function)
+
+
+def number_legs_by(runs, by, function=None):
+    return compare_by(runs, by=by, get_data=lambda r: r.get_legs(), title="#legs", values="person_id",
+               aggfunc="count", function=function)
+
+
+def compare_by(runs, by, get_data, function=None, title="#trips", values="person_id", aggfunc="count"):
     _dfs = []
     _names = []
     for run in runs:
         _names.append(run.name)
-        _df = run.get_trips()
+        _df = get_data(run)
         if function is not None:
             _df = function(_df, run)
         _dfs.append(_df)
 
     df = analyse.compare.append(_dfs, names=_names, column="Run")
-    df = df.pivot_table(index=by, columns="Run", values="person_id", aggfunc="count", fill_value=0)
-    ax = df.plot(kind="bar", title="#trips pro %s und Run" % by)
+    df = df.pivot_table(index=by, columns="Run", values=values, aggfunc=aggfunc, fill_value=0)
+    ax = df.plot(kind="bar", title="%s pro %s und Run" % (title, by))
     ax.set_ylabel("#trips")
     return ax, df
