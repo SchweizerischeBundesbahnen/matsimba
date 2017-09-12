@@ -22,7 +22,7 @@ def number_trips_by(runs, by, other=None, on=None):
         _df = run.get_trips()
         if other is not None:
             _df2 = run.data[other]
-            _df.merge(_df2.set_index(on)[by], how="left", left_on=on, right_index=True)
+            _df = _df.merge(_df2.set_index(on)[[by]], how="left", left_on=on, right_index=True)
         _dfs.append(_df)
 
     df = analyse.compare.append(_dfs, names=_names, column="Run")
