@@ -4,12 +4,16 @@ import pandas as pd
 import numpy as np
 import gzip
 import xml.etree.ElementTree as ET
+import logging
 
 
 def get_stops(folder):
-    transitfile = glob.glob(os.path.join(folder, "*transitSchedule.xml.gz"))[0]
+    transitfiles = glob.glob(os.path.join(folder, "*transitSchedule.xml.gz"))
+    if len(transitfiles)==0:
+        logging.warn("No transitSchedule.xml.gz found")
+        return None
     
-    with gzip.open(transitfile, 'rb') as f:
+    with gzip.open(transitfiles[0], 'rb') as f:
         file_content = f.read()
         tree = ET.fromstring(file_content)
 
