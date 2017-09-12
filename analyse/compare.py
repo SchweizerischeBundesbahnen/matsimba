@@ -11,3 +11,13 @@ def concat(dfs, names=None):
         df.columns = pd.MultiIndex.from_product([df.columns, [name]])
         _dfs.append(df)
     return pd.concat(_dfs, axis=1)
+
+
+def append(dfs, names):
+    _dfs = []
+    for df, name in zip(dfs, names):
+        _df = df.copy()
+        _df["Run"] = name
+        _dfs.append(_df)
+
+    return pd.concat(_dfs, ignore_index=True)
