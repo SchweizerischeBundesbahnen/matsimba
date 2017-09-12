@@ -1,6 +1,7 @@
 import pandas as pd
 from collections import defaultdict
 import os
+import logging
 
 
 class RunsDatabase:
@@ -22,7 +23,7 @@ class RunsDatabase:
         return self.db.loc[name].Path
 
     def load_data(self, only_new=True, names=None):
-        if names is not None:
+        if names is None:
             names = self.db.index
         for name in names:
             if only_new:
@@ -32,7 +33,7 @@ class RunsDatabase:
                 self._load_data(name)
 
     def _load_data(self, run_name):
-
+        logging.info("Laoding Data for %s" % run_name)
         keys = {"acts": {"path": "matsim_activities.txt", "sep": "\t"},
                 "journeys": {"path": "matsim_journeys.txt", "sep": "\t"},
                 "legs": {"path": "matsim_trips.txt", "sep": "\t"},
@@ -48,5 +49,5 @@ class RunsDatabase:
                 path = os.path.join(_path, keys[name]["path"])
                 self.data[run_name][name] = pd.DataFrame.from_csv(path, sep=sep, encoding="utf-8").reset_index()
             except Exception as e:
-                print e.message
+                logging.error(e.message)
 
