@@ -27,5 +27,6 @@ def number_trips_by(runs, by, other=None, on=None):
 
     df = analyse.compare.append(_dfs, names=_names, column="Run")
     df = df.pivot_table(index=by, columns="Run", values="person_id", aggfunc="count", fill_value=0)
-    ax = df.plot(kind="bar")
+    ax = df.plot(kind="bar", title="#trips pro %s und Run" % by)
+    ax.set_ylabel("#trips")
     return ax, df
