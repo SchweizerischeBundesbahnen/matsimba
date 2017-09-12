@@ -6,7 +6,7 @@ import os
 class RunsDatabase:
     def __init__(self, path):
         self.path = path
-        self.data = defaultdict({})
+        self.data = defaultdict(dict)
         self.db = None
         self.rescan()
 
