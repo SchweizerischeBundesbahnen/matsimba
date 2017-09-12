@@ -13,11 +13,11 @@ def concat(dfs, names=None):
     return pd.concat(_dfs, axis=1)
 
 
-def append(dfs, names):
+def append(dfs, names, column="Run"):
     _dfs = []
     for df, name in zip(dfs, names):
         _df = df.copy()
-        _df["Run"] = name
+        _df[column] = name
         _dfs.append(_df)
 
     return pd.concat(_dfs, ignore_index=True)
