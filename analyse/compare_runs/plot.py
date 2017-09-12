@@ -20,7 +20,7 @@ def number_trips_by(runs, by, function=None):
 
 
 def number_legs_by(runs, by, function=None):
-    return compare_by(runs, by=by, get_data=lambda r: r.get_legs(), title="#legs", values="person_id",
+    return compare_by(runs, by=by, get_data=lambda r: r.get_legs(), title="#legs", values="trip_id",
                aggfunc="count", function=function)
 
 
