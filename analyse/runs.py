@@ -21,8 +21,10 @@ class RunsDatabase:
     def get_path(self, name):
         return self.db.loc[name].Path
 
-    def load_data(self, only_new=True):
-        for name in self.db.index:
+    def load_data(self, only_new=True, names=None):
+        if names is not None:
+            names = self.db.index
+        for name in names:
             if only_new:
                 if name not in self.data:
                     self._load_data(name)
