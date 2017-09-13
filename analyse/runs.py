@@ -100,7 +100,9 @@ class RunsDatabase:
         if not overwrite and name in self.db.index:
             logging.info("Name %s already in csv. Overwrite?" % name)
             return
-        self.runs[name] = Run(name=name, path=path, scale_factor=scale_factor)
+        run = Run(name=name, path=path, scale_factor=scale_factor)
+        self.runs[name] = run
+        return run
 
     def load_run(self, name, with_stop_points):
         run = Run(name=name, path=self.db.loc[name].Path, scale_factor=self.db.loc[name].Factor)
