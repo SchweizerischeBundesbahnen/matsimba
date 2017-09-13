@@ -36,6 +36,11 @@ def compare_by(runs, by, get_data, func=None, title="#trips", values="person_id"
 
     df = analyse.compare.append(_dfs, names=_names, column="Run")
     df = df.pivot_table(index=by, columns="Run", values=values, aggfunc=aggfunc, fill_value=0)
-    ax = df.plot(kind="bar", title="%s pro %s und Run" % (title, by))
+
+    if isinstance(by, list):
+        _by = ", ".join(by)
+    else:
+        _by = by
+    ax = df.plot(kind="bar", title="%s pro %s und Run" % (title, _by))
     ax.set_ylabel("#trips")
     return ax, df
