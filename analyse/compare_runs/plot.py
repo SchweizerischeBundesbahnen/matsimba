@@ -50,8 +50,8 @@ def modalsplit_number_trips(runs, by, func=None):
         _by = ", ".join(by)
     else:
         _by = by
-    ax = df.plot(kind="bar", title="%s pro %s und Run" % ("#trips", _by))
-    ax.set_ylabel("#trips")
+    ax = df.plot(kind="bar", title="Modalsplit bzgl. %s pro %s und Run" % ("#trips", _by))
+    ax.set_ylabel("%")
     return ax, df
 
 
