@@ -90,6 +90,9 @@ class RunsDatabase:
         db.set_index(["Name"], inplace=True)
         self.db = db
 
+    def get_names(self):
+        return self.db.index
+
     def get_paths(self, names):
         return [self.get_path(k) for k in names]
 
@@ -101,6 +104,7 @@ class RunsDatabase:
             logging.info("Name %s already in csv. Overwrite?" % name)
             return
         run = Run(name=name, path=path, scale_factor=scale_factor)
+
         self.runs[name] = run
         return run
 
