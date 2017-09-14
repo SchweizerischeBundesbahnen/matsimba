@@ -1,10 +1,10 @@
 import analyse.compare
 
 
-def make_simba_code(stops):
+def make_simba_code(stops, code_field="CODE", field="stop_id"):
     stops["is_simba"] = stops.line.str.match(r'\d{3}-[A-Z]-.*')
-    stops["CODE"] = None
-    stops.loc[stops.is_simba, "CODE"] = stops[stops.is_simba].stop_id.apply(lambda x: x.split("_")[1])
+    stops[code_field] = None
+    stops.loc[stops.is_simba, code_field] = stops[stops.is_simba][field].apply(lambda x: x.split("_")[1])
     return stops
 
 
