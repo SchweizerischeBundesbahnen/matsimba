@@ -1,4 +1,4 @@
-from analyse.compare_runs.plot import _compare_by
+from analyse.compare import _compare_by
 
 
 def pfahrt(runs, by, prozentual=False, func=None):
