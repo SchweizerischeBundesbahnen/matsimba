@@ -2,7 +2,7 @@ import pandas as pd
 from collections import defaultdict
 import os
 import logging
-import analyse.data
+import analyse.reader
 
 
 class Run:
@@ -47,7 +47,7 @@ class Run:
         return self.data["stop_points"]
 
     def load_stop_points(self):
-        self.data["stop_points"] = analyse.data.get_stops(self.path)
+        self.data["stop_points"] = analyse.reader.get_stops(self.path)
 
     def load_data(self, with_stop_points=False):
         logging.info("Laoding Data for %s" % self.name)

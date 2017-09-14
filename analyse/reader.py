@@ -1,7 +1,6 @@
 import glob
 import os
 import pandas as pd
-import numpy as np
 import gzip
 import xml.etree.ElementTree as ET
 import logging
@@ -23,14 +22,6 @@ def get_stops(folder):
                 stops.append(stop.attrib)
 
         return pd.DataFrame.from_dict(stops)
-
-
-def get_persons(folder):
-    return pd.read_csv(os.path.join(folder, "agents.csv"), sep=";")
-
-
-def get_planelements(folder):
-    return pd.read_csv(os.path.join(folder, "plan_elements.csv"), sep=";")
 
 
 def get_persons_from_xml(folder, attributes_file=None, persons_file=None):
@@ -70,33 +61,4 @@ def get_persons_from_xml(folder, attributes_file=None, persons_file=None):
             return pd.DataFrame.from_dict(persons)
 
 
-def get_activities(folder):
-    filename = os.path.join(folder, "matsim_activities.txt")
-    return pd.DataFrame.from_csv(filename, sep="\t")
-
-
-def get_trips(folder):
-    filename = os.path.join(folder, "matsim_journeys.txt")
-    return pd.DataFrame.from_csv(filename, sep="\t")
-
-
-def get_legs(folder):
-    filename = os.path.join(folder, "matsim_trips.txt")
-    legs = pd.DataFrame.from_csv(filename, sep="\t")
-    legs["duration"] = legs.end_time-legs.start_time
-    return legs
-
-
-def get_legs_sum(folder):
-    legs = get_legs(folder)
-    return legs.groupby("mode").sum()[["distance", "duration"]]
-
-
-def merge_journeys_with_acts(acts, journeys):
-    _acts = acts[["type", "zone", "activity_id"]]
-    _acts = _acts.rename(columns={'type': 'act_type', 'zone': 'act_zone'})
-
-    merged = journeys.merge(_acts, left_on="from_act", right_on="activity_id")
-    merged = merged.merge(_acts, left_on="to_act", suffixes=("_from", "_to"), right_on="activity_id")
-    return merged[np.logical_and(merged.act_zone_from != "undefined", merged.act_zone_to != "undefined" )]
 
