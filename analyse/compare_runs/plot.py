@@ -21,7 +21,7 @@ def number_trips_by(runs, by, func=None):
     :param func: can be used to merged data or filter dataframe
     :return: ax and dataframe
     """
-    df = compare_by(runs, by=by, get_data=lambda r: r.get_trips(), values="journey_id", aggfunc="count", func=func)
+    df = _compare_by(runs, by=by, get_data=lambda r: r.get_trips(), values="journey_id", aggfunc="count", func=func)
 
     if isinstance(by, list):
         _by = ", ".join(by)
@@ -33,7 +33,7 @@ def number_trips_by(runs, by, func=None):
 
 
 def number_legs_by(runs, by, func=None):
-    df = compare_by(runs, by=by, get_data=lambda r: r.get_legs(), values="trip_id", aggfunc="count", func=func)
+    df = _compare_by(runs, by=by, get_data=lambda r: r.get_legs(), values="trip_id", aggfunc="count", func=func)
     if isinstance(by, list):
         _by = ", ".join(by)
     else:
@@ -44,7 +44,7 @@ def number_legs_by(runs, by, func=None):
 
 
 def modalsplit_number_trips(runs, by, func=None):
-    df = compare_by(runs, by=by, get_data=lambda r: r.get_trips(), values="journey_id", aggfunc="count", func=func)
+    df = _compare_by(runs, by=by, get_data=lambda r: r.get_trips(), values="journey_id", aggfunc="count", func=func)
     df = df.div(df.sum())*100
     if isinstance(by, list):
         _by = ", ".join(by)
@@ -55,7 +55,7 @@ def modalsplit_number_trips(runs, by, func=None):
     return ax, df
 
 
-def compare_by(runs, by, get_data, func=None, values="person_id", aggfunc="count"):
+def _compare_by(runs, by, get_data, func=None, values="person_id", aggfunc="count"):
     _dfs = []
     _names = []
     for run in runs:
