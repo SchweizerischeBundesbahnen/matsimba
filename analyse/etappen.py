@@ -1,5 +1,4 @@
 from analyse.compare import _compare_by
-from haltepunkte import make_simba_code
 
 
 def pfahrt(runs, by, prozentual=False, func=None):
