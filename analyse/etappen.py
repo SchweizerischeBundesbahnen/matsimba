@@ -32,9 +32,9 @@ def _ea(runs, field, by=[], func=None):
     return df
 
 
-def einsteiger(runs, by=[], func=None):
+def einsteiger(runs, by, func=None):
     return _ea(runs, "boarding_stop", by, func)
 
 
-def austeiger(runs, by=[], func=None):
+def austeiger(runs, by, func=None):
     return _ea(runs, "alighting_stop", by, func)
