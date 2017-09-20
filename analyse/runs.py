@@ -2,7 +2,7 @@ import pandas as pd
 from collections import defaultdict
 import os
 import logging
-import analyse.data
+import analyse.reader
 
 
 class Run:
@@ -47,7 +47,7 @@ class Run:
         return self.data["stop_points"]
 
     def load_stop_points(self):
-        self.data["stop_points"] = analyse.data.get_stops(self.path)
+        self.data["stop_points"] = analyse.reader.get_stops(self.path)
 
     def load_data(self, with_stop_points=False):
         logging.info("Laoding Data for %s" % self.name)
@@ -90,14 +90,23 @@ class RunsDatabase:
         db.set_index(["Name"], inplace=True)
         self.db = db
 
+    def get_names(self):
+        return self.db.index
+
     def get_paths(self, names):
         return [self.get_path(k) for k in names]
 
     def get_path(self, name):
         return self.runs[name].path
 
-    def add_run(self, run):
-        print "not yet implemented sorry :("
+    def add_run(self, name, path, scale_factor, overwrite=False):
+        if not overwrite and name in self.db.index:
+            logging.info("Name %s already in csv. Overwrite?" % name)
+            return
+        run = Run(name=name, path=path, scale_factor=scale_factor)
+
+        self.runs[name] = run
+        return run
 
     def load_run(self, name, with_stop_points):
         run = Run(name=name, path=self.db.loc[name].Path, scale_factor=self.db.loc[name].Factor)
