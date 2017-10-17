@@ -39,8 +39,12 @@ def make_link(fzp_id, from_node_no, to_node_no, links, nodes, visum_com, speed=1
 
 def set_projection(v, config):
     v.visum_com.Net.SetAttValue("ConcatMaxLen", config.get("Visum", "maxlength"))
-    proj = config.get("Visum", "projection")
-    v.visum_com.Net.SetProjection(newProjection=proj, calculate=True)
+    proj_GCS_WGS_1984 = config.get("Visum", "projection_GCS_WGS_1984")
+    v.visum_com.Net.SetProjection(newProjection=proj_GCS_WGS_1984, calculate=True)
+    proj_GCS_CH1903 = config.get("Visum", "projection_GCS_CH1903")
+    v.visum_com.Net.SetProjection(newProjection=proj_GCS_CH1903, calculate=True)
+    proj_CH1903_LV03 = config.get("Visum", "projection_CH1903_LV03")
+    v.visum_com.Net.SetProjection(newProjection=proj_CH1903_LV03, calculate=True)
 
 
 def export_supply_and_network(v, config):
