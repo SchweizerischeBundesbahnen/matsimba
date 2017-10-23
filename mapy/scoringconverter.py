@@ -52,7 +52,7 @@ def read_xlsx(scenario):
     return general_params, mode_params
 
 
-def modify_config(config, gp, mp):
+def modify_config(config, output, gp, mp):
 
     config = config
     parser = etree.XMLParser(remove_blank_text=True)
@@ -64,6 +64,9 @@ def modify_config(config, gp, mp):
         config_content = f.read()
         tree = etree.parse(StringIO(config_content), parser)
         encoding = tree.docinfo.encoding
+
+        out_dir = tree.find('//module[@name="controler"]/param[@name="outputDirectory"]')
+        out_dir.attrib['value'] = output
 
         for sp in tree.findall('//module[@name="planCalcScore"]/parameterset[@type="scoringParameters"]/param'):
             sp.getparent().remove(sp)
@@ -90,7 +93,6 @@ def modify_config(config, gp, mp):
 
 def write_config(new_config, config_out):
 
-
     if os.path.isfile(config_out):
         logging.error(" The config already exists. Try new name or delete the existing config.")
     else:
@@ -115,17 +117,19 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Convert excel to config.xml.')
     parser.add_argument('excel', type=str, help='name of excel file')
+    parser.add_argument('out_directory', type=str, help='set the output directory of the simulation')
     parser.add_argument('config_in', type=str, help='default config')
     parser.add_argument('config_out', type=str, help='converted config')
     args = parser.parse_args()
 
     SCENARIO_NAME = args.excel
+    OUT_DIR = args.out_directory
     CONFIG_IN = args.config_in
     CONFIG_OUT = args.config_out
 
     gp, mp = read_xlsx(SCENARIO_NAME)
 
-    new_config = modify_config(CONFIG_IN, gp, mp)
+    new_config = modify_config(CONFIG_IN, OUT_DIR, gp, mp)
 
     write_config(new_config, CONFIG_OUT)
 
