@@ -91,7 +91,7 @@ def modify_config(config, output, gp, mp):
         return tree
 
 
-def write_config(new_config, config_out):
+def write_config(config_out, new_config):
 
     if os.path.isfile(config_out):
         logging.error(" The config already exists. Try new name or delete the existing config.")
@@ -115,21 +115,21 @@ def prettify(elem):
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description='Convert excel to config.xml.')
+    parser = argparse.ArgumentParser(description='Converts excel with specific scoring parameters to config.xml.')
     parser.add_argument('excel', type=str, help='name of excel file')
     parser.add_argument('out_directory', type=str, help='set the output directory of the simulation')
     parser.add_argument('config_in', type=str, help='default config')
     parser.add_argument('config_out', type=str, help='converted config')
     args = parser.parse_args()
 
-    SCENARIO_NAME = args.excel
+    EXCEL_FILE = args.excel
     OUT_DIR = args.out_directory
     CONFIG_IN = args.config_in
     CONFIG_OUT = args.config_out
 
-    gp, mp = read_xlsx(SCENARIO_NAME)
+    gp, mp = read_xlsx(EXCEL_FILE)
 
     new_config = modify_config(CONFIG_IN, OUT_DIR, gp, mp)
 
-    write_config(new_config, CONFIG_OUT)
+    write_config(CONFIG_OUT, new_config)
 
