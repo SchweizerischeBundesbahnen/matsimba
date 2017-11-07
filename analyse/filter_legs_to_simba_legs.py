@@ -54,4 +54,4 @@ def get_legs_from_bahn_fq_binnenverkehr_journeys(df_legs, is_simba_line, stop_id
     hat_fq_leg = hat_fq_leg.reset_index()
     legs_simba_binnenverkehr = legs_simba_binnenverkehr.merge(hat_fq_leg, on="journey_id", how="left")
     legs_simba_binnenverkehr_fq = legs_simba_binnenverkehr[legs_simba_binnenverkehr["boarding_stop_ist_normalspur_y"]]
-    return legs_simba_binnenverkehr_fq[cols]
+    return legs_simba_binnenverkehr_fq[cols + ["first_stop", "last_stop"]]
