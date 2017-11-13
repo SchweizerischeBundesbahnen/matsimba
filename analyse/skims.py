@@ -4,7 +4,6 @@ import pandas as pd
 
 from vimapy.helpers import hhmmss_to_seconds, seconds_to_hhmmss
 
-
 pd.options.mode.chained_assignment = None
 
 required_attributes = {"journey_id", "start_time", "end_time", "boarding_stop", "alighting_stop"}

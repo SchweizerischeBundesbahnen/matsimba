@@ -10,7 +10,6 @@ from analyse.skims import filter_legs_to_binnenverkehr_fq_legs, prepare_oevteile
 
 
 class MyTestCase(unittest.TestCase):
-
     def test_skims_for_visum_teilwege(self):
         path_data = os.path.join("..", "..", "data_in", "test")
 
@@ -46,9 +45,8 @@ class MyTestCase(unittest.TestCase):
         stop_ids_cnb = set(pd.read_csv(path_stop_ids_cnb, sep=";")["stop_id"].unique())
         stop_ids_cnb_normalspur = set(pd.read_csv(path_stop_ids_cnb_normalspur, sep=";")["stop_id"].unique())
 
-
         fq_legs_matsim = filter_legs_to_binnenverkehr_fq_legs(df_trips_matsim, stop_ids_cnb,
-                                                             stop_ids_cnb_normalspur)
+                                                              stop_ids_cnb_normalspur)
 
         skims_matsim = get_station_to_station_skims(fq_legs_matsim)
         skims_bi_ins = skims_matsim[
@@ -57,6 +55,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEquals(skims_bi_ins["bz_hhmmss"].iloc[0], "00:32:02", msg="trip over midnight!")
         self.assertAlmostEqual(skims_bi_ins["uh"].iloc[0], 1.0, places=5, msg="umsteigehäufigkeit")
         self.assertAlmostEqual(skims_bi_ins["distance"].iloc[0], 42.345000, places=5, msg="distanz")
+
 
 if __name__ == '__main__':
     unittest.main()
