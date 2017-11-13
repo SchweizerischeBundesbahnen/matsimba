@@ -6,11 +6,15 @@ from vimapy.helpers import hhmmss_to_seconds, seconds_to_hhmmss
 
 pd.options.mode.chained_assignment = None
 
+FPFE_START_HP_CODE = "STARTFAHRPLANFAHRTELEMENT\FZPELEMENT\LINIENROUTENELEMENT\HALTEPUNKT\CODE"
+FPFE_END_HP_CODE = "ENDFAHRPLANFAHRTELEMENT\FZPELEMENT\LINIENROUTENELEMENT\HALTEPUNKT\CODE"
+
+
 required_attributes = {"journey_id", "start_time", "end_time", "boarding_stop", "alighting_stop"}
 required_attributes_visum = {"LINNAME", "$OEVTEILWEG:QBEZNR", "ZBEZNR", "WEGIND", "VONHPUNKTNR",
-                             "STARTFAHRPLANFAHRTELEMENT\FZPELEMENT\LINIENROUTENELEMENT\HALTEPUNKT\CODE",
+                             FPFE_START_HP_CODE,
                              "NACHHPUNKTNR",
-                             "ENDFAHRPLANFAHRTELEMENT\FZPELEMENT\LINIENROUTENELEMENT\HALTEPUNKT\CODE",
+                             FPFE_END_HP_CODE,
                              "ABFAHRT", "ANKUNFT",
                              "TWEGIND", "PFAHRT", "WEITE"}
 
@@ -39,28 +43,26 @@ def test_columns_of_legs(df_legs, required_attr, from_simba_visum=False):
                 "following columns in input-dataframe are required: {}".format(list(missing_attributes)))
 
 
-def prepare_oevteilewege_visum(df_oevteilwege_visum_input):
+def prepare_oevteilwege_visum(df_oevteilwege_input):
     """renames and recalculates the columns of oevteilwege from visum such that the resulting data-frame
     has the same structure as a leg-dataframe from matsim"""
-    test_columns_of_legs(df_oevteilwege_visum_input, required_attributes_visum)
-    df_oevteilwege_visum = df_oevteilwege_visum_input[df_oevteilwege_visum_input["LINNAME"].notnull()]
-    df_oevteilwege_visum["journey_id"] = df_oevteilwege_visum["$OEVTEILWEG:QBEZNR"].map(str) + "_" + \
-                                         df_oevteilwege_visum_input["ZBEZNR"].map(str) + "_" + \
-                                         df_oevteilwege_visum_input["WEGIND"].map(str)
-    df_oevteilwege_visum["boarding_stop"] = df_oevteilwege_visum["VONHPUNKTNR"].map(int).map(str) + "_" + \
-                                            df_oevteilwege_visum_input[
-                                                "STARTFAHRPLANFAHRTELEMENT\FZPELEMENT\LINIENROUTENELEMENT\HALTEPUNKT\CODE"]
-    df_oevteilwege_visum["alighting_stop"] = df_oevteilwege_visum["NACHHPUNKTNR"].map(int).map(str) + "_" + \
-                                             df_oevteilwege_visum_input[
-                                                 "ENDFAHRPLANFAHRTELEMENT\FZPELEMENT\LINIENROUTENELEMENT\HALTEPUNKT\CODE"]
-    df_oevteilwege_visum["start_time"] = df_oevteilwege_visum["ABFAHRT"].map(hhmmss_to_seconds)
-    df_oevteilwege_visum["end_time"] = df_oevteilwege_visum["ANKUNFT"].map(hhmmss_to_seconds)
+    test_columns_of_legs(df_oevteilwege_input, required_attributes_visum)
+    df_oevteilwege = df_oevteilwege_input[df_oevteilwege_input["LINNAME"].notnull()]
+    df_oevteilwege["journey_id"] = df_oevteilwege["$OEVTEILWEG:QBEZNR"].map(str) + "_" + \
+                                   df_oevteilwege_input["ZBEZNR"].map(str) + "_" + \
+                                   df_oevteilwege_input["WEGIND"].map(str)
+    df_oevteilwege["boarding_stop"] = df_oevteilwege["VONHPUNKTNR"].map(int).map(str) + "_" + \
+                                      df_oevteilwege_input[FPFE_START_HP_CODE]
+    df_oevteilwege["alighting_stop"] = df_oevteilwege["NACHHPUNKTNR"].map(int).map(str) + "_" + \
+                                       df_oevteilwege_input[FPFE_END_HP_CODE]
+    df_oevteilwege["start_time"] = df_oevteilwege["ABFAHRT"].map(hhmmss_to_seconds)
+    df_oevteilwege["end_time"] = df_oevteilwege["ANKUNFT"].map(hhmmss_to_seconds)
     new_cols = ["journey_id", "TWEGIND", "boarding_stop", "alighting_stop", "PFAHRT", "LINNAME", "start_time",
                 "end_time", "WEITE"]
-    df_oevteilwege_visum = df_oevteilwege_visum[new_cols]
-    df_oevteilwege_visum.columns = ["journey_id", "TWEGIND", "boarding_stop", "alighting_stop", "PFAHRT",
+    df_oevteilwege = df_oevteilwege[new_cols]
+    df_oevteilwege.columns = ["journey_id", "TWEGIND", "boarding_stop", "alighting_stop", "PFAHRT",
                                     "line", "start_time", "end_time", "distance"]
-    return df_oevteilwege_visum
+    return df_oevteilwege
 
 
 # noinspection PyShadowingNames
