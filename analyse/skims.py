@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: cp1252-*-
+import pandas as pd
+
 from vimapy.helpers import hhmmss_to_seconds, seconds_to_hhmmss
+
+
+pd.options.mode.chained_assignment = None
 
 required_attributes = {"journey_id", "start_time", "end_time", "boarding_stop", "alighting_stop"}
 required_attributes_visum = {"LINNAME", "$OEVTEILWEG:QBEZNR", "ZBEZNR", "WEGIND", "VONHPUNKTNR",
@@ -188,6 +193,6 @@ def get_station_to_station_skims(df_legs, factor=1.0, from_simba_visum=False):
                                               skim_per_station_to_station["PFAHRT"]
     skim_per_station_to_station["distance"] /= 1000.0
     skim_per_station_to_station = skim_per_station_to_station.reset_index()
-    skim_per_station_to_station = skim_per_station_to_station.sort("PFAHRT", ascending=False)
+    skim_per_station_to_station = skim_per_station_to_station.sort_values(by="PFAHRT", ascending=False)
     cols_out = ["first_stop", "last_stop", "PFAHRT", "bz", "bz_hhmmss", "uh", "distance"]
     return skim_per_station_to_station[cols_out]
