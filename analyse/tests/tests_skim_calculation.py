@@ -36,7 +36,7 @@ class MyTestCase(unittest.TestCase):
         self.assertAlmostEqual(skims_bv_nese["PFAHRT"].iloc[0], 14.573, places=5, msg="pf")
 
 
-def test_skims_for_matsim_legs(self):
+    def test_skims_for_matsim_legs(self):
         path_data = os.path.join("..", "..", "data_in", "test")
 
         path_trips_matsim = os.path.join(path_data, "matsim_trips_for_skimtest.txt")
@@ -50,7 +50,7 @@ def test_skims_for_matsim_legs(self):
         fq_legs_matsim = filter_legs_to_binnenverkehr_fq_legs(df_trips_matsim, stop_ids_cnb,
                                                               stop_ids_cnb_normalspur)
 
-        skims_matsim = get_station_to_station_skims(fq_legs_matsim)
+        skims_matsim = get_station_to_station_skims(fq_legs_matsim, factor=10.0)
         skims_bi_ins = skims_matsim[
             (skims_matsim["first_stop"] == "1279_BI") & (skims_matsim["last_stop"] == "1984_INS")]
 
