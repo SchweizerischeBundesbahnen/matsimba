@@ -35,7 +35,7 @@ def is_simba_line(line_id):
 
 def test_columns_of_legs(df_legs, required_attr, from_simba_visum=False):
     if from_simba_visum:
-        required_attr.add("TWEGIND")
+        required_attr = required_attr.union({"TWEGIND"})
     if required_attr not in set(df_legs.columns):
         missing_attributes = required_attr - set(df_legs)
         if len(missing_attributes) > 0:
