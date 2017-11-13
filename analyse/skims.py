@@ -68,7 +68,7 @@ def prepare_oevteilewege_visum(df_oevteilwege_visum_input):
 def filter_to_simba_legs(df_legs, is_simba_line, from_simba_visum=False):
     test_columns_of_legs(df_legs, required_attributes, from_simba_visum=from_simba_visum)
     if not from_simba_visum:
-        legs_simba = df_legs[df_legs.line.apply(is_simba_line)].sort(["journey_id", "start_time"])
+        legs_simba = df_legs[df_legs.line.apply(is_simba_line)].sort_values(by=["journey_id", "start_time"])
     else:
         legs_simba = df_legs
     return legs_simba
