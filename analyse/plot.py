@@ -8,12 +8,36 @@ import datetime
 import analyse.compare
 
 
+sbb_colors = [(22,24,63) #0 dunkelstes SBB Blau
+             ,(34, 37,94)#1
+             ,(71,73, 116)#2
+             ,(114, 117,167)#3
+             ,(204, 205, 223)#4 beginn helle SBB Blautöne
+             ,(221, 222, 234)#5
+             ,(238, 244,244)#6 hellstes SBB Blau
+             ,(102,0, 0)#7dunkelstes SBB Rot
+             ,(128,0,0)#8
+             ,(191,0, 0)#9
+             ,(255,102, 102)#10 beginn helle SBB Rottöne
+             ,(255, 153, 153)#11
+             ,(255, 204, 204) #12 hellstes SBB Rot
+             ,(255,0, 0)#13 knalliges Rot
+             ,(45, 50, 125)#14 knalliges Blau
+             ,(0,0,0)#15 schwarz
+             ,(255,255,255)#16 weiss
+             ,(0,0,0)#17
+             ,(139,131,120)#18]
+
+
 def set_matplotlib_params():
     plt.rcParams['figure.figsize'] = (16.0, 4.0)
     plt.rcParams.update({'font.size': 16})
     plt.style.use('ggplot')
-    mpl.rcParams['axes.color_cycle'] = ["EB0000", "4C4C4C","2D327D", "348ABD", "7A68A6", "A60628", "467821", "CF4457", "188487", "E24A33", "FFFF00", "FF1DD8", "00FF8D"]
+    mpl.rcParams['axes.color_cycle'] = sbb_colors
     mpl.rcParams['lines.linewidth'] = 2.5
+    mpl.rcParams['grid.color'] = "grey"
+    mpl.rcParams['grid.linestyle'] = "--"
+    mpl.rcParams['grid.linewidth'] = 0.5
 
 
 def get_score(folder):
