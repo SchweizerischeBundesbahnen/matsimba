@@ -50,7 +50,7 @@ class Run:
         self.data["stop_points"] = analyse.reader.get_stops(self.path)
 
     def load_data(self, with_stop_points=False):
-        logging.info("Laoding Data for %s" % self.name)
+        logging.info("Loading Data for %s" % self.name)
         keys = {"acts":
                     {"path": "matsim_activities.txt", "sep": "\t"},
                 "journeys":
@@ -69,6 +69,7 @@ class Run:
                     {"path": "agents.csv", "sep": ";"}}
         for name in keys:
             try:
+                logging.info(name)
                 sep = keys[name]["sep"]
                 path = os.path.join(self.path, keys[name]["path"])
                 self.data[name] = pd.read_csv(path, sep=sep, encoding="utf-8", dtype={"person_id": str} ).reset_index()
