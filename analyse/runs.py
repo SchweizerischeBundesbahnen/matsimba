@@ -71,7 +71,7 @@ class Run:
             try:
                 sep = keys[name]["sep"]
                 path = os.path.join(self.path, keys[name]["path"])
-                self.data[name] = pd.DataFrame.from_csv(path, sep=sep, encoding="utf-8").reset_index()
+                self.data[name] = pd.DataFrame.read_csv(path, sep=sep, encoding="utf-8", dtype={"person_id": str} ).reset_index()
             except Exception as e:
                 logging.error(e.message)
         if with_stop_points:
