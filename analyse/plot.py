@@ -7,26 +7,25 @@ import glob
 import datetime
 import analyse.compare
 
-
-sbb_colors = [(22,24,63) #0 dunkelstes SBB Blau
-             ,(34, 37,94)#1
-             ,(71,73, 116)#2
-             ,(114, 117,167)#3
-             ,(204, 205, 223)#4 beginn helle SBB Blautöne
-             ,(221, 222, 234)#5
-             ,(238, 244,244)#6 hellstes SBB Blau
-             ,(102,0, 0)#7dunkelstes SBB Rot
-             ,(128,0,0)#8
-             ,(191,0, 0)#9
-             ,(255,102, 102)#10 beginn helle SBB Rottöne
-             ,(255, 153, 153)#11
-             ,(255, 204, 204) #12 hellstes SBB Rot
-             ,(255,0, 0)#13 knalliges Rot
-             ,(45, 50, 125)#14 knalliges Blau
-             ,(0,0,0)#15 schwarz
-             ,(255,255,255)#16 weiss
-             ,(0,0,0)#17
-             ,(139,131,120)]#18]
+sbb_colors = [(22, 24, 63)  # 0 dunkelstes SBB Blau
+    , (34, 37, 94)  # 1
+    , (71, 73, 116)  # 2
+    , (114, 117, 167)  # 3
+    , (204, 205, 223)  # 4 beginn helle SBB Blautne
+    , (221, 222, 234)  # 5
+    , (238, 244, 244)  # 6 hellstes SBB Blau
+    , (102, 0, 0)  # 7dunkelstes SBB Rot
+    , (128, 0, 0)  # 8
+    , (191, 0, 0)  # 9
+    , (255, 102, 102)  # 10 beginn helle SBB Rottne
+    , (255, 153, 153)  # 11
+    , (255, 204, 204)  # 12 hellstes SBB Rot
+    , (255, 0, 0)  # 13 knalliges Rot
+    , (45, 50, 125)  # 14 knalliges Blau
+    , (0, 0, 0)  # 15 schwarz
+    , (255, 255, 255)  # 16 weiss
+    , (0, 0, 0)  # 17
+    , (139, 131, 120)]  # 18]
 
 
 def set_matplotlib_params():
@@ -208,7 +207,7 @@ def plot_plans(planelements, end_time=35 * 60 * 60):
     for i, plan_id in enumerate(plan_ids):
         times = []
         pes = []
-        for index, b in planelements[planelements.plan_id==plan_id].iterrows():
+        for index, b in planelements[planelements.plan_id == plan_id].iterrows():
             if b["type"] == "activity":
                 pes.append(b["activity_type"])
                 times.append(b["start_time"])
