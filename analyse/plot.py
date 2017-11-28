@@ -26,7 +26,7 @@ sbb_colors = [(22,24,63) #0 dunkelstes SBB Blau
              ,(0,0,0)#15 schwarz
              ,(255,255,255)#16 weiss
              ,(0,0,0)#17
-             ,(139,131,120)#18]
+             ,(139,131,120)]#18]
 
 
 def set_matplotlib_params():
