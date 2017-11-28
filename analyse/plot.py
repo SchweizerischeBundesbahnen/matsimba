@@ -27,6 +27,8 @@ sbb_colors = [(22, 24, 63)  # 0 dunkelstes SBB Blau
     , (0, 0, 0)  # 17
     , (139, 131, 120)]  # 18]
 
+sbb_colors = ["EB0000", "4C4C4C","2D327D", "348ABD", "7A68A6", "A60628", "467821", "CF4457", "188487", "E24A33", "FFFF00", "FF1DD8", "00FF8D"]
+
 
 def set_matplotlib_params():
     plt.rcParams['figure.figsize'] = (16.0, 4.0)
