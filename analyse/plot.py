@@ -6,6 +6,8 @@ import numpy as np
 import glob
 import datetime
 import analyse.compare
+from itertools import product
+import math
 
 sbb_colors = [(22, 24, 63)  # 0 dunkelstes SBB Blau
     , (34, 37, 94)  # 1
@@ -234,3 +236,40 @@ def plot_plans(planelements, end_time=35 * 60 * 60):
     ax.axis('off')
     f.tight_layout()
     return ax, pd.DataFrame(text)
+
+
+def plot_multi(df, cols=2.0, stacked=False):
+    def if_last_move_legend(ax):
+        title = ax.title
+        if title.get_text()=="":
+            fig.delaxes(ax)
+
+    n_levels = len(df.index.levels)
+
+    lists = [df.index.levels[i] for i in range(n_levels-1)]
+    labels = list(product(*lists))
+
+    n = len(labels)
+    nrows = int(math.ceil(n/cols))
+    ncols = int(cols)
+
+    fig, axs = plt.subplots(nrows=nrows, ncols=ncols, figsize=(ncols*5, nrows*4))
+
+    for i, label in enumerate(labels):
+        if nrows==1:
+            ax = axs[i]
+        else:
+            ax = axs[i//int(cols), i%int(cols)]
+        ax.set_title(", ".join(label))
+        df.loc[label].plot(kind="bar", stacked=stacked, ax=ax, legend=False)
+
+    analyse.plot.move_legend(ax)
+    for _ax in axs:
+        if nrows ==1:
+            if_last_move_legend(ax)
+        else:
+            for ax in _ax:
+                if_last_move_legend(ax)
+
+    fig.tight_layout()
+    return fig, axs

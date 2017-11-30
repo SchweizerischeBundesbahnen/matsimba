@@ -1,129 +1,87 @@
+import analyse.compare
+import analyse.plot
+import analyse.run as _run
 import pandas as pd
-from collections import defaultdict
-import os
-import logging
-import analyse.reader
 
 
-class Run:
-    def __init__(self, path, name, scale_factor):
-        self.path = path
-        self.name = name
-        self.scale_factor = scale_factor
+class RunsList(list):
+    def get(self, name):
+        for e in self:
+            if e.name == name:
+                return e
 
-        self.data = {}
+    @staticmethod
+    def _plot(df, kind="bar", title="", **kwargs):
+        if "foreach" in kwargs:
+            fig, axs = analyse.plot.plot_multi(df=df, cols=2.0)
+            fig.suptitle(title)
+            fig.tight_layout()
+            return df, fig
 
-    def get_persons(self):
-        return self.data["persons"]
+        else:
+            ax = df.plot(kind=kind, title=title)
+            analyse.plot.move_legend(ax)
+            return df, ax
 
-    def get_acts(self):
-        return self.data["acts"]
+    def _get(self, method, foreach=None, ref_df=None, **kwargs):
+        names = [r.name for r in self]
+        data = [method.im_func(r, foreach=foreach, **kwargs) for r in self]
+        df = analyse.compare.concat(data, names)
 
-    def get_trips(self):
-        return self.data["journeys"]
+        if foreach is None:
+            df.columns = df.columns.droplevel()
 
-    def get_legs(self):
-        return self.data["legs"]
+        else:
+            n = len(df.columns.levels)-1
 
-    def get_vehjourneys(self):
-        return self.data["vehjourneys"]
+            for i in range(n):
+                df = df.stack()
+            df = df.swaplevel(0, len(df.index.levels)-1, axis=0)
 
-    def get_boarding_alighting(self):
-        return self.data["stops"]
+            #df.index = df.index.rename(foreach, level=0)
+            df.sort_index(inplace=True)
 
-    def get_stops(self):
-        return self.get_boarding_alighting()
+        #df.columns = df.columns.rename(_run.column_run)
+        if ref_df is not None:
+            df = pd.concat([df, ref_df], axis=1)
+        return df
 
-    def get_ea(self):
-        return self.get_boarding_alighting()
+    def get_nb_trips(self, **kwargs):
+        return self._get(analyse.run.Run.calc_nb_trips, **kwargs)
 
-    def get_linkvolumes(self):
-        return self.data["linkvolumes"]
+    def plot_nb_trips(self, **kwargs):
+        df = self.get_nb_trips(**kwargs)
+        return self._plot(df=df, title="#trips pro %s und runs" % kwargs["by"], **kwargs)
 
-    def get_planelements(self):
-        return self.data["planelements"]
+    def get_dist_trips(self, **kwargs):
+        return self._get(analyse.run.Run.calc_dist_trips, **kwargs)
 
-    def get_stop_points(self):
-        return self.data["stop_points"]
+    def plot_dist_trips(self, **kwargs):
+        df = self.get_dist_trips(**kwargs)
+        return self._plot(df=df, title="distance trips pro %s und runs" % kwargs["by"], **kwargs)
 
-    def load_stop_points(self):
-        self.data["stop_points"] = analyse.reader.get_stops(self.path)
+    def get_nb_legs(self, **kwargs):
+        return self._get(analyse.run.Run.calc_nb_legs, **kwargs)
 
-    def load_data(self, with_stop_points=False):
-        logging.info("Loading Data for %s" % self.name)
-        keys = {"acts":
-                    {"path": "matsim_activities.txt", "sep": "\t"},
-                "journeys":
-                    {"path": "matsim_journeys.txt", "sep": "\t"},
-                "legs":
-                    {"path": "matsim_trips.txt", "sep": "\t"},
-                "vehjourneys":
-                    {"path": "matsim_vehjourneys.csv", "sep": ";"},
-                "stops":
-                    {"path": "matsim_stops.csv", "sep": ";"},
-                "linkvolumes":
-                    {"path": "matsim_linkvolumes.csv", "sep": ";"},
-                "planelements":
-                    {"path": "plan_elements.csv", "sep": ";"},
-                "persons":
-                    {"path": "agents.csv", "sep": ";"}}
-        for name in keys:
-            try:
-                logging.info(name)
-                sep = keys[name]["sep"]
-                path = os.path.join(self.path, keys[name]["path"])
-                self.data[name] = pd.read_csv(path, sep=sep, encoding="utf-8", dtype={"person_id": str} ).reset_index()
-            except Exception as e:
-                logging.error(e.message)
-        if with_stop_points:
-            self.load_stop_points()
+    def plot_nb_legs(self, **kwargs):
+        df = self.get_nb_legs(**kwargs)
+        return self._plot(df=df, title="#legs pro %s und runs" % kwargs["by"], **kwargs)
+
+    def get_dist_legs(self, **kwargs):
+        return self._get(analyse.run.Run.calc_dist_legs, **kwargs)
+
+    def plot_dist_legs(self, **kwargs):
+        df = self.get_dist_legs(**kwargs)
+        return self._plot(df=df, title="distance legs pro %s und runs" % kwargs["by"], **kwargs)
+
+    def get_einsteiger(self, **kwargs):
+        return self._get(analyse.run.Run.calc_einsteiger, **kwargs)
+
+    def plot_einsteiger(self, **kwargs):
+        df = self.get_einsteiger(**kwargs)
+        if df.index.size>100:
+            raise ValueError("Index size to large to be plotted")
+        return self._plot(df=df, title="Einsteiger pro CODE", **kwargs)
 
 
-class RunsDatabase:
-    def __init__(self, path):
-        self.path = path
-        self.runs = defaultdict(dict)
-        self.db = None
-        self.rescan()
-
-    def rescan(self):
-        db = pd.read_csv(self.path)
-        db.set_index(["Name"], inplace=True)
-        self.db = db
-
-    def get_names(self):
-        return self.db.index
-
-    def get_paths(self, names):
-        return [self.get_path(k) for k in names]
-
-    def get_path(self, name):
-        return self.runs[name].path
-
-    def add_run(self, name, path, scale_factor, overwrite=False):
-        if not overwrite and name in self.db.index:
-            logging.info("Name %s already in csv. Overwrite?" % name)
-            return
-        run = Run(name=name, path=path, scale_factor=scale_factor)
-
-        self.runs[name] = run
-        return run
-
-    def load_run(self, name, with_stop_points):
-        run = Run(name=name, path=self.db.loc[name].Path, scale_factor=self.db.loc[name].Factor)
-        run.load_data(with_stop_points)
-        self.runs[run.name] = run
-
-    def load_data(self, only_new=True, names=None, with_stop_points=False):
-        if names is None:
-            names = self.db.index
-        for name in names:
-            if only_new:
-                if name not in self.runs:
-                    self.load_run(name, with_stop_points)
-            else:
-                self.load_run(name, with_stop_points)
-
-    def get(self, sim_name):
-        return self.runs[sim_name]
 
