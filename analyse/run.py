@@ -55,7 +55,15 @@ dtypes = {u'activity_id': str,
           u'trip_id': str,
           u'boarding_stop': str,
           u'alighting': str,
-          u'link_id': str}
+          u'link_id': str,
+          u'work': str,
+          u'season_ticket': str,
+          u'subpopulation': str,
+          u'employed': str,
+          u'carAvail': str,
+          u"age": int,
+          u"sex": str,
+          u"hasLicense": str}
 
 
 class Run:
