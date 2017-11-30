@@ -29,6 +29,7 @@ class RunsList(list):
         df = analyse.compare.concat(data, names)
 
         if foreach is None:
+            df = df.swaplevel(0, 1, axis=1)
             df.columns = df.columns.droplevel()
 
         else:
