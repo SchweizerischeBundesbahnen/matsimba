@@ -260,12 +260,12 @@ def plot_multi(df, cols=2.0, stacked=False):
             ax = axs[i]
         else:
             ax = axs[i//int(cols), i%int(cols)]
-        ax.set_title(", ".join(label))
+        ax.set_title(", ".join(map(str, label)))
         df.loc[label].plot(kind="bar", stacked=stacked, ax=ax, legend=False)
 
-    analyse.plot.move_legend(ax)
+    move_legend(ax)
     for _ax in axs:
-        if nrows ==1:
+        if nrows == 1:
             if_last_move_legend(ax)
         else:
             for ax in _ax:
