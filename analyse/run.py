@@ -61,7 +61,6 @@ dtypes = {u'activity_id': str,
           u'subpopulation': str,
           u'employed': str,
           u'carAvail': str,
-          u"age": int,
           u"sex": str,
           u"hasLicense": str}
 
