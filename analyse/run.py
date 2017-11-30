@@ -3,6 +3,7 @@ import analyse.reader
 import os
 import pandas as pd
 import analyse.plot
+import numpy as np
 
 person_id = "person_id"
 mode_trip = "main_mode"
@@ -190,3 +191,10 @@ class Run:
 
         return df
 
+    def calc_vehicles(self, link_id_to_name, **kwargs):
+        df = self.get_linkvolumes()
+        df = df[df.link_id.isin(np.unique(link_id_to_name.link_id.tolist()))]
+        df = df.merge(link_id_to_name, on="link_id", how="left")
+        df = self._do(df, value="volume", aggfunc="sum", **kwargs)
+
+        return df
