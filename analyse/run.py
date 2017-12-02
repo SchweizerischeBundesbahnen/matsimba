@@ -4,6 +4,31 @@ import os
 import pandas as pd
 import analyse.plot
 import numpy as np
+import json
+
+_cache = {}
+
+
+def clear_cache():
+    _cache = {}
+
+
+def cache(func):
+    " Used on methods to convert them to methods that replace themselves\
+        with their return value once they are called. "
+
+    def f(*args, **kwargs):
+        self = args[0]  # Reference to the class who owns the method
+        funcname = func.__name__
+        key = (self, funcname, args) + tuple(json.dumps(kwargs, sort_keys=True))
+        if key not in _cache:
+            _cache[key] = func(*args, **kwargs)
+        else:
+            logging.info("Loading from cache :). Use clear_cache")
+        return _cache[key]
+
+    return f
+
 
 person_id = "person_id"
 mode_trip = "main_mode"
@@ -160,15 +185,19 @@ class Run:
         else:
             return df.groupby(by).agg({value: aggfunc})*self.scale_factor
 
+    @cache
     def calc_nb_trips(self, by=mode_trip, **kwargs):
         return self._do(self.get_trips(), by=by, value=trip_id, aggfunc="count", **kwargs)
 
+    @cache
     def calc_nb_legs(self, **kwargs):
         return self._do(self.get_legs(), value=leg_id, aggfunc="count", **kwargs)
 
+    @cache
     def calc_dist_trips(self, **kwargs):
         return self._do(self.get_trips(), value=distance_field, aggfunc="sum", **kwargs)
 
+    @cache
     def calc_dist_legs(self, **kwargs):
         return self._do(self.get_legs(), value=distance_field, aggfunc="sum", **kwargs)
 
@@ -178,6 +207,7 @@ class Run:
     def plot_score(self):
         analyse.plot.plot_score([self.path])
 
+    @cache
     def calc_einsteiger(self, codes=None, **kwargs):
         def make_code(stop_id):
             a = stop_id.split("_")
@@ -198,10 +228,12 @@ class Run:
 
         return df
 
-    def calc_vehicles(self, link_id_to_name, **kwargs):
+    @cache
+    def calc_vehicles(self, names, **kwargs):
         df = self.get_linkvolumes()
-        df = df[df.link_id.isin(np.unique(link_id_to_name.link_id.tolist()))]
-        df = df.merge(link_id_to_name, on="link_id", how="left")
+        df = df[df.name.isin(names)]
         df = self._do(df, value="volume", aggfunc="sum", **kwargs)
-
         return df
+
+
+
