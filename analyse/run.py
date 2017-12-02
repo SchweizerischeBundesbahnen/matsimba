@@ -3,14 +3,13 @@ import analyse.reader
 import os
 import pandas as pd
 import analyse.plot
-import numpy as np
 import json
 
 _cache = {}
 
 
 def clear_cache():
-    _cache = {}
+    _cache.clear()
 
 
 def cache(func):
