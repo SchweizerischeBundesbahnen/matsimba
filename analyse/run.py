@@ -176,6 +176,10 @@ class Run:
             self.data["legs"] = legs
         return self.get_legs()
 
+    def merge_link_id_to_name(self, link_id_to_name):
+        df = self.get_linkvolumes()
+        self.data["linkvolumes"] = df.merge(link_id_to_name, on="link_id", how="left")
+
     def _do(self, df, by, value, foreach=None, aggfunc="count", percent=None, **kwargs):
         if foreach is not None:
             df = df.pivot_table(index=by, columns=foreach, values=value, aggfunc=aggfunc)*self.scale_factor
