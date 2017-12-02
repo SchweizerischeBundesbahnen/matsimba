@@ -1,6 +1,5 @@
 import analyse.compare
 import analyse.plot
-import analyse.run as _run
 import pandas as pd
 
 
@@ -39,10 +38,8 @@ class RunsList(list):
                 df = df.stack()
             df = df.swaplevel(0, len(df.index.levels)-1, axis=0)
 
-            #df.index = df.index.rename(foreach, level=0)
             df.sort_index(inplace=True)
 
-        #df.columns = df.columns.rename(_run.column_run)
         if ref_df is not None:
             df = pd.concat([df, ref_df], axis=1)
         return df
