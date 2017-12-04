@@ -239,6 +239,13 @@ def plot_plans(planelements, end_time=35 * 60 * 60):
 
 
 def plot_multi(df, cols=2.0, stacked=False):
+    def has_label(df, label):
+        try:
+            df.loc[label]
+            return True
+        except KeyError:
+            return False
+
     def if_last_move_legend(ax):
         title = ax.title
         if title.get_text()=="":
@@ -248,6 +255,8 @@ def plot_multi(df, cols=2.0, stacked=False):
 
     lists = [df.index.levels[i] for i in range(n_levels-1)]
     labels = list(product(*lists))
+
+    labels = [label for label in labels if has_label(df, label)]
 
     n = len(labels)
     nrows = int(math.ceil(n/cols))
@@ -260,12 +269,8 @@ def plot_multi(df, cols=2.0, stacked=False):
             ax = axs[i]
         else:
             ax = axs[i//int(cols), i%int(cols)]
-        try:
-            ax.set_title(", ".join(map(str, label)))
-            df.loc[label].plot(kind="bar", stacked=stacked, ax=ax, legend=False)
-        except KeyError:
-            #ToDo
-            pass
+        ax.set_title(", ".join(map(str, label)))
+        df.loc[label].plot(kind="bar", stacked=stacked, ax=ax, legend=False)
 
     move_legend(ax)
     for _ax in axs:
