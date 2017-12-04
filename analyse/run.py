@@ -160,6 +160,12 @@ class Run:
         except Exception as e:
             logging.error(e.message)
 
+    def unload_data(self):
+        self.data.clear()
+        self.trip_persons_merged = False
+        self.legs_persons_merged = False
+        self.link_merged = False
+
     def load_data(self, with_stop_points=False):
         logging.info("Loading Data for %s" % self.name)
         for name in keys:
