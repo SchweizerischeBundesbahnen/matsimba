@@ -168,14 +168,14 @@ class Run:
 
     def merge_trips_persons(self):
         if not self.trip_persons_merged:
-            trips = self.get_trips().merge(self.get_persons(), on=person_id, how="left")
+            trips = self.get_trips().merge(self.get_persons(), on=person_id, how="left", suffixes=("", "_p"))
             self.trip_persons_merged = True
             self.data["journeys"] = trips
         return self.get_trips()
 
     def merge_legs_persons(self):
         if not self.legs_persons_merged:
-            legs = self.get_legs().merge(self.merge_trips_persons(), on=trip_id, how="left")
+            legs = self.get_legs().merge(self.merge_trips_persons(), on=trip_id, how="left", suffixes=("", "_trips"))
             self.legs_persons_merged = True
             self.data["legs"] = legs
         return self.get_legs()
