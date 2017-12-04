@@ -150,10 +150,10 @@ class Run:
             return
 
         try:
-            logging.info("Starting loading data %s " % name)
             time1 = time.time()
             sep = keys[name]["sep"]
             path = os.path.join(self.path, keys[name]["path"])
+            logging.info("Starting loading data %s: %s " % (name, path))
             self.data[name] = pd.read_csv(path, sep=sep, encoding="utf-8", dtype=dtypes).reset_index(drop=True)
             logging.info("%s loaded in %i seconds" % (name,  time.time()-time1))
         except Exception as e:
