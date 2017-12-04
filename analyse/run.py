@@ -5,6 +5,7 @@ import pandas as pd
 import analyse.plot
 import json
 import time
+import numpy as np
 
 _cache = {}
 
@@ -212,6 +213,16 @@ class Run:
     def calc_dist_legs(self, **kwargs):
         return self._do(self.get_legs(), value=distance_field, aggfunc="sum", **kwargs)
 
+    @cache
+    def calc_dist_distr_trips(self, **kwargs):
+        self.create_distance_class_for_trips()
+        return self._do(self.get_trips(), value="cat_dist", aggfunc="count", **kwargs).cumsum()
+
+    @cache
+    def calc_dist_distr_legs(self, **kwargs):
+        self.create_distance_class_for_legs()
+        return self._do(self.get_legs(), value="cat_dist", aggfunc="count", **kwargs).cumsum()
+
     def plot_timing(self):
         analyse.plot.plot_timing(self.path)
 
@@ -246,5 +257,21 @@ class Run:
         df = self._do(df, value="volume", aggfunc="sum", **kwargs)
         return df
 
+    @staticmethod
+    def _create_distance_class(df, column="distance", classes=None, labels=None, category_column="cat_dist"):
+        if classes is None:
+            classes = np.array([-1, 2, 4, 6, 8, 10, 15, 20, 25, 30, 40, 50, 100, 150, 200, 250, 300, np.inf])*1000.0
+            labels = ["0-%ikm" % (classes[1] / 1000.0)]
+            for i in range(len(classes) - 3):
+                labels.append("%i-%i km" % (classes[i + 1] / 1000.0, classes[i + 2] / 1000.0))
+            labels.append("-")
+
+        df[category_column] = pd.cut(df[column], classes, labels=labels)
+
+    def create_distance_class_for_legs(self, **kwargs):
+        self._create_distance_class(self.get_legs(), **kwargs)
+
+    def create_distance_class_for_trips(self, **kwargs):
+        self._create_distance_class(self.get_trips(), **kwargs)
 
 
