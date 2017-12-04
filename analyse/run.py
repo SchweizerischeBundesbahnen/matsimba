@@ -4,6 +4,7 @@ import os
 import pandas as pd
 import analyse.plot
 import json
+import time
 
 _cache = {}
 
@@ -149,16 +150,17 @@ class Run:
             return
 
         try:
-            logging.info(name)
+            logging.info("Starting loading data %s " % name)
+            time1 = time.time()
             sep = keys[name]["sep"]
             path = os.path.join(self.path, keys[name]["path"])
             self.data[name] = pd.read_csv(path, sep=sep, encoding="utf-8", dtype=dtypes).reset_index(drop=True)
+            logging.info("%s loaded in %i seconds" % (name,  time.time()-time1))
         except Exception as e:
             logging.error(e.message)
 
     def load_data(self, with_stop_points=False):
         logging.info("Loading Data for %s" % self.name)
-
         for name in keys:
             self._load_data(name)
         if with_stop_points:
