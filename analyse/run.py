@@ -99,6 +99,7 @@ class Run:
 
         self.trip_persons_merged = False
         self.legs_persons_merged = False
+        self.link_merged = False
 
     def get_persons(self):
         return self._get("persons")
@@ -176,8 +177,11 @@ class Run:
         return self.get_legs()
 
     def merge_link_id_to_name(self, link_id_to_name):
-        df = self.get_linkvolumes()
-        self.data["linkvolumes"] = df.merge(link_id_to_name, on="link_id", how="left")
+        if not self.link_merged:
+            df = self.get_linkvolumes()
+            self.data["linkvolumes"] = df.merge(link_id_to_name, on="link_id", how="left")
+            self.link_merged = True
+        return self.get_linkvolumes()
 
     def _do(self, df, by, value, foreach=None, aggfunc="count", percent=None, **kwargs):
         if foreach is not None:
