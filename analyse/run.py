@@ -196,7 +196,7 @@ class Run:
 
     def _do(self, df, by, value, foreach=None, aggfunc="count", percent=None, **kwargs):
         if foreach is not None:
-            df = df.pivot_table(index=by, columns=foreach, values=value, aggfunc=aggfunc)*self.scale_factor
+            df = df.pivot_table(index=by, columns=foreach, values=value, aggfunc=aggfunc).fillna(0)*self.scale_factor
             if percent:
                 df = df.divide(df.sum())
             return df.fillna(0)
