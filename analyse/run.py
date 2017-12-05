@@ -257,10 +257,11 @@ class Run:
         return df
 
     @cache
-    def calc_vehicles(self, names, **kwargs):
+    def calc_vehicles(self, names=None, **kwargs):
         df = self.get_linkvolumes()
-        df = df[df.name.isin(names)]
         df = self._do(df, value="volume", aggfunc="sum", **kwargs)
+        if names is not None:
+            df = df.loc[names]
         return df
 
     @staticmethod
