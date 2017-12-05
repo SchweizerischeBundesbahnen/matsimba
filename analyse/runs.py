@@ -39,9 +39,13 @@ class RunsList(list):
 
             #df.sort_index(inplace=True)
 
+        columns = [r.name for r in self]
+
         if ref_df is not None:
             df = pd.concat([df, ref_df], axis=1)
-        return df[[r.name for r in self]]
+            columns = ref_df.columns + columns
+
+        return df[columns]
 
     def get_nb_trips(self, **kwargs):
         return self._get(analyse.run.Run.calc_nb_trips, **kwargs)
