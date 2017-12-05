@@ -43,7 +43,7 @@ class RunsList(list):
 
         if ref_df is not None:
             df = pd.concat([df, ref_df], axis=1)
-            columns = ref_df.columns + columns
+            columns = ref_df.columns.tolist() + columns
 
         return df[columns]
 
