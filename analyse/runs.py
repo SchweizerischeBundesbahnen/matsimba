@@ -12,7 +12,7 @@ class RunsList(list):
     @staticmethod
     def _plot(df, kind="bar", title="", **kwargs):
         if "foreach" in kwargs:
-            fig, axs = analyse.plot.plot_multi(df=df, cols=2.0)
+            fig, axs = analyse.plot.plot_multi(df=df, cols=2.0, kind=kind)
             fig.suptitle(title, fontsize=16)
             fig.tight_layout(rect=[0, 0.03, 1, 0.95])
             return df, fig
@@ -38,7 +38,7 @@ class RunsList(list):
                 df = df.stack()
             df = df.swaplevel(0, len(df.index.levels)-1, axis=0)
 
-            df.sort_index(inplace=True)
+            #df.sort_index(inplace=True)
 
         if ref_df is not None:
             df = pd.concat([df, ref_df], axis=1)
@@ -60,6 +60,20 @@ class RunsList(list):
 
     def get_nb_legs(self, **kwargs):
         return self._get(analyse.run.Run.calc_nb_legs, **kwargs)
+
+    def get_dist_distr_legs(self, **kwargs):
+        return self._get(analyse.run.Run.calc_dist_distr_legs, **kwargs)
+
+    def get_dist_distr_trips(self, **kwargs):
+        return self._get(analyse.run.Run.calc_dist_distr_trips, **kwargs)
+
+    def plot_dist_distr_legs(self, **kwargs):
+        df = self.get_dist_distr_legs(**kwargs)
+        return self._plot(df=df, kind="line", title="", **kwargs)
+
+    def plot_dist_distr_trips(self, **kwargs):
+        df = self.get_dist_distr_trips(**kwargs)
+        return self._plot(df=df, kind="line", title="", **kwargs)
 
     def plot_nb_legs(self, **kwargs):
         df = self.get_nb_legs(**kwargs)
