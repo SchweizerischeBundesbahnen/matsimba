@@ -26,7 +26,6 @@ class RunsList(list):
         names = [r.name for r in self]
         data = [method.im_func(r, foreach=foreach, **kwargs) for r in self]
         df = analyse.compare.concat(data, names)
-        print df.columns
         if foreach is None:
             df = df.swaplevel(0, 1, axis=1)
             df.columns = df.columns.droplevel()
