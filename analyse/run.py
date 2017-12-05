@@ -199,7 +199,7 @@ class Run:
             df = df.pivot_table(index=by, columns=foreach, values=value, aggfunc=aggfunc)*self.scale_factor
             if percent:
                 df = df.divide(df.sum())
-            return df
+            return df.fillna(0)
         else:
             return df.groupby(by).agg({value: aggfunc})*self.scale_factor
 
@@ -222,12 +222,12 @@ class Run:
     @cache
     def calc_dist_distr_trips(self, **kwargs):
         self.create_distance_class_for_trips()
-        return self._do(self.get_trips(), value="cat_dist", aggfunc="count", **kwargs).cumsum()
+        return self._do(self.get_trips(), by="cat_dist", value=trip_id, aggfunc="count", **kwargs).cumsum()
 
     @cache
     def calc_dist_distr_legs(self, **kwargs):
         self.create_distance_class_for_legs()
-        return self._do(self.get_legs(), value="cat_dist", aggfunc="count", **kwargs).cumsum()
+        return self._do(self.get_legs(), by="cat_dist", value=leg_id, aggfunc="count", **kwargs).cumsum()
 
     def plot_timing(self):
         analyse.plot.plot_timing(self.path)
