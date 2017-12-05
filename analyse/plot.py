@@ -238,7 +238,7 @@ def plot_plans(planelements, end_time=35 * 60 * 60):
     return ax, pd.DataFrame(text)
 
 
-def plot_multi(df, cols=2.0, stacked=False):
+def plot_multi(df, cols=2.0, stacked=False, kind="bar"):
     def has_label(df, label):
         try:
             df.loc[label]
@@ -270,7 +270,7 @@ def plot_multi(df, cols=2.0, stacked=False):
         else:
             ax = axs[i//int(cols), i%int(cols)]
         ax.set_title(", ".join(map(str, label)))
-        df.loc[label].plot(kind="bar", stacked=stacked, ax=ax, legend=False)
+        df.loc[label].plot(kind=kind, stacked=stacked, ax=ax, legend=False)
 
     move_legend(ax)
     for _ax in axs:
