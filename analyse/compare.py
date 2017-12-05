@@ -13,7 +13,7 @@ def concat(dfs, names=None):
     df = pd.concat(_dfs, axis=1)
     #reorder
     #df.columns = df.columns.droplevel()
-    return df[names]
+    return df
 
 
 def append(dfs, names, column="Run"):
