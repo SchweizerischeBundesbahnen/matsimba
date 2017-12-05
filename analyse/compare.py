@@ -12,7 +12,6 @@ def concat(dfs, names=None):
         _dfs.append(df)
     df = pd.concat(_dfs, axis=1)
     #reorder
-    df = df[names]
     #df.columns = df.columns.droplevel()
     return df[names]
 
