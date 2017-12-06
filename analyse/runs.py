@@ -12,7 +12,7 @@ class RunsList(list):
     @staticmethod
     def _plot(df, kind="bar", title="", **kwargs):
         if "foreach" in kwargs:
-            fig, axs = analyse.plot.plot_multi(df=df, cols=2.0, kind=kind)
+            fig, axs = analyse.plot.plot_multi(df=df, cols=2.0, kind=kind, **kwargs)
             fig.suptitle(title, fontsize=16)
             fig.tight_layout(rect=[0, 0.03, 1, 0.95])
             return df, fig
