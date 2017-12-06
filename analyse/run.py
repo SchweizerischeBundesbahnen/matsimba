@@ -245,7 +245,7 @@ class Run:
                 return None
 
         df = self.get_legs()
-        df = pd.DataFrame(df[df.boarding_stop.nonull()])
+        df = pd.DataFrame(df[df.boarding_stop.notnull()])
 
         df["CODE"] = df["boarding_stop"].apply(make_code)
 
