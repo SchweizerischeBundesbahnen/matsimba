@@ -267,10 +267,10 @@ class Run:
     @staticmethod
     def _create_distance_class(df, column="distance", classes=None, labels=None, category_column="cat_dist"):
         if classes is None:
-            classes = np.array([-1, 2, 4, 6, 8, 10, 15, 20, 25, 30, 40, 50, 100, 150, 200, 250, 300, np.inf])*1000.0
-            labels = ["0-%ikm" % (classes[1] / 1000.0)]
-            for i in range(len(classes) - 3):
-                labels.append("%i-%i km" % (classes[i + 1] / 1000.0, classes[i + 2] / 1000.0))
+            classes = np.array([-1, 0 , 2, 4, 6, 8, 10, 15, 20, 25, 30, 40, 50, 100, 150, 200, 250, 300, np.inf])*1000.0
+            labels = []
+            for i in range(len(classes) - 2):
+                labels.append("%i-%i km" % (classes[i] / 1000.0, classes[i+1] / 1000.0))
             labels.append("-")
 
         df[category_column] = pd.cut(df[column], classes, labels=labels)
