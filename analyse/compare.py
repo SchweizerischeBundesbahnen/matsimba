@@ -5,12 +5,15 @@ def concat(dfs, names=None):
     _dfs = []
     if names is None:
         names = range(len(dfs))
-
     for _df, name in zip(dfs, names):
         df = _df.copy()
-        df.columns = pd.MultiIndex.from_product([df.columns, [name]])
+        df = pd.concat([df], keys=[name], names=['Run'], axis=1)
+        #df.columns = pd.MultiIndex.from_product([df.columns, [name]])
         _dfs.append(df)
-    return pd.concat(_dfs, axis=1)
+    df = pd.concat(_dfs, axis=1)
+    #reorder
+    #df.columns = df.columns.droplevel()
+    return df
 
 
 def append(dfs, names, column="Run"):

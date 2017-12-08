@@ -1,0 +1,2 @@
+journey_id	person_id	start_time	end_time	distance	main_mode	main_mode_mikrozensus	from_act	to_act	in_vehicle_distance	in_vehicle_time	access_walk_distance	access_walk_time	access_wait_time	first_boarding_stop	egress_walk_distance	egress_walk_time	last_alighting_stop	transfer_walk_distance	transfer_walk_time	transfer_wait_time	sample_selector	stucked
+19	1	27181	51384	201332.000	bike	pt	18	23	201332.000	24203	0.000	0	0	null	0.000	0	null	0.000	0	0	0.215903	false

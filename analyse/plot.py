@@ -6,14 +6,41 @@ import numpy as np
 import glob
 import datetime
 import analyse.compare
+from itertools import product
+import math
+
+sbb_colors = [(22, 24, 63)  # 0 dunkelstes SBB Blau
+    , (34, 37, 94)  # 1
+    , (71, 73, 116)  # 2
+    , (114, 117, 167)  # 3
+    , (204, 205, 223)  # 4 beginn helle SBB Blautne
+    , (221, 222, 234)  # 5
+    , (238, 244, 244)  # 6 hellstes SBB Blau
+    , (102, 0, 0)  # 7dunkelstes SBB Rot
+    , (128, 0, 0)  # 8
+    , (191, 0, 0)  # 9
+    , (255, 102, 102)  # 10 beginn helle SBB Rottne
+    , (255, 153, 153)  # 11
+    , (255, 204, 204)  # 12 hellstes SBB Rot
+    , (255, 0, 0)  # 13 knalliges Rot
+    , (45, 50, 125)  # 14 knalliges Blau
+    , (0, 0, 0)  # 15 schwarz
+    , (255, 255, 255)  # 16 weiss
+    , (0, 0, 0)  # 17
+    , (139, 131, 120)]  # 18]
+
+sbb_colors = ["EB0000", "4C4C4C","2D327D", "348ABD", "7A68A6", "A60628", "467821", "CF4457", "188487", "E24A33", "FFFF00", "FF1DD8", "00FF8D"]
 
 
 def set_matplotlib_params():
     plt.rcParams['figure.figsize'] = (16.0, 4.0)
     plt.rcParams.update({'font.size': 16})
     plt.style.use('ggplot')
-    mpl.rcParams['axes.color_cycle'] = ["EB0000", "4C4C4C","2D327D", "348ABD", "7A68A6", "A60628", "467821", "CF4457", "188487", "E24A33", "FFFF00", "FF1DD8", "00FF8D"]
+    mpl.rcParams['axes.color_cycle'] = sbb_colors
     mpl.rcParams['lines.linewidth'] = 2.5
+    mpl.rcParams['grid.color'] = "grey"
+    mpl.rcParams['grid.linestyle'] = "--"
+    mpl.rcParams['grid.linewidth'] = 0.5
 
 
 def get_score(folder):
@@ -184,7 +211,7 @@ def plot_plans(planelements, end_time=35 * 60 * 60):
     for i, plan_id in enumerate(plan_ids):
         times = []
         pes = []
-        for index, b in planelements[planelements.plan_id==plan_id].iterrows():
+        for index, b in planelements[planelements.plan_id == plan_id].iterrows():
             if b["type"] == "activity":
                 pes.append(b["activity_type"])
                 times.append(b["start_time"])
@@ -209,3 +236,54 @@ def plot_plans(planelements, end_time=35 * 60 * 60):
     ax.axis('off')
     f.tight_layout()
     return ax, pd.DataFrame(text)
+
+
+def plot_multi(df, cols=2.0, stacked=False, kind="bar", rotate=False, **kwargs):
+    def has_label(df, label):
+        try:
+            a = df.loc[label]
+            return True
+        except KeyError:
+            return False
+
+    def if_last_move_legend(ax):
+        title = ax.title
+        if title.get_text()=="":
+            fig.delaxes(ax)
+
+    n_levels = len(df.index.levels)
+
+    lists = [df.index.levels[i] for i in range(n_levels-1)]
+    labels = list(product(*lists))
+
+    labels = [label for label in labels if has_label(df, label)]
+
+    n = len(labels)
+    nrows = int(math.ceil(n/cols))
+    ncols = int(cols)
+
+    fig, axs = plt.subplots(nrows=nrows, ncols=ncols, figsize=(ncols*5, nrows*4))
+
+    for i, label in enumerate(labels):
+        if nrows==1:
+            ax = axs[i]
+        else:
+            ax = axs[i//int(cols), i%int(cols)]
+        ax.set_title(", ".join(map(str, label)))
+
+        ax = df.loc[label].plot(kind=kind, stacked=stacked, ax=ax, legend=False)
+
+        if rotate:
+            for tick in ax.get_xticklabels():
+                tick.set_rotation(45)
+
+    move_legend(ax)
+    for _ax in axs:
+        if nrows == 1:
+            if_last_move_legend(ax)
+        else:
+            for ax in _ax:
+                if_last_move_legend(ax)
+
+    fig.tight_layout()
+    return fig, axs
