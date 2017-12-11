@@ -54,39 +54,39 @@ class RunsList(list):
         df = self.get_nb_trips(**kwargs)
         return self._plot(df=df, title="#trips pro %s und runs" % kwargs["by"], **kwargs)
 
-    def get_dist_trips(self, **kwargs):
+    def get_pkm_trips(self, **kwargs):
         return self._get(analyse.run.Run.calc_dist_trips, **kwargs)
 
-    def plot_dist_trips(self, **kwargs):
-        df = self.get_dist_trips(**kwargs)
+    def plot_pkm_trips(self, **kwargs):
+        df = self.get_pkm_trips(**kwargs)
         return self._plot(df=df, title="distance trips pro %s und runs" % kwargs["by"], **kwargs)
 
     def get_nb_legs(self, **kwargs):
         return self._get(analyse.run.Run.calc_nb_legs, **kwargs)
 
-    def get_dist_distr_legs(self, **kwargs):
+    def get_pkm_distr_legs(self, **kwargs):
         return self._get(analyse.run.Run.calc_dist_distr_legs, **kwargs)
 
-    def get_dist_distr_trips(self, **kwargs):
+    def get_pkm_distr_trips(self, **kwargs):
         return self._get(analyse.run.Run.calc_dist_distr_trips, **kwargs)
 
-    def plot_dist_distr_legs(self, **kwargs):
-        df = self.get_dist_distr_legs(**kwargs)
+    def plot_pkm_distr_legs(self, **kwargs):
+        df = self.get_pkm_distr_legs(**kwargs)
         return self._plot(df=df, kind="line", title="", **kwargs)
 
-    def plot_dist_distr_trips(self, **kwargs):
-        df = self.get_dist_distr_trips(**kwargs)
+    def plot_pkm_distr_trips(self, **kwargs):
+        df = self.get_pkm_distr_trips(**kwargs)
         return self._plot(df=df, kind="line", title="", **kwargs)
 
     def plot_nb_legs(self, **kwargs):
         df = self.get_nb_legs(**kwargs)
         return self._plot(df=df, title="#legs pro %s und runs" % kwargs["by"], **kwargs)
 
-    def get_dist_legs(self, **kwargs):
+    def get_pkm_legs(self, **kwargs):
         return self._get(analyse.run.Run.calc_dist_legs, **kwargs)
 
-    def plot_dist_legs(self, **kwargs):
-        df = self.get_dist_legs(**kwargs)
+    def plot_pkm_legs(self, **kwargs):
+        df = self.get_pkm_legs(**kwargs)
         return self._plot(df=df, title="distance legs pro %s und runs" % kwargs["by"], **kwargs)
 
     def get_einsteiger(self, **kwargs):
