@@ -194,11 +194,14 @@ class Run:
             self.link_merged = True
         return self.get_linkvolumes()
 
-    def _do(self, df, by, value, foreach=None, aggfunc="count", percent=None, **kwargs):
+    def _do(self, df, by, value, foreach=None, aggfunc="count", percent=None, inverse_percent_axis=False,**kwargs):
         if foreach is not None:
             df = df.pivot_table(index=by, columns=foreach, values=value, aggfunc=aggfunc).fillna(0)*self.scale_factor
             if percent:
-                df = df.divide(df.sum())
+                if inverse_percent_axis:
+                    df = df.divide(df.sum(axis=1), axis=0)
+                else:
+                    df = df.divide(df.sum())
             return df.fillna(0)
         else:
             return df.groupby(by).agg({value: aggfunc})*self.scale_factor
