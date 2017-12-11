@@ -239,6 +239,7 @@ def plot_plans(planelements, end_time=35 * 60 * 60):
 
 
 def plot_multi(df, cols=2.0, stacked=False, kind="bar", rotate=False, **kwargs):
+    df.sort_index(inplace=True)
     def has_label(df, label):
         try:
             a = df.loc[label]
