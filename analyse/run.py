@@ -223,18 +223,18 @@ class Run:
         return self._do(self.get_legs(), value=distance_field, aggfunc="sum", **kwargs)
 
     @cache
-    def calc_dist_distr_trips(self, inverse_percent_axis=False, **kwargs):
+    def calc_dist_distr_trips(self, inverse_percent_axis=False, rotate=True, **kwargs):
         self.create_distance_class_for_trips()
-        df = self._do(self.get_trips(), by="cat_dist", value=trip_id, aggfunc="count", inverse_percent_axis=inverse_percent_axis, **kwargs)
+        df = self._do(self.get_trips(), by="cat_dist", value=trip_id, aggfunc="count", rotate=rotate, inverse_percent_axis=inverse_percent_axis, **kwargs)
         if inverse_percent_axis:
             return df
         else:
             return df.cumsum()
 
     @cache
-    def calc_dist_distr_legs(self, inverse_percent_axis=False, **kwargs):
+    def calc_dist_distr_legs(self, inverse_percent_axis=False, rotate=True, **kwargs):
         self.create_distance_class_for_legs()
-        df = self._do(self.get_legs(), by="cat_dist", value=leg_id, aggfunc="count", **kwargs)
+        df = self._do(self.get_legs(), by="cat_dist", value=leg_id, aggfunc="count", rotate=rotate, **kwargs)
         if inverse_percent_axis:
             return df
         else:
