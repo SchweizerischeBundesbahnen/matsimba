@@ -29,7 +29,8 @@ sbb_colors = [(22, 24, 63)  # 0 dunkelstes SBB Blau
     , (0, 0, 0)  # 17
     , (139, 131, 120)]  # 18]
 
-sbb_colors = ["EB0000", "4C4C4C","2D327D", "348ABD", "7A68A6", "A60628", "467821", "CF4457", "188487", "E24A33", "FFFF00", "FF1DD8", "00FF8D"]
+sbb_colors = ["EB0000", "4C4C4C", "2D327D", "348ABD", "7A68A6", "A60628", "467821", "CF4457", "188487", "E24A33",
+              "FFFF00", "FF1DD8", "00FF8D"]
 
 
 def set_matplotlib_params():
@@ -240,6 +241,7 @@ def plot_plans(planelements, end_time=35 * 60 * 60):
 
 def plot_multi(df, cols=2.0, stacked=False, kind="bar", rotate=False, **kwargs):
     df.sort_index(inplace=True)
+
     def has_label(df, label):
         try:
             a = df.loc[label]
@@ -249,27 +251,27 @@ def plot_multi(df, cols=2.0, stacked=False, kind="bar", rotate=False, **kwargs):
 
     def if_last_move_legend(ax):
         title = ax.title
-        if title.get_text()=="":
+        if title.get_text() == "":
             fig.delaxes(ax)
 
     n_levels = len(df.index.levels)
 
-    lists = [df.index.levels[i] for i in range(n_levels-1)]
+    lists = [df.index.levels[i] for i in range(n_levels - 1)]
     labels = list(product(*lists))
 
     labels = [label for label in labels if has_label(df, label)]
 
     n = len(labels)
-    nrows = int(math.ceil(n/cols))
+    nrows = int(math.ceil(n / cols))
     ncols = int(cols)
 
-    fig, axs = plt.subplots(nrows=nrows, ncols=ncols, figsize=(ncols*5, nrows*4))
+    fig, axs = plt.subplots(nrows=nrows, ncols=ncols, figsize=(ncols * 5, nrows * 4))
 
     for i, label in enumerate(labels):
-        if nrows==1:
+        if nrows == 1:
             ax = axs[i]
         else:
-            ax = axs[i//int(cols), i%int(cols)]
+            ax = axs[i // int(cols), i % int(cols)]
         ax.set_title(", ".join(map(str, label)))
 
         ax = df.loc[label].plot(kind=kind, stacked=stacked, ax=ax, legend=False)
