@@ -225,7 +225,7 @@ class Run:
     @cache
     def calc_dist_distr_trips(self, inverse_percent_axis=False, **kwargs):
         self.create_distance_class_for_trips()
-        df = self._do(self.get_trips(), by="cat_dist", value=trip_id, aggfunc="count", inverse_percent_axis=inverse_percent_axis **kwargs)
+        df = self._do(self.get_trips(), by="cat_dist", value=trip_id, aggfunc="count", inverse_percent_axis=inverse_percent_axis, **kwargs)
         if inverse_percent_axis:
             return df
         else:
