@@ -278,7 +278,7 @@ def plot_multi(df, cols=2.0, stacked=False, kind="bar", rotate=False, **kwargs):
             ax = axs[i // int(cols), i % int(cols)]
 
         title = ", ".join(["%s=%s" % (df.index.names[i], l) for i, l in enumerate(label)])
-        title = ax.set_title("\n".join(wrap(title,60)))
+        title = "\n".join(wrap(title, 20))
 
         ax.set_title(title)
 
