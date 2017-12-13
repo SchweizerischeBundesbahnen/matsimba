@@ -8,6 +8,8 @@ import datetime
 import analyse.compare
 from itertools import product
 import math
+from textwrap import wrap
+
 
 sbb_colors = [(22, 24, 63)  # 0 dunkelstes SBB Blau
     , (34, 37, 94)  # 1
@@ -276,6 +278,8 @@ def plot_multi(df, cols=2.0, stacked=False, kind="bar", rotate=False, **kwargs):
             ax = axs[i // int(cols), i % int(cols)]
 
         title = ", ".join(["%s=%s" % (df.index.names[i], l) for i, l in enumerate(label)])
+        title = ax.set_title("\n".join(wrap(title,60)))
+
         ax.set_title(title)
 
         ax = df.loc[label].plot(kind=kind, stacked=stacked, ax=ax, legend=False)
