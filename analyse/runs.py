@@ -59,7 +59,7 @@ class RunsList(list):
 
     def plot_pkm_trips(self, **kwargs):
         df = self.get_pkm_trips(**kwargs)
-        return self._plot(df=df, title="distance trips pro %s und runs" % kwargs["by"], **kwargs)
+        return self._plot(df=df, title="pkm trips pro %s und runs" % kwargs["by"], **kwargs)
 
     def get_nb_legs(self, **kwargs):
         return self._get(analyse.run.Run.calc_nb_legs, **kwargs)
@@ -87,7 +87,7 @@ class RunsList(list):
 
     def plot_pkm_legs(self, **kwargs):
         df = self.get_pkm_legs(**kwargs)
-        return self._plot(df=df, title="distance legs pro %s und runs" % kwargs["by"], **kwargs)
+        return self._plot(df=df, title="pkm legs pro %s und runs" % kwargs["by"], **kwargs)
 
     def get_einsteiger(self, **kwargs):
         return self._get(analyse.run.Run.calc_einsteiger, **kwargs)
