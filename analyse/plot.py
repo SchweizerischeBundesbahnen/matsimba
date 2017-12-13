@@ -268,7 +268,7 @@ def plot_multi(df, cols=2.0, stacked=False, kind="bar", rotate=False, **kwargs):
     fig, axs = plt.subplots(nrows=nrows, ncols=ncols, figsize=(ncols * 5, nrows * 4))
 
     for i, label in enumerate(labels):
-        if nrows == 1:
+        if ncols == 1:
             ax = axs[i]
         else:
             ax = axs[i // int(cols), i % int(cols)]
