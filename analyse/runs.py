@@ -18,7 +18,7 @@ class RunsList(list):
             return df, fig
 
         else:
-            ax = df.plot(kind=kind, title=title)
+            ax = df.plot(kind=kind, title=title, figsize=(10, 5))
             analyse.plot.move_legend(ax)
             return df, ax.figure
 
