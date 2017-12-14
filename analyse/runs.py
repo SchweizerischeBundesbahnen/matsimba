@@ -20,7 +20,9 @@ class RunsList(list):
         else:
             ax = df.plot(kind=kind, title=title, figsize=(10, 5))
             analyse.plot.move_legend(ax)
-            return df, ax.figure
+            fig = ax.figure
+            fig.tight_layout(rect=[0, 0.03, 1, 0.95])
+            return df, fig
 
     def _get(self, method, foreach=None, ref_df=None, **kwargs):
         names = [r.name for r in self]
