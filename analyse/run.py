@@ -156,7 +156,7 @@ class Run:
             path = os.path.join(self.path, keys[name]["path"])
             logging.info("Starting loading data %s: %s " % (name, path))
             self.data[name] = pd.read_csv(path, sep=sep, encoding="utf-8", dtype=dtypes).reset_index(drop=True)
-            logging.info("%s loaded in %i seconds" % (name,  time.time()-time1))
+            logging.info("%s loaded in %i seconds" % (name, time.time() - time1))
         except Exception as e:
             logging.error(e.message)
 
@@ -194,9 +194,19 @@ class Run:
             self.link_merged = True
         return self.get_linkvolumes()
 
-    def _do(self, df, by, value, foreach=None, aggfunc="count", percent=None, inverse_percent_axis=False,**kwargs):
+    def _do(self, df, by, value, foreach=None, aggfunc="count", percent=None, inverse_percent_axis=False, **kwargs):
+        def check_variable(values):
+            if not isinstance(values, list):
+                values = [values]
+            for _value in values:
+                if _value not in df.columns:
+                    df[_value] = "Undefined"
+
+        check_variable(by)
+        check_variable(foreach)
+
         if foreach is not None:
-            df = df.pivot_table(index=by, columns=foreach, values=value, aggfunc=aggfunc).fillna(0)*self.scale_factor
+            df = df.pivot_table(index=by, columns=foreach, values=value, aggfunc=aggfunc).fillna(0) * self.scale_factor
             if percent:
                 if inverse_percent_axis:
                     df = df.divide(df.sum(axis=1), axis=0)
@@ -204,7 +214,7 @@ class Run:
                     df = df.divide(df.sum())
             return df.fillna(0)
         else:
-            return df.groupby(by).agg({value: aggfunc})*self.scale_factor
+            return df.groupby(by).agg({value: aggfunc}) * self.scale_factor
 
     @cache
     def calc_nb_trips(self, by=mode_trip, **kwargs):
@@ -225,7 +235,8 @@ class Run:
     @cache
     def calc_dist_distr_trips(self, inverse_percent_axis=False, rotate=True, **kwargs):
         self.create_distance_class_for_trips()
-        df = self._do(self.get_trips(), by="cat_dist", value=trip_id, aggfunc="count", rotate=rotate, inverse_percent_axis=inverse_percent_axis, **kwargs)
+        df = self._do(self.get_trips(), by="cat_dist", value=trip_id, aggfunc="count", rotate=rotate,
+                      inverse_percent_axis=inverse_percent_axis, **kwargs)
         if inverse_percent_axis:
             return df
         else:
@@ -278,10 +289,11 @@ class Run:
     @staticmethod
     def _create_distance_class(df, column="distance", classes=None, labels=None, category_column="cat_dist"):
         if classes is None:
-            classes = np.array([-1, 0 , 2, 4, 6, 8, 10, 15, 20, 25, 30, 40, 50, 100, 150, 200, 250, 300, np.inf])*1000.0
+            classes = np.array(
+                [-1, 0, 2, 4, 6, 8, 10, 15, 20, 25, 30, 40, 50, 100, 150, 200, 250, 300, np.inf]) * 1000.0
             labels = []
             for i in range(len(classes) - 2):
-                labels.append("%i-%i km" % (classes[i] / 1000.0, classes[i+1] / 1000.0))
+                labels.append("%i-%i km" % (classes[i] / 1000.0, classes[i + 1] / 1000.0))
             labels.append("-")
 
         df[category_column] = pd.cut(df[column], classes, labels=labels)
@@ -291,5 +303,3 @@ class Run:
 
     def create_distance_class_for_trips(self, **kwargs):
         self._create_distance_class(self.get_trips(), **kwargs)
-
-
