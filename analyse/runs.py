@@ -20,7 +20,7 @@ class RunsList(list):
         else:
             ax = df.plot(kind=kind, title=title)
             analyse.plot.move_legend(ax)
-            return df, ax
+            return df, ax.figure
 
     def _get(self, method, foreach=None, ref_df=None, **kwargs):
         names = [r.name for r in self]
