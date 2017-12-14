@@ -21,7 +21,7 @@ class RunsList(list):
             ax = df.plot(kind=kind, title=title, figsize=(10, 5))
             analyse.plot.move_legend(ax)
             fig = ax.figure
-            fig.tight_layout(rect=[0, 0.03, 1, 0.95])
+            fig.tight_layout()
             return df, fig
 
     def _get(self, method, foreach=None, ref_df=None, **kwargs):
