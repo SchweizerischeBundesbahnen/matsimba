@@ -9,7 +9,6 @@ import analyse.compare
 from itertools import product
 import math
 
-
 sbb_colors = [(22, 24, 63)  # 0 dunkelstes SBB Blau
     , (34, 37, 94)  # 1
     , (71, 73, 116)  # 2
@@ -284,9 +283,11 @@ def plot_multi(df, cols=2.0, stacked=False, kind="bar", rotate=False, **kwargs):
 
         if rotate:
             for tick in ax.get_xticklabels():
-                tick.set_rotation(45)
+                tick.set_rotation(90)
 
-    move_legend(ax)
+    i = max(1, min(len(axs), 2))
+    move_legend(axs[i-1])
+
     for _ax in axs:
         if ncols == 1 or nrows == 1:
             if_last_move_legend(ax)
