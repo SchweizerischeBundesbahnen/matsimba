@@ -288,7 +288,9 @@ def plot_multi(df, cols=2.0, stacked=False, kind="bar", rotate=False, **kwargs):
     for _i, _ax in enumerate(axs):
         if ncols == 1 or nrows == 1:
             if_last_move_legend(_ax)
-            move_legend(_ax)
+            i = max(1, min(len(_ax), 2))
+            if _i == i:
+                move_legend(_ax)
         else:
             for ax in _ax:
                 if_last_move_legend(ax)
