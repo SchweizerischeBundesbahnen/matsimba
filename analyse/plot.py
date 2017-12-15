@@ -285,15 +285,16 @@ def plot_multi(df, cols=2.0, stacked=False, kind="bar", rotate=False, **kwargs):
             for tick in ax.get_xticklabels():
                 tick.set_rotation(90)
 
-    i = max(1, min(len(axs), 2))
-    move_legend(axs[i-1])
-
-    for _ax in axs:
+    for _i, _ax in enumerate(axs):
         if ncols == 1 or nrows == 1:
-            if_last_move_legend(ax)
+            if_last_move_legend(_ax)
+            move_legend(_ax)
         else:
             for ax in _ax:
                 if_last_move_legend(ax)
+            if _i == 0:
+                i = max(1, min(len(_ax), 2))
+                move_legend(_ax[i - 1])
 
     fig.tight_layout()
     return fig, axs
