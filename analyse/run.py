@@ -6,6 +6,8 @@ import analyse.plot
 import json
 import time
 import numpy as np
+import analyse.skims
+from variable import *
 
 _cache = {}
 
@@ -30,16 +32,6 @@ def cache(func):
 
     return f
 
-
-person_id = "person_id"
-mode_trip = "main_mode"
-mode_leg = "mode"
-column_run = "Run"
-trip_id = "journey_id"
-leg_id = "trip_id"
-distance_field = "distance"
-boarding_id = "boarding"
-alighting_id = "alighting"
 
 keys = {"acts":
             {"path": "matsim_activities.txt", "sep": "\t"},
@@ -173,6 +165,24 @@ class Run:
         if with_stop_points:
             self.load_stop_points()
 
+    def prepare(self, stop_ids_perimeter, defining_stop_ids):
+        self.unload_data()
+
+        df = self.get_legs()
+        df = df[df.line.notnull()]
+        fq_legs = analyse.skims.filter_legs_to_binnenverkehr_fq_legs(df, stop_ids_perimeter=stop_ids_perimeter,
+                                                                     defining_stop_ids=defining_stop_ids)
+
+        df[IS_SIMBA_FQ] = False
+        df.loc[df.trip_id.isin(fq_legs.trip_id), IS_SIMBA_FQ] = True
+
+        df = self.merge_trips_persons()
+        df = self.merge_legs_persons()
+
+        df = self.get_trips()
+        df.loc[df.main_mode == TRANSIT_WALK, MAIN_MODE] = WALK_AGGR
+        df.loc[df.main_mode == WALK, MAIN_MODE] = WALK_AGGR
+
     def merge_trips_persons(self):
         if not self.trip_persons_merged:
             trips = self.get_trips().merge(self.get_persons(), on=person_id, how="left", suffixes=("", "_p"))
@@ -235,7 +245,7 @@ class Run:
     @cache
     def calc_dist_distr_trips(self, inverse_percent_axis=False, rotate=True, **kwargs):
         self.create_distance_class_for_trips()
-        df = self._do(self.get_trips(), by="cat_dist", value=trip_id, aggfunc="count", rotate=rotate,
+        df = self._do(self.get_trips(), by=CAT_DIST, value=trip_id, aggfunc="count", rotate=rotate,
                       inverse_percent_axis=inverse_percent_axis, **kwargs)
         if inverse_percent_axis:
             return df
@@ -245,7 +255,7 @@ class Run:
     @cache
     def calc_dist_distr_legs(self, inverse_percent_axis=False, rotate=True, **kwargs):
         self.create_distance_class_for_legs()
-        df = self._do(self.get_legs(), by="cat_dist", value=leg_id, aggfunc="count", rotate=rotate, **kwargs)
+        df = self._do(self.get_legs(), by=CAT_DIST, value=leg_id, aggfunc="count", rotate=rotate, **kwargs)
         if inverse_percent_axis:
             return df
         else:
@@ -269,7 +279,7 @@ class Run:
         df = self.get_legs()
         df = pd.DataFrame(df[df.boarding_stop.notnull()])
 
-        df["CODE"] = df["boarding_stop"].apply(make_code)
+        df[CODE] = df[BOARDING_STOP].apply(make_code)
 
         df = self._do(df, value=leg_id, aggfunc="count", **kwargs)
 
@@ -281,13 +291,13 @@ class Run:
     @cache
     def calc_vehicles(self, names=None, **kwargs):
         df = self.get_linkvolumes()
-        df = self._do(df, value="volume", aggfunc="sum", **kwargs)
+        df = self._do(df, value=VOLUME, aggfunc="sum", **kwargs)
         if names is not None:
             df = df.loc[names]
         return df
 
     @staticmethod
-    def _create_distance_class(df, column="distance", classes=None, labels=None, category_column="cat_dist"):
+    def _create_distance_class(df, column=DISTANCE, classes=None, labels=None, category_column=CAT_DIST):
         if classes is None:
             classes = np.array(
                 [-1, 0, 2, 4, 6, 8, 10, 15, 20, 25, 30, 40, 50, 100, 150, 200, 250, 300, np.inf]) * 1000.0

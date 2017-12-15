@@ -38,7 +38,6 @@ class RunsList(list):
             for i in range(n):
                 df = df.stack()
             df = df.swaplevel(0, len(df.index.levels)-1, axis=0)
-
             #df.sort_index(inplace=True)
 
         columns = [r.name for r in self]
@@ -109,5 +108,8 @@ class RunsList(list):
             raise ValueError("Index size to large to be plotted")
         return self._plot(df=df, title="Fahrzeuge", **kwargs)
 
+    def prepare(self, stop_ids_perimeter, defining_stop_ids):
+        for run in self:
+            run.preprare(stop_ids_perimeter=stop_ids_perimeter, defining_stop_ids=defining_stop_ids)
 
 
