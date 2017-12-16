@@ -24,7 +24,7 @@ class RunsList(list):
             fig.tight_layout()
             return df, fig
 
-    def _get(self, method, foreach=None, ref_df=None, **kwargs):
+    def _get(self, method, foreach=None, ref_df=None, ref_run=None, **kwargs):
         names = [r.name for r in self]
         data = [method.im_func(r, foreach=foreach, **kwargs) for r in self]
         df = analyse.compare.concat(data, names)
@@ -33,18 +33,25 @@ class RunsList(list):
             df.columns = df.columns.droplevel()
 
         else:
-            n = len(df.columns.levels)-1
+            n = len(df.columns.levels) - 1
 
             for i in range(n):
                 df = df.stack()
-            df = df.swaplevel(0, len(df.index.levels)-1, axis=0)
-            #df.sort_index(inplace=True)
+            df = df.swaplevel(0, len(df.index.levels) - 1, axis=0)
+            # df.sort_index(inplace=True)
 
         columns = [r.name for r in self]
 
         if ref_df is not None:
             df = pd.concat([df, ref_df], axis=1)
             columns = ref_df.columns.tolist() + columns
+
+        if ref_run is not None:
+            _runs = RunsList()
+            _runs.append(ref_run)
+            _df = _runs._get(method=method, foreach=foreach, **kwargs)
+            df = pd.concat([df, _df], axis=1)
+            columns = df.columns.tolist()
 
         return df[columns]
 
