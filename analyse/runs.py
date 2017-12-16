@@ -117,4 +117,4 @@ class RunsList(list):
 
     def prepare(self, stop_ids_perimeter, defining_stop_ids):
         for run in self:
-            run.preprare(stop_ids_perimeter=stop_ids_perimeter, defining_stop_ids=defining_stop_ids)
+            run.prepare(stop_ids_perimeter=stop_ids_perimeter, defining_stop_ids=defining_stop_ids)
