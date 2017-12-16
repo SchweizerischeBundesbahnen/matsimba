@@ -217,7 +217,8 @@ class Run:
             self.link_merged = True
         return self.get_linkvolumes()
 
-    def _do(self, df, by, value, foreach=None, aggfunc="count", percent=None, inverse_percent_axis=False, **kwargs):
+    def _do(self, df, by, value, foreach=None, aggfunc="count", percent=None, inverse_percent_axis=False,
+            percent_level=None, **kwargs):
         def check_variable(values):
             if not isinstance(values, list):
                 values = [values]
@@ -227,9 +228,10 @@ class Run:
 
         def make_percent(df):
             if inverse_percent_axis:
-                df = df.divide(df.sum(axis=1), axis=0)
+                logging.warn("Be carefull with inverse_percent_axis")
+                df = df.divide(df.sum(axis=1, level=percent_level), axis=0)
             else:
-                df = df.divide(df.sum())
+                df = df.divide(df.sum(level=percent_level))
             return df
 
         check_variable(by)
