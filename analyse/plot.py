@@ -239,7 +239,7 @@ def plot_plans(planelements, end_time=35 * 60 * 60):
     return ax, pd.DataFrame(text)
 
 
-def plot_multi(df, cols=2.0, stacked=False, kind="bar", rotate=False, **kwargs):
+def plot_multi(df, cols=2.0, stacked=False, kind="bar", rotate=False, xs_index=None, **kwargs):
     #df.sort_index(inplace=True)
 
     def has_label(df, label):
@@ -278,7 +278,10 @@ def plot_multi(df, cols=2.0, stacked=False, kind="bar", rotate=False, **kwargs):
         title = "\n".join(["%s=%s" % (df.index.names[i], l) for i, l in enumerate(label)])
 
         ax.set_title(title)
-        ax = df.loc[label].plot(kind=kind, stacked=stacked, ax=ax, legend=False)
+        _df = df.loc[label]
+        if xs_index is None:
+            xs_index = _df.index
+        ax = _df.loc[xs_index].plot(kind=kind, stacked=stacked, ax=ax, legend=False)
 
         if rotate:
             for tick in ax.get_xticklabels():

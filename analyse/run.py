@@ -317,14 +317,9 @@ class Run:
         return df
 
     @staticmethod
-    def _create_distance_class(df, column=DISTANCE, classes=None, labels=None, category_column=CAT_DIST):
-        if classes is None:
-            classes = np.array(
-                [-1, 0, 2, 4, 6, 8, 10, 15, 20, 25, 30, 40, 50, 100, 150, 200, 250, 300, np.inf]) * 1000.0
-            labels = []
-            for i in range(len(classes) - 2):
-                labels.append("%i-%i km" % (classes[i] / 1000.0, classes[i + 1] / 1000.0))
-            labels.append("-")
+    def _create_distance_class(df, column=DISTANCE, category_column=CAT_DIST):
+        classes = distance_classes
+        labels = distance_labels
 
         df[category_column] = pd.cut(df[column], classes, labels=labels)
 
@@ -333,3 +328,7 @@ class Run:
 
     def create_distance_class_for_trips(self, **kwargs):
         self._create_distance_class(self.get_trips(), **kwargs)
+
+
+distance_classes = np.array( [-1, 0, 2, 4, 6, 8, 10, 15, 20, 25, 30, 40, 50, 100, 150, 200, 250, 300, np.inf]) * 1000.0
+distance_labels = ["0", "0-2", "2-4", "4-6", "6-8", "8-10", "10-15", "15-20", "20-25", "25-30", "30-40", "40-50", "50-100", "100-150", "150-200", "200-250", "250-300", "300+"]

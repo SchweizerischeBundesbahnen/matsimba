@@ -1,6 +1,7 @@
 import analyse.compare
 import analyse.plot
 import pandas as pd
+import analyse.run
 
 
 class RunsList(list):
@@ -10,15 +11,27 @@ class RunsList(list):
                 return e
 
     @staticmethod
-    def _plot(df, kind="bar", title="", cols=2.0, **kwargs):
+    def _plot(df, kind="bar", title="", cols=2.0, xs_index=None, **kwargs):
+        """
+        :param df:
+        :param kind:
+        :param title:
+        :param cols:
+        :param xs_index: is used to sort the x axis for plotting
+        :param kwargs:
+        :return:
+        """
         if "foreach" in kwargs:
-            fig, axs = analyse.plot.plot_multi(df=df, cols=cols, kind=kind, **kwargs)
+            fig, axs = analyse.plot.plot_multi(df=df, cols=cols, kind=kind, xs_index=xs_index, **kwargs)
             fig.suptitle(title, fontsize=16)
             fig.tight_layout(rect=[0, 0.03, 1, 0.95])
             return df, fig
 
         else:
-            ax = df.plot(kind=kind, title=title, figsize=(10, 5))
+            if xs_index is None:
+                xs_index = df.index
+
+            ax = df.loc[xs_index].plot(kind=kind, title=title, figsize=(10, 5))
             analyse.plot.move_legend(ax)
             fig = ax.figure
             fig.tight_layout()
@@ -53,7 +66,7 @@ class RunsList(list):
             df = pd.concat([df, _df], axis=1)
             columns = df.columns.tolist()
 
-        return df[columns]
+        return df[columns].sort_index()
 
     def get_nb_trips(self, **kwargs):
         return self._get(analyse.run.Run.calc_nb_trips, **kwargs)
@@ -73,18 +86,18 @@ class RunsList(list):
         return self._get(analyse.run.Run.calc_nb_legs, **kwargs)
 
     def get_pkm_distr_legs(self, **kwargs):
-        return self._get(analyse.run.Run.calc_dist_distr_legs, **kwargs)
+        return self._get(analyse.run.Run.calc_dist_distr_legs, xs_index=analyse.run.dis, **kwargs)
 
     def get_pkm_distr_trips(self, **kwargs):
         return self._get(analyse.run.Run.calc_dist_distr_trips, **kwargs)
 
     def plot_pkm_distr_legs(self, **kwargs):
         df = self.get_pkm_distr_legs(**kwargs)
-        return self._plot(df=df, kind="line", title="", **kwargs)
+        return self._plot(df=df, kind="line", title="", xs_index=analyse.run.distance_labels, **kwargs)
 
     def plot_pkm_distr_trips(self, **kwargs):
         df = self.get_pkm_distr_trips(**kwargs)
-        return self._plot(df=df, kind="line", title="", **kwargs)
+        return self._plot(df=df, kind="line", title="", xs_index=analyse.run.distance_labels, **kwargs)
 
     def plot_nb_legs(self, **kwargs):
         df = self.get_nb_legs(**kwargs)
