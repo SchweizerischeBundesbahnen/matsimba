@@ -63,7 +63,7 @@ class RunsList(list):
             _runs = RunsList()
             _runs.append(ref_run)
             _df = _runs._get(method=method, foreach=foreach, **kwargs)
-            df = pd.concat([df, _df], axis=1)
+            df = pd.concat([_df, df], axis=1)
             columns = df.columns.tolist()
 
         return df[columns].sort_index()
