@@ -243,7 +243,7 @@ class Run:
         if percent:
             df = make_percent(df)
 
-        return df
+        return df.fillna(0)
 
     @cache
     def calc_nb_trips(self, by=mode_trip, **kwargs):
