@@ -165,10 +165,20 @@ class Run:
         if with_stop_points:
             self.load_stop_points()
 
+    def _set_dummy_pf(self):
+        df = self.get_legs()
+        df[PF] = 1.0
+        df[PKM] = df[DISTANCE]
+
+        df = self.get_trips()
+        df[PF] = 1.0
+        df[PKM] = df[DISTANCE]
+
     def prepare(self, stop_ids_perimeter, defining_stop_ids):
         self.unload_data()
 
         df = self.get_legs()
+
         df = df[df.line.notnull()]
         fq_legs = analyse.skims.filter_legs_to_binnenverkehr_fq_legs(df, stop_ids_perimeter=stop_ids_perimeter,
                                                                      defining_stop_ids=defining_stop_ids)
@@ -182,6 +192,8 @@ class Run:
         df = self.get_trips()
         df.loc[df.main_mode == TRANSIT_WALK, MAIN_MODE] = WALK_AGGR
         df.loc[df.main_mode == WALK, MAIN_MODE] = WALK_AGGR
+
+        self._set_dummy_pf()
 
     def merge_trips_persons(self):
         if not self.trip_persons_merged:
@@ -228,24 +240,24 @@ class Run:
 
     @cache
     def calc_nb_trips(self, by=mode_trip, **kwargs):
-        return self._do(self.get_trips(), by=by, value=trip_id, aggfunc="count", **kwargs)
+        return self._do(self.get_trips(), by=by, value=PF, aggfunc="sum", **kwargs)
 
     @cache
     def calc_nb_legs(self, **kwargs):
-        return self._do(self.get_legs(), value=leg_id, aggfunc="count", **kwargs)
+        return self._do(self.get_legs(), value=PF, aggfunc="sum", **kwargs)
 
     @cache
     def calc_dist_trips(self, **kwargs):
-        return self._do(self.get_trips(), value=distance_field, aggfunc="sum", **kwargs)
+        return self._do(self.get_trips(), value=PKM, aggfunc="sum", **kwargs)
 
     @cache
     def calc_dist_legs(self, **kwargs):
-        return self._do(self.get_legs(), value=distance_field, aggfunc="sum", **kwargs)
+        return self._do(self.get_legs(), value=PKM, aggfunc="sum", **kwargs)
 
     @cache
     def calc_dist_distr_trips(self, inverse_percent_axis=False, rotate=True, **kwargs):
         self.create_distance_class_for_trips()
-        df = self._do(self.get_trips(), by=CAT_DIST, value=trip_id, aggfunc="count", rotate=rotate,
+        df = self._do(self.get_trips(), by=CAT_DIST, value=PF, aggfunc="sum", rotate=rotate,
                       inverse_percent_axis=inverse_percent_axis, **kwargs)
         if inverse_percent_axis:
             return df
@@ -255,7 +267,8 @@ class Run:
     @cache
     def calc_dist_distr_legs(self, inverse_percent_axis=False, rotate=True, **kwargs):
         self.create_distance_class_for_legs()
-        df = self._do(self.get_legs(), by=CAT_DIST, value=leg_id, aggfunc="count", rotate=rotate, **kwargs)
+        df = self._do(self.get_legs(), by=CAT_DIST, value=PF, aggfunc="sum", rotate=rotate,
+                      inverse_percent_axis=inverse_percent_axis, **kwargs)
         if inverse_percent_axis:
             return df
         else:
