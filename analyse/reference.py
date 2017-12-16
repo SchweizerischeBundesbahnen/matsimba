@@ -21,7 +21,7 @@ class Reference:
         df.distance = df.distance * 1000.0
 
         if is_cnb:
-            df = pd.DataFrame(df[df.isCNB])
+            df = pd.DataFrame(df[df.istCNB])
         mzmv = analyse.run.Run(name="mzmv")
         mzmv.data["journeys"] = df
         return mzmv
