@@ -13,12 +13,15 @@ class Reference:
         self.path_mikro = path_mikro
         self.path_ea = path_ea
 
-    def get_mzmv_run(self, subpopulation="regular_inAct"):
+    def get_mzmv_run(self, subpopulation="regular_inAct", is_cnb=False):
         df = pd.read_csv(self.path_mikro, sep=",", dtype={"link_id": str})
         df[SUBPOPULATION] = subpopulation
         df = df.rename(columns={u'Weglaenge': "distance"})
         df = df.rename(columns={u'Pkm': "PKM"})
         df.distance = df.distance * 1000.0
+
+        if is_cnb:
+            df = pd.DataFrame(df[df.isCNB])
         mzmv = analyse.run.Run(name="mzmv")
         mzmv.data["journeys"] = df
         return mzmv
