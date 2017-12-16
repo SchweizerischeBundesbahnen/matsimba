@@ -17,6 +17,7 @@ class Reference:
         df = pd.read_csv(self.path_mikro, sep=",", dtype={"link_id": str})
         df[SUBPOPULATION] = subpopulation
         df = df.rename(columns={u'Weglaenge': "distance"})
+        df = df.rename(columns={u'Pkm': "PKM"})
         df.distance = df.distance * 1000.0
         mzmv = analyse.run.Run(name="mzmv")
         mzmv.data["journeys"] = df
