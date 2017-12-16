@@ -86,7 +86,7 @@ dtypes = {u'activity_id': str,
 
 
 class Run:
-    def __init__(self, path, name, scale_factor):
+    def __init__(self, path=None, name=None, scale_factor=1.0):
         self.path = path
         self.name = name
         self.scale_factor = scale_factor
@@ -190,6 +190,7 @@ class Run:
         df = self.merge_legs_persons()
 
         df = self.get_trips()
+
         df.loc[df.main_mode == TRANSIT_WALK, MAIN_MODE] = WALK_AGGR
         df.loc[df.main_mode == WALK, MAIN_MODE] = WALK_AGGR
 
@@ -224,19 +225,25 @@ class Run:
                 if _value not in df.columns:
                     df[_value] = "Undefined"
 
+        def make_percent(df):
+            if inverse_percent_axis:
+                df = df.divide(df.sum(axis=1), axis=0)
+            else:
+                df = df.divide(df.sum())
+            return df
+
         check_variable(by)
         check_variable(foreach)
 
         if foreach is not None:
-            df = df.pivot_table(index=by, columns=foreach, values=value, aggfunc=aggfunc).fillna(0) * self.scale_factor
-            if percent:
-                if inverse_percent_axis:
-                    df = df.divide(df.sum(axis=1), axis=0)
-                else:
-                    df = df.divide(df.sum())
-            return df.fillna(0)
+            df = df.pivot_table(index=by, columns=foreach, values=value, aggfunc=aggfunc) * self.scale_factor
         else:
-            return df.groupby(by).agg({value: aggfunc}) * self.scale_factor
+            df = df.groupby(by).agg({value: aggfunc}) * self.scale_factor
+
+        if percent:
+            df = make_percent(df)
+
+        return df
 
     @cache
     def calc_nb_trips(self, by=mode_trip, **kwargs):
