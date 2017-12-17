@@ -77,10 +77,10 @@ def get_datas(runs, ref):
     df, fig = runs.plot_pkm_distr_legs(foreach=[IS_SIMBA_FQ], percent=True, inverse_percent_axis=False, rotate=True)
     datas.append(SheetData(df, fig, "simba_legs"))
 
-    df, fig = runs.plot_einsteiger(by=CODE, codes=ref.get_stations().index, ref_df=ref.get_stations())
+    df, fig = runs.plot_einsteiger(by=CODE, codes=ref.get_stations().index.tolist(), ref_df=ref.get_stations())
     datas.append(SheetData(df, fig, "Einsteiger"))
 
-    df, fig = runs.plot_einsteiger(by=CODE, codes=ref.get_stations().index, foreach=SUBPOPULATION)
+    df, fig = runs.plot_einsteiger(by=CODE, codes=ref.get_stations().index.tolist(), foreach=SUBPOPULATION)
     datas.append(SheetData(df, fig, "Einsteiger 2"))
 
     df, fig = runs.plot_vehicles(by="name", names=ref.get_count_stations().names, ref_df=ref.get_stations())
