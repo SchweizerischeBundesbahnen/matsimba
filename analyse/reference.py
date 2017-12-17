@@ -13,6 +13,18 @@ class Reference:
         self.path_mikro = path_mikro
         self.path_ea = path_ea
 
+        self.stations = ["BI", "NE", "CF", "SCB", "LOC", "STI"]
+        self.count_stations = ['HAUTERIVE (AR)',
+                               'ST-URSANNE, TUN. TERRI (AR)',
+                               'DEVELIER (AR)',
+                               'WALLISELLEN (AB)',
+                               'ROTHENBURG (AB)',
+                               'VAUMARCUS (AR)',
+                               'ROTHENBRUNNEN S (AB)',
+                               'MATTSTETTEN (AB)',
+                               'ROLLE N (AR)',
+                               'NYON, CRASSIER (AR)']
+
     def get_mzmv_run(self, subpopulation="regular_inAct", is_cnb=False):
         df = pd.read_csv(self.path_mikro, sep=",", dtype={"link_id": str})
         df[SUBPOPULATION] = subpopulation
@@ -26,15 +38,15 @@ class Reference:
         mzmv.data["journeys"] = df
         return mzmv
 
-    def get_stations(self, stops):
+    def get_stations(self):
         ref_ea = pd.read_csv(self.path_ea, sep=";")
         ref_ea[CODE] = ref_ea.stop_id.apply(lambda x: x.split("_")[-1])
 
         ref_ea = ref_ea.groupby(CODE)[["boarding"]].sum()
         ref_ea = ref_ea.rename(columns={"boarding": "FQKal+"})
-        return ref_ea.loc[stops]
+        return ref_ea.loc[self.stops]
 
-    def get_count_stations(self, names):
+    def get_count_stations(self):
         ref_astra = pd.read_csv(self.path_astra, sep=";", dtype={"link_id": str})
         ref_astra.rename(columns={"zaehlstellen_bezeichnung": "name"}, inplace=True)
-        return ref_astra[ref_astra.name.isin(names)]
+        return ref_astra[ref_astra.name.isin(self.count_stations)]
