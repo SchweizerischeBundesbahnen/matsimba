@@ -26,15 +26,15 @@ class Reference:
         mzmv.data["journeys"] = df
         return mzmv
 
-    def get_stations(self):
+    def get_stations(self, stops):
         ref_ea = pd.read_csv(self.path_ea, sep=";")
         ref_ea[CODE] = ref_ea.stop_id.apply(lambda x: x.split("_")[-1])
 
         ref_ea = ref_ea.groupby(CODE)[["boarding"]].sum()
         ref_ea = ref_ea.rename(columns={"boarding": "FQKal+"})
-        return ref_ea
+        return ref_ea[stops]
 
-    def get_count_stations(self):
+    def get_count_stations(self, names):
         ref_astra = pd.read_csv(self.path_astra, sep=";", dtype={"link_id": str})
         ref_astra.rename(columns={"zaehlstellen_bezeichnung": "name"}, inplace=True)
-        return ref_astra
+        return ref_astra[ref_astra.name.isin(names)]
