@@ -243,11 +243,7 @@ def plot_multi(df, cols=2.0, stacked=False, kind="bar", rotate=False, xs_index=N
     #df.sort_index(inplace=True)
 
     def has_label(df, label):
-        try:
-            a = df.loc[label]
-            return True
-        except KeyError:
-            return False
+        return label in df.index
 
     def if_last_move_legend(ax):
         title = ax.title
