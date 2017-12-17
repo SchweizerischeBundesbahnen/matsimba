@@ -86,7 +86,7 @@ class RunsList(list):
         return self._get(analyse.run.Run.calc_nb_legs, **kwargs)
 
     def get_pkm_distr_legs(self, **kwargs):
-        return self._get(analyse.run.Run.calc_dist_distr_legs, xs_index=analyse.run.dis, **kwargs)
+        return self._get(analyse.run.Run.calc_dist_distr_legs, **kwargs)
 
     def get_pkm_distr_trips(self, **kwargs):
         return self._get(analyse.run.Run.calc_dist_distr_trips, **kwargs)
