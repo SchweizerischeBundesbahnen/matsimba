@@ -187,6 +187,7 @@ class Run:
         df = df[df.line.notnull()]
         fq_legs = analyse.skims.filter_legs_to_binnenverkehr_fq_legs(df, stop_ids_perimeter=stop_ids_perimeter,
                                                                      defining_stop_ids=defining_stop_ids)
+        df = self.get_legs()
         df[IS_SIMBA_FQ] = False
         df.loc[df.trip_id.isin(fq_legs.trip_id), IS_SIMBA_FQ] = True
 
