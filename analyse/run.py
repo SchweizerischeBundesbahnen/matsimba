@@ -174,7 +174,7 @@ class Run:
         df[PF] = 1.0
         df[PKM] = df[DISTANCE]
 
-    def prepare(self, stop_ids_perimeter, defining_stop_ids):
+    def prepare(self, stop_ids_perimeter, defining_stop_ids, ref_run):
         self.unload_data()
 
         df = self.get_legs()
@@ -195,6 +195,37 @@ class Run:
         df.loc[df.main_mode == WALK, MAIN_MODE] = WALK_AGGR
 
         self._set_dummy_pf()
+
+        self.merge_link_id_to_name(ref_run.get_count_stations()[["link_id", "name"]])
+        self.journey_has_transfer()
+        self.journey_is_simba()
+        self.journey_has_simba_transfer()
+
+    def journey_has_simba_transfer(self):
+        df = self.get_legs()
+        df = df[(df["mode"] == "pt") & (df.is_simba_fq)].groupby(["journey_id"])[["trip_id"]].count()
+        j_ids = df[df.trip_id > 1].index
+
+        df = self.get_trips()
+        df["hasSIMBATransfer"] = False
+        df.loc[df.journey_id.isin(j_ids), "hasSIMBATransfer"] = True
+
+    def journey_has_transfer(self):
+        df = self.get_legs()
+        df = df[(df["mode"] == "pt")].groupby(["journey_id"])[["trip_id"]].count()
+        j_ids = df[df.trip_id > 1].index
+
+        df = self.get_trips()
+        df["hasTransfer"] = False
+        df.loc[df.journey_id.isin(j_ids), "hasTransfer"] = True
+
+    def journey_is_simba(self):
+        df = self.get_legs()
+        j_ids = df[df.is_simba_fq].journey_id.unique()
+
+        df = self.get_trips()
+        df["is_simba_fq"] = False
+        df.loc[df.journey_id.isin(j_ids), "is_simba_fq"] = True
 
     def merge_trips_persons(self):
         if not self.trip_persons_merged:
