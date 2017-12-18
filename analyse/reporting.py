@@ -11,8 +11,8 @@ class SheetData:
         self.name = name
 
 
-def make_report(runs, filename, ref=None):
-    datas = get_datas(runs=runs, ref=ref)
+def make_report(runs, filename, ref=None, is_cnb=True):
+    datas = get_datas(runs=runs, ref=ref, is_cnb=is_cnb)
     _make_report(datas=datas, filename=filename)
 
 
