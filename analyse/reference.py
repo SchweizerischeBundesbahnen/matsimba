@@ -50,3 +50,7 @@ class Reference:
         ref_astra = pd.read_csv(self.path_astra, sep=";", dtype={"link_id": str})
         ref_astra.rename(columns={"zaehlstellen_bezeichnung": "name"}, inplace=True)
         return ref_astra[ref_astra.name.isin(self.count_stations)]
+
+    def get_count_stations_volume(self):
+        df = self.get_count_stations().groupby("name").sum()[["volume"]]
+        return f.rename(columns={"volume": "fqkal+"})
