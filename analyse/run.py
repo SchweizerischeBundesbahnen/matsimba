@@ -174,8 +174,11 @@ class Run:
         df[PF] = 1.0
         df[PKM] = df[DISTANCE]
 
-    def prepare(self, stop_ids_perimeter, defining_stop_ids, ref_run):
+    def prepare(self, stop_ids_perimeter, defining_stop_ids, ref_run, persons=None):
         self.unload_data()
+
+        if persons is not None:
+            self.data["persons"] = persons
 
         df = self.get_trips()
         df.loc[df.main_mode == TRANSIT_WALK, MAIN_MODE] = WALK_AGGR
