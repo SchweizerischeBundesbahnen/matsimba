@@ -174,10 +174,12 @@ class Run:
         df[PF] = 1.0
         df[PKM] = df[DISTANCE]
 
-    def prepare(self, stop_ids_perimeter, defining_stop_ids, ref_run, persons=None):
+
+    def prepare(self, stop_ids_perimeter=None, defining_stop_ids=None, ref_run=None, persons=None):
         self.unload_data()
 
         if persons is not None:
+            logging.info("Using a special dataframe for persons")
             self.data["persons"] = persons
 
         df = self.get_trips()
@@ -186,22 +188,28 @@ class Run:
 
         self._set_dummy_pf()
 
-        df = self.get_legs()
-        df = df[df.line.notnull()]
-        fq_legs = analyse.skims.filter_legs_to_binnenverkehr_fq_legs(df, stop_ids_perimeter=stop_ids_perimeter,
+        if stop_ids_perimeter is not None and defining_stop_ids is not None:
+            df = self.get_legs()
+            df = df[df.line.notnull()]
+            fq_legs = analyse.skims.filter_legs_to_binnenverkehr_fq_legs(df, stop_ids_perimeter=stop_ids_perimeter,
                                                                      defining_stop_ids=defining_stop_ids)
-        df = self.get_legs()
-        df[IS_SIMBA_FQ] = False
-        df.loc[df.trip_id.isin(fq_legs.trip_id), IS_SIMBA_FQ] = True
+            df = self.get_legs()
+            df[IS_SIMBA_FQ] = False
+            df.loc[df.trip_id.isin(fq_legs.trip_id), IS_SIMBA_FQ] = True
 
-        self.journey_has_transfer()
-        self.journey_is_simba()
-        self.journey_has_simba_transfer()
+            self.journey_has_transfer()
+            self.journey_is_simba()
+            self.journey_has_simba_transfer()
+        else:
+            logging.info("Without stop_ids_perimeter oder defining_stop_ids, I cannot accurately campute is_simba_fq")
 
         df = self.merge_trips_persons()
         df = self.merge_legs_persons()
 
-        self.merge_link_id_to_name(ref_run.get_count_stations()[["link_id", "name"]])
+        if ref_run is not None:
+            self.merge_link_id_to_name(ref_run.get_count_stations()[["link_id", "name"]])
+        else:
+            logging.info("Without ref_run, I cannot merge the link_ids to the names")
 
     def journey_has_simba_transfer(self):
         df = self.get_legs()
