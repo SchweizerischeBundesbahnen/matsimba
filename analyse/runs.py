@@ -128,6 +128,6 @@ class RunsList(list):
             raise ValueError("Index size to large to be plotted")
         return self._plot(df=df, title="Fahrzeuge", **kwargs)
 
-    def prepare(self, stop_ids_perimeter, defining_stop_ids):
+    def prepare(self, **kwargs):
         for run in self:
-            run.prepare(stop_ids_perimeter=stop_ids_perimeter, defining_stop_ids=defining_stop_ids)
+            run.prepare(**kwargs)
