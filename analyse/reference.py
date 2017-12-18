@@ -44,7 +44,7 @@ class Reference:
 
         ref_ea = ref_ea.groupby(CODE)[["boarding"]].sum()
         ref_ea = ref_ea.rename(columns={"boarding": "FQKal+"})
-        return ref_ea.loc[self.stops]
+        return ref_ea.loc[self.stations]
 
     def get_count_stations(self):
         ref_astra = pd.read_csv(self.path_astra, sep=";", dtype={"link_id": str})
