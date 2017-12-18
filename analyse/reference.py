@@ -53,4 +53,4 @@ class Reference:
 
     def get_count_stations_volume(self):
         df = self.get_count_stations().groupby("name").sum()[["volume"]]
-        return f.rename(columns={"volume": "fqkal+"})
+        return df.rename(columns={"volume": "fqkal+"})
