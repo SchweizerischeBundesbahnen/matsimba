@@ -124,8 +124,6 @@ class RunsList(list):
 
     def plot_vehicles(self, **kwargs):
         df = self.get_vehicles(**kwargs)
-        if df.index.size > 100:
-            raise ValueError("Index size to large to be plotted")
         return self._plot(df=df, title="Fahrzeuge", **kwargs)
 
     def prepare(self, **kwargs):

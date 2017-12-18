@@ -13,17 +13,27 @@ class Reference:
         self.path_mikro = path_mikro
         self.path_ea = path_ea
 
-        self.stations = ["BI", "NE", "CF", "SCB", "LOC", "STI"]
-        self.count_stations = ['HAUTERIVE (AR)',
-                               'ST-URSANNE, TUN. TERRI (AR)',
-                               'DEVELIER (AR)',
-                               'WALLISELLEN (AB)',
-                               'ROTHENBURG (AB)',
-                               'VAUMARCUS (AR)',
-                               'ROTHENBRUNNEN S (AB)',
-                               'MATTSTETTEN (AB)',
-                               'ROLLE N (AR)',
-                               'NYON, CRASSIER (AR)']
+        self.stations = ["ZUE", "ZMUS", "BN", "W", "ZOER", "BS", "ZSTH", "GE", "LS", "SIO"]
+        self.count_stations = ['WALLISELLEN (AB)',
+                               'MUTTENZ, HARD (AB)',
+                               'BADEN, BAREGGTUNNEL (AB)',
+                               'NEUENHOF (AB) - AG1402',
+                               'WUERENLOS (AB) - AG1401',
+                               'CRISSIER (AR)',
+                               'BERN, FELSENAUVIADUKT (AB)',
+                               'RENENS (AR)',
+                               'UMF. ZUERICH N, AFFOLTERN (AB)',
+                               'LUZERN, REUSSPORTTUNNEL (AB)',
+                               'PREVERENGES (AR)',
+                               'CONT. DE LAUSANNE (AR)',
+                               'GUNZGEN (AB)',
+                               'WINTERTHUR TOESS (AB) - ZH105',
+                               'CHAM N (AB)',
+                               'LAUSANNE BLECHERETTE (AR)',
+                               'NIEDERBIPP (AB)',
+                               'DEITINGEN (AB)',
+                               'URDORF (AB)',
+                               'EMMENBRUECKE, GRUEBLISCH. (AB)']
 
     def get_mzmv_run(self, subpopulation="regular_inAct", is_cnb=False):
         df = pd.read_csv(self.path_mikro, sep=",", dtype={"link_id": str})

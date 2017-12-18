@@ -174,8 +174,7 @@ class Run:
         df[PF] = 1.0
         df[PKM] = df[DISTANCE]
 
-
-    def prepare(self, stop_ids_perimeter=None, defining_stop_ids=None, ref_run=None, persons=None):
+    def prepare(self, stop_ids_perimeter=None, defining_stop_ids=None, ref=None, persons=None):
         self.unload_data()
 
         if persons is not None:
@@ -192,7 +191,7 @@ class Run:
             df = self.get_legs()
             df = df[df.line.notnull()]
             fq_legs = analyse.skims.filter_legs_to_binnenverkehr_fq_legs(df, stop_ids_perimeter=stop_ids_perimeter,
-                                                                     defining_stop_ids=defining_stop_ids)
+                                                                         defining_stop_ids=defining_stop_ids)
             df = self.get_legs()
             df[IS_SIMBA_FQ] = False
             df.loc[df.trip_id.isin(fq_legs.trip_id), IS_SIMBA_FQ] = True
@@ -206,8 +205,8 @@ class Run:
         df = self.merge_trips_persons()
         df = self.merge_legs_persons()
 
-        if ref_run is not None:
-            self.merge_link_id_to_name(ref_run.get_count_stations()[["link_id", "name"]])
+        if ref is not None:
+            self.merge_link_id_to_name(ref.get_count_stations()[["link_id", "name"]])
         else:
             logging.info("Without ref_run, I cannot merge the link_ids to the names")
 
