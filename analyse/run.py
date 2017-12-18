@@ -177,33 +177,31 @@ class Run:
     def prepare(self, stop_ids_perimeter, defining_stop_ids, ref_run):
         self.unload_data()
 
-        df = self.get_legs()
-
-        df = df[df.line.notnull()]
-        fq_legs = analyse.skims.filter_legs_to_binnenverkehr_fq_legs(df, stop_ids_perimeter=stop_ids_perimeter,
-                                                                     defining_stop_ids=defining_stop_ids)
-
-        df[IS_SIMBA_FQ] = False
-        df.loc[df.trip_id.isin(fq_legs.trip_id), IS_SIMBA_FQ] = True
-
-        df = self.merge_trips_persons()
-        df = self.merge_legs_persons()
-
         df = self.get_trips()
-
         df.loc[df.main_mode == TRANSIT_WALK, MAIN_MODE] = WALK_AGGR
         df.loc[df.main_mode == WALK, MAIN_MODE] = WALK_AGGR
 
         self._set_dummy_pf()
 
-        self.merge_link_id_to_name(ref_run.get_count_stations()[["link_id", "name"]])
+        df = self.get_legs()
+        df = df[df.line.notnull()]
+        fq_legs = analyse.skims.filter_legs_to_binnenverkehr_fq_legs(df, stop_ids_perimeter=stop_ids_perimeter,
+                                                                     defining_stop_ids=defining_stop_ids)
+        df[IS_SIMBA_FQ] = False
+        df.loc[df.trip_id.isin(fq_legs.trip_id), IS_SIMBA_FQ] = True
+
         self.journey_has_transfer()
         self.journey_is_simba()
         self.journey_has_simba_transfer()
 
+        df = self.merge_trips_persons()
+        df = self.merge_legs_persons()
+
+        self.merge_link_id_to_name(ref_run.get_count_stations()[["link_id", "name"]])
+
     def journey_has_simba_transfer(self):
         df = self.get_legs()
-        df = df[(df["mode"] == "pt") & (df.is_simba_fq)].groupby(["journey_id"])[["trip_id"]].count()
+        df = df[(df["mode"] == "pt") & (df[IS_SIMBA_FQ])].groupby(["journey_id"])[["trip_id"]].count()
         j_ids = df[df.trip_id > 1].index
 
         df = self.get_trips()
@@ -221,11 +219,11 @@ class Run:
 
     def journey_is_simba(self):
         df = self.get_legs()
-        j_ids = df[df.is_simba_fq].journey_id.unique()
+        j_ids = df[df[IS_SIMBA_FQ]].journey_id.unique()
 
         df = self.get_trips()
-        df["is_simba_fq"] = False
-        df.loc[df.journey_id.isin(j_ids), "is_simba_fq"] = True
+        df[IS_SIMBA_FQ] = False
+        df.loc[df.journey_id.isin(j_ids), IS_SIMBA_FQ] = True
 
     def merge_trips_persons(self):
         if not self.trip_persons_merged:
