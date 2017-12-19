@@ -62,5 +62,5 @@ class Reference:
         return ref_astra[ref_astra.name.isin(self.count_stations)]
 
     def get_count_stations_volume(self):
-        df = self.get_count_stations().groupby("name").sum()[["volume"]]
+        df = self.get_count_stations().groupby("name").sum()[["volume"]]/2.0
         return df.rename(columns={"volume": "ASTRA"})
