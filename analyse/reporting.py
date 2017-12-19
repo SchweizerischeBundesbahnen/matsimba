@@ -90,7 +90,7 @@ def get_datas(runs, ref, is_cnb=False, subpopulation="regular"):
     datas.append(SheetData(df, fig, "Einsteiger"))
 
     df, fig = runs.plot_einsteiger(by=CODE, codes=ref.get_stations().index.tolist(),
-                                   foreach=[SUBPOPULATION, CARAVAIL, SEASON_TICKET])
+                                   foreach=[SUBPOPULATION, SEASON_TICKET])
     datas.append(SheetData(df, fig, "Einsteiger 2"))
 
     df, fig = runs.plot_vehicles(by="name", names=ref.get_count_stations().name.unique().tolist(),
