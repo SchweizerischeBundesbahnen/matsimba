@@ -20,17 +20,11 @@ required_attributes_visum = {"LINNAME", "$OEVTEILWEG:QBEZNR", "ZBEZNR", "WEGIND"
 
 
 def is_simba_line(line_id):
-    # a hack: we assume that simba-lines are coded as 041-A-01102_GEAP-BI-ZUE-SG_Bas120_[H]
-    splitted = line_id.split("_")
-    if len(splitted) <= 1:
-        return False
-    else:
-        first = splitted[0]
-        splitted_againg = first.split("-")
-        if len(splitted_againg) == 3:
+    #TODO: should directly use 01_Datenherkunft of route in routeAttributes.xml
+    if line_id.split("_")[0] == "S2016":
             return True
-        else:
-            return False
+    else:
+        return False
 
 
 def test_columns_of_legs(df_legs, required_attr, from_simba_visum=False):
@@ -51,10 +45,8 @@ def prepare_oevteilwege_visum(df_oevteilwege_input):
     df_oevteilwege["journey_id"] = df_oevteilwege["$OEVTEILWEG:QBEZNR"].map(str) + "_" + \
                                    df_oevteilwege_input["ZBEZNR"].map(str) + "_" + \
                                    df_oevteilwege_input["WEGIND"].map(str)
-    df_oevteilwege["boarding_stop"] = df_oevteilwege["VONHPUNKTNR"].map(int).map(str) + "_" + \
-                                      df_oevteilwege_input[FPFE_START_HP_CODE]
-    df_oevteilwege["alighting_stop"] = df_oevteilwege["NACHHPUNKTNR"].map(int).map(str) + "_" + \
-                                       df_oevteilwege_input[FPFE_END_HP_CODE]
+    df_oevteilwege["boarding_stop"] = df_oevteilwege["VONHPUNKTNR"].map(int)
+    df_oevteilwege["alighting_stop"] = df_oevteilwege["NACHHPUNKTNR"].map(int)
     df_oevteilwege["start_time"] = df_oevteilwege["ABFAHRT"].map(hhmmss_to_seconds)
     df_oevteilwege["end_time"] = df_oevteilwege["ANKUNFT"].map(hhmmss_to_seconds)
     new_cols = ["journey_id", "TWEGIND", "boarding_stop", "alighting_stop", "PFAHRT", "LINNAME", "start_time",
@@ -183,9 +175,9 @@ def get_station_to_station_skims(df_legs, factor=1.0, from_simba_visum=False):
     skim_per_station_to_station = skim_per_journey[
         ["first_stop", "last_stop", "PFAHRT", "weighted_bz", "weighted_uh", "weighted_distance"]].groupby(
         ["first_stop", "last_stop"]).sum()
-    skim_per_station_to_station["bz"] = skim_per_station_to_station["weighted_bz"] / \
+    skim_per_station_to_station["bz"] = (skim_per_station_to_station["weighted_bz"] / \
                                         skim_per_station_to_station[
-                                            "PFAHRT"]
+                                            "PFAHRT"]).apply(float)
     skim_per_station_to_station["bz_hhmmss"] = skim_per_station_to_station["bz"].apply(seconds_to_hhmmss)
     skim_per_station_to_station["uh"] = skim_per_station_to_station["weighted_uh"] / \
                                         skim_per_station_to_station[

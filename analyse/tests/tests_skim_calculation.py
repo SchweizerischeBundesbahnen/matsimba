@@ -28,7 +28,7 @@ class MyTestCase(unittest.TestCase):
 
         skims_visum = get_station_to_station_skims(fq_legs_visum, from_simba_visum=True)
         skims_bv_nese = skims_visum[
-            (skims_visum["first_stop"] == "1422_BV") & (skims_visum["last_stop"] == "2346_NESE")]
+            (skims_visum["first_stop"] == 1422) & (skims_visum["last_stop"] == 2346)]
 
         self.assertEquals(skims_bv_nese["bz_hhmmss"].iloc[0], "00:12:04", msg="trip over midnight!")
         self.assertAlmostEqual(skims_bv_nese["uh"].iloc[0], 0.048857476, places=5, msg="umsteigehäufigkeit")
@@ -52,7 +52,7 @@ class MyTestCase(unittest.TestCase):
 
         skims_matsim = get_station_to_station_skims(fq_legs_matsim, factor=10.0)
         skims_bi_ins = skims_matsim[
-            (skims_matsim["first_stop"] == "1279_BI") & (skims_matsim["last_stop"] == "1984_INS")]
+            (skims_matsim["first_stop"] == 1279) & (skims_matsim["last_stop"] == 1984)]
 
         self.assertEquals(skims_bi_ins["bz_hhmmss"].iloc[0], "00:32:02", msg="trip over midnight!")
         self.assertAlmostEqual(skims_bi_ins["uh"].iloc[0], 1.0, places=5, msg="umsteigehäufigkeit")
