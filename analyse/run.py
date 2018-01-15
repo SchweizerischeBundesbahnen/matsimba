@@ -8,6 +8,7 @@ import time
 import numpy as np
 import analyse.skims
 from variable import *
+import gc
 
 _cache = {}
 
@@ -343,11 +344,12 @@ class Run:
 
         df[CODE] = df[BOARDING_STOP].apply(make_code)
 
-        df = self._do(df, value=leg_id, aggfunc="count", **kwargs)
+        df = self._do(df, value=PF, aggfunc="sum", **kwargs)
 
         if codes is not None:
             df = df.loc[codes]
 
+        gc.collect()
         return df
 
     @cache
