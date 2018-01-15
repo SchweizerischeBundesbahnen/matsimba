@@ -75,6 +75,18 @@ class MyTestCase(unittest.TestCase):
         self.assertAlmostEqual(skims_bi_ins["distance"].iloc[0], 42.345000, places=5, msg="distanz")
         self.assertAlmostEqual(skims_bi_ins["PFAHRT"].iloc[0], 30.0, places=5, msg="pf")
 
+    def test_full_cnb_matsim_trips(self):
+
+        path_data = os.path.join("..", "..", "data_in", "test")
+        path_trips_matsim = os.path.join(path_data, "matsim_trips_full_cnb.txt")
+        path_att_file = os.path.join(path_data, "20180109_PerimeterSimbaBahn_Attribute.att")
+
+        df_trips = pd.read_csv(path_trips_matsim, sep="\t")
+        stop_ids_cnb = read_stops_in_perimeter(path_att_file, "ISTSIMBABAHNCNBPERIMETER")
+        stops_ids_fq_relevant = read_fqrelevant_stops(path_att_file)
+        fq_legs_matsim = filter_legs_to_binnenverkehr_fq_legs(df_trips, stop_ids_cnb, stops_ids_fq_relevant)
+        self.assertEquals(len(fq_legs_matsim) > 0, True, msg="non empty")
+
 
 if __name__ == '__main__':
     unittest.main()
