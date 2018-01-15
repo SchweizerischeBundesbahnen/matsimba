@@ -2,6 +2,7 @@ import pandas as pd
 import io
 from PIL import Image
 from variable import *
+import logging
 
 
 class SheetData:
@@ -11,8 +12,8 @@ class SheetData:
         self.name = name
 
 
-def make_report(runs, filename, ref=None):
-    datas = get_datas(runs=runs, ref=ref)
+def make_report(runs, filename, ref=None, stop_attributes=None):
+    datas = get_datas(runs=runs, ref=ref, stop_attributes=stop_attributes)
     _make_report(datas=datas, filename=filename)
 
 
@@ -45,7 +46,7 @@ def _make_report(datas, filename):
         buf.close()
 
 
-def get_datas(runs, ref):
+def get_datas(runs, ref, stop_attributes):
     datas = []
 
     mzmv = ref.mzmv = ref.get_mzmv_run()
@@ -77,20 +78,20 @@ def get_datas(runs, ref):
     df, fig = runs.plot_pkm_distr_trips(foreach=[MAIN_MODE], percent=True, rotate=True, ref_run=mzmv)
     datas.append(SheetData(df, fig, "pkm distribution"))
 
-    df, fig = runs.plot_pkm_distr_trips(foreach=[MAIN_MODE, SUBPOPULATION, SEASON_TICKET], percent=True,
+    df, fig = runs.plot_pkm_distr_trips(foreach=[SUBPOPULATION, MAIN_MODE, SEASON_TICKET], percent=True,
                                         rotate=True, ref_run=mzmv, inverse_percent_axis=True,
-                                        percent_level=["subpopulation"])
+                                        percent_level=[SUBPOPULATION, MAIN_MODE])
     datas.append(SheetData(df, fig, "pkm distribution 2"))
 
     df, fig = runs.plot_pkm_distr_legs(foreach=[IS_SIMBA_FQ], percent=True, inverse_percent_axis=True,
                                        rotate=True)
     datas.append(SheetData(df, fig, "simba_legs"))
 
-    df, fig = runs.plot_einsteiger(by=CODE, codes=ref.get_stations().index.tolist(), ref_df=ref.get_stations())
+    df, fig = runs.plot_einsteiger(by=CODE, codes=ref.stations, ref_run=ref.get_pt_run(), stop_attributes=stop_attributes)
     datas.append(SheetData(df, fig, "Einsteiger"))
 
-    df, fig = runs.plot_einsteiger(by=CODE, codes=ref.get_stations().index.tolist(),
-                                   foreach=[SUBPOPULATION, SEASON_TICKET])
+    df, fig = runs.plot_einsteiger(by=CODE, codes=ref.stations,
+                                   foreach=[SUBPOPULATION, SEASON_TICKET], stop_attributes=stop_attributes)
     datas.append(SheetData(df, fig, "Einsteiger 2"))
 
     df, fig = runs.plot_vehicles(by="name", names=ref.get_count_stations().name.unique().tolist(),
