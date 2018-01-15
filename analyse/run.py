@@ -371,6 +371,17 @@ class Run:
     def create_distance_class_for_trips(self, **kwargs):
         self._create_distance_class(self.get_trips(), **kwargs)
 
+    @staticmethod
+    def _create_starttime_class(df, **kwargs):
+        return #df[]
+
+    def create_starttime_class_for_legs(self, **kwargs):
+        self._create_starttime_class(self.get_legs(), **kwargs)
+
+    def create_starttime_class_for_trips(self, **kwargs):
+        self._create_starttime_class(self.get_trips(), **kwargs)
+
+
 
 distance_classes = np.array([-1, 0, 2, 4, 6, 8, 10, 15, 20, 25, 30, 40, 50, 100, 150, 200, 250, 300, np.inf]) * 1000.0
 distance_labels = ["0", "0-2", "2-4", "4-6", "6-8", "8-10", "10-15", "15-20", "20-25", "25-30", "30-40", "40-50",
