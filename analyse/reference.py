@@ -8,10 +8,15 @@ path_count_ea = r"/opt/sbb/hdd/u222223/MATSim/simulations/CH/zaehldaten/stop_cou
 
 
 class Reference:
-    def __init__(self, path_astra, path_mikro, path_ea):
+    def __init__(self, path_astra, path_mikro, path_pt_legs, is_cnb=True):
+        self.is_cnb = is_cnb
+        self.subpopulation = "regular"
+        if is_cnb:
+            self.subpopulation = "regular_inAct"
+
         self.path_astra = path_astra
         self.path_mikro = path_mikro
-        self.path_ea = path_ea
+        self.path_pt_legs = path_pt_legs
 
         self.stations = ["ZUE", "ZMUS", "BN", "W", "ZOER", "BS", "ZSTH", "GE", "LS", "SIO"]
         self.count_stations = ['WALLISELLEN (AB)',
@@ -35,14 +40,14 @@ class Reference:
                                'URDORF (AB)',
                                'EMMENBRUECKE, GRUEBLISCH. (AB)']
 
-    def get_mzmv_run(self, subpopulation="regular_inAct", is_cnb=False):
+    def get_mzmv_run(self):
         df = pd.read_csv(self.path_mikro, sep=",", dtype={"link_id": str})
-        df[SUBPOPULATION] = subpopulation
+        df[SUBPOPULATION] = self.subpopulation
         df = df.rename(columns={u'Weglaenge': "distance"})
         df = df.rename(columns={u'Pkm': "PKM"})
         df.distance = df.distance * 1000.0
 
-        if is_cnb:
+        if self.is_cnb:
             df = pd.DataFrame(df[df.istCNB])
         mzmv = analyse.run.Run(name="mzmv")
         mzmv.data["journeys"] = df
