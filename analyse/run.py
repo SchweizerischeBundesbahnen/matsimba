@@ -270,7 +270,14 @@ class Run:
         def make_percent(df):
             if inverse_percent_axis:
                 logging.warn("Be carefull with inverse_percent_axis")
-                df = df.divide(df.sum(axis=1, level=percent_level), axis=0)
+                not_percent_col = [c for c in df.columns.names if c not in percent_level]
+                df = df.stack(percent_level)
+
+                _df = df.sum(axis=1)
+                df = df.divide(_df, axis=0)
+
+                df = df.unstack(percent_level)
+                df = df.swaplevel(0, 1, axis=1)
             else:
                 df = df.divide(df.sum(level=percent_level))
             return df
