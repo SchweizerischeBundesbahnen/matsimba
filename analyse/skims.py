@@ -45,8 +45,8 @@ def prepare_oevteilwege_visum(df_oevteilwege_input):
     df_oevteilwege["journey_id"] = df_oevteilwege["$OEVTEILWEG:QBEZNR"].map(str) + "_" + \
                                    df_oevteilwege_input["ZBEZNR"].map(str) + "_" + \
                                    df_oevteilwege_input["WEGIND"].map(str)
-    df_oevteilwege["boarding_stop"] = df_oevteilwege["VONHPUNKTNR"].map(int)
-    df_oevteilwege["alighting_stop"] = df_oevteilwege["NACHHPUNKTNR"].map(int)
+    df_oevteilwege["boarding_stop"] = df_oevteilwege["VONHPUNKTNR"].map(int).map(str)
+    df_oevteilwege["alighting_stop"] = df_oevteilwege["NACHHPUNKTNR"].map(int).map(str)
     df_oevteilwege["start_time"] = df_oevteilwege["ABFAHRT"].map(hhmmss_to_seconds)
     df_oevteilwege["end_time"] = df_oevteilwege["ANKUNFT"].map(hhmmss_to_seconds)
     new_cols = ["journey_id", "TWEGIND", "boarding_stop", "alighting_stop", "PFAHRT", "LINNAME", "start_time",
@@ -55,6 +55,12 @@ def prepare_oevteilwege_visum(df_oevteilwege_input):
     df_oevteilwege.columns = ["journey_id", "TWEGIND", "boarding_stop", "alighting_stop", "PFAHRT",
                                     "line", "start_time", "end_time", "distance"]
     return df_oevteilwege
+
+
+def prepare_matsim_trips(df_matsim_trips):
+    df_matsim_trips["boarding_stop"] = df_matsim_trips["boarding_stop"].map(str)
+    df_matsim_trips["alighting_stop"] = df_matsim_trips["alighting_stop"].map(str)
+    return df_matsim_trips
 
 
 # noinspection PyShadowingNames
@@ -189,3 +195,24 @@ def get_station_to_station_skims(df_legs, factor=1.0, from_simba_visum=False):
     skim_per_station_to_station = skim_per_station_to_station.sort("PFAHRT", ascending=False)
     cols_out = ["first_stop", "last_stop", "PFAHRT", "bz", "bz_hhmmss", "uh", "distance"]
     return skim_per_station_to_station[cols_out]
+
+
+def read_stops_in_perimeter(path_to_visum_att_file, col_name):
+    stops = pd.read_csv(path_to_visum_att_file, sep="\t", skiprows=12, encoding="cp1252").reset_index()
+    return {str(x) for x in set(stops[stops[col_name] == 1]["$HALTEPUNKT:NR"])}
+
+
+def read_fqrelevant_stops(path_to_visum_att_file):
+    stops = pd.read_csv(path_to_visum_att_file, sep="\t", skiprows=12, encoding="cp1252").reset_index()
+    return {str(x) for x in set(stops[stops["FQRELEVANTFUERMATSIMSIMBABAHNABGLEICH"] == 1]["$HALTEPUNKT:NR"])}
+
+
+def read_oev_teilwege_visum(path_oev_teilwege_visum):
+    df_oevteilwege_visum = pd.read_csv(path_oev_teilwege_visum, sep="\t", skiprows=12, encoding='cp1252')
+    return prepare_oevteilwege_visum(df_oevteilwege_visum)
+
+
+def read_matsim_trips(path_matsim_trips):
+    df_trips_matsim = pd.read_csv(path_matsim_trips, sep="\t")
+    return prepare_matsim_trips(df_trips_matsim)
+
