@@ -11,8 +11,8 @@ class SheetData:
         self.name = name
 
 
-def make_report(runs, filename, ref=None, is_cnb=True, subpopulation="regular"):
-    datas = get_datas(runs=runs, ref=ref, is_cnb=is_cnb, subpopulation=subpopulation)
+def make_report(runs, filename, ref=None):
+    datas = get_datas(runs=runs, ref=ref)
     _make_report(datas=datas, filename=filename)
 
 
@@ -45,10 +45,10 @@ def _make_report(datas, filename):
         buf.close()
 
 
-def get_datas(runs, ref, is_cnb=False, subpopulation="regular"):
+def get_datas(runs, ref):
     datas = []
 
-    mzmv = ref.mzmv = ref.get_mzmv_run(is_cnb=is_cnb, subpopulation=subpopulation)
+    mzmv = ref.mzmv = ref.get_mzmv_run()
 
     df, ax = runs.plot_nb_trips(by=MAIN_MODE, foreach=SUBPOPULATION, ref_run=mzmv, percent=True)
     datas.append(SheetData(df, ax, "#trips 1"))
