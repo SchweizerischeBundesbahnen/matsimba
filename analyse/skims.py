@@ -19,7 +19,21 @@ required_attributes_visum = {"LINNAME", "$OEVTEILWEG:QBEZNR", "ZBEZNR", "WEGIND"
                              "TWEGIND", "PFAHRT", "WEITE"}
 
 
-def is_simba_line(line_id):
+def is_simba_line_nettype_cnb1p3(line_id):
+    # a hack: we assume that simba-lines are coded as 041-A-01102_GEAP-BI-ZUE-SG_Bas120_[H]
+    splitted = line_id.split("_")
+    if len(splitted) <= 1:
+        return False
+    else:
+        first = splitted[0]
+        splitted_againg = first.split("-")
+        if len(splitted_againg) == 3:
+            return True
+        else:
+            return False
+
+
+def is_simba_line_nettype_npvm(line_id):
     #TODO: should directly use 01_Datenherkunft of route in routeAttributes.xml
     if line_id.split("_")[0] == "S2016":
             return True
@@ -37,7 +51,7 @@ def test_columns_of_legs(df_legs, required_attr, from_simba_visum=False):
                 "following columns in input-dataframe are required: {}".format(list(missing_attributes)))
 
 
-def prepare_oevteilwege_visum(df_oevteilwege_input):
+def prepare_oevteilwege_visum(df_oevteilwege_input, nettype="nettype_npvm"):
     """renames and recalculates the columns of oevteilwege from visum such that the resulting data-frame
     has the same structure as a leg-dataframe from matsim"""
     test_columns_of_legs(df_oevteilwege_input, required_attributes_visum)
@@ -45,8 +59,16 @@ def prepare_oevteilwege_visum(df_oevteilwege_input):
     df_oevteilwege["journey_id"] = df_oevteilwege["$OEVTEILWEG:QBEZNR"].map(str) + "_" + \
                                    df_oevteilwege_input["ZBEZNR"].map(str) + "_" + \
                                    df_oevteilwege_input["WEGIND"].map(str)
-    df_oevteilwege["boarding_stop"] = df_oevteilwege["VONHPUNKTNR"].map(int).map(str)
-    df_oevteilwege["alighting_stop"] = df_oevteilwege["NACHHPUNKTNR"].map(int).map(str)
+    if nettype == "nettype_npvm":
+        df_oevteilwege["boarding_stop"] = df_oevteilwege["VONHPUNKTNR"].map(int).map(str)
+        df_oevteilwege["alighting_stop"] = df_oevteilwege["NACHHPUNKTNR"].map(int).map(str)
+    elif nettype == "nettype_cnb1p3":
+        df_oevteilwege["boarding_stop"] = df_oevteilwege["VONHPUNKTNR"].map(int).map(str) + "_" + \
+                                          df_oevteilwege_input[FPFE_START_HP_CODE]
+        df_oevteilwege["alighting_stop"] = df_oevteilwege["NACHHPUNKTNR"].map(int).map(str) + "_" + \
+                                           df_oevteilwege_input[FPFE_END_HP_CODE]
+    else:
+        raise Exception("not a valid nettyp: {}".format(nettype))
     df_oevteilwege["start_time"] = df_oevteilwege["ABFAHRT"].map(hhmmss_to_seconds)
     df_oevteilwege["end_time"] = df_oevteilwege["ANKUNFT"].map(hhmmss_to_seconds)
     new_cols = ["journey_id", "TWEGIND", "boarding_stop", "alighting_stop", "PFAHRT", "LINNAME", "start_time",
@@ -116,7 +138,8 @@ def filter_to_binnenverkehr(df_legs, stops_in_perimeter, from_simba_visum=False)
     if len(df_legs_merged) != len(df_legs):
         raise ValueError(
             "nb of legs changed. before: {}. after: {}".format(len(df_legs), len(df_legs_merged)))
-    return df_legs_merged[(df_legs_merged.start_in_cnb & df_legs_merged.end_in_cnb)]
+    print "hier: {}".format(len(df_legs_merged[(df_legs_merged.start_in_cnb) & (df_legs_merged.end_in_cnb)]))
+    return df_legs_merged[(df_legs_merged.start_in_cnb) & (df_legs_merged.end_in_cnb)]
 
 
 def filter_to_journeys_with_at_least_one_leg_in_defining_stops(df_legs, defining_stop_ids):
@@ -133,7 +156,13 @@ def filter_to_journeys_with_at_least_one_leg_in_defining_stops(df_legs, defining
 
 
 def filter_legs_to_binnenverkehr_fq_legs(df_legs, stop_ids_perimeter, defining_stop_ids,
-                                         from_simba_visum=False):
+                                         from_simba_visum=False, nettype = "nettype_npvm"):
+    if nettype == "nettype_npvm":
+        is_simba_line = is_simba_line_nettype_npvm
+    elif nettype == "nettype_cnb1p3":
+        is_simba_line = is_simba_line_nettype_cnb1p3
+    else:
+        raise Exception("not a valid nettype: {}".format(nettype))
     df_legs_simba = filter_to_simba_legs(df_legs, is_simba_line, from_simba_visum=from_simba_visum)
     df_legs_simba_binnenverkehr = filter_to_binnenverkehr(df_legs_simba, stop_ids_perimeter,
                                                           from_simba_visum=from_simba_visum)
@@ -202,9 +231,10 @@ def read_stops_in_perimeter(path_to_visum_att_file, col_name):
     return {str(x) for x in set(stops[stops[col_name] == 1]["$HALTEPUNKT:NR"])}
 
 
-def read_fqrelevant_stops(path_to_visum_att_file):
+def read_fqrelevant_stops_in_perimeter(path_to_visum_att_file, stops_in_perimeter):
     stops = pd.read_csv(path_to_visum_att_file, sep="\t", skiprows=12, encoding="cp1252").reset_index()
-    return {str(x) for x in set(stops[stops["FQRELEVANTFUERMATSIMSIMBABAHNABGLEICH"] == 1]["$HALTEPUNKT:NR"])}
+    fq_relevant_stops = {str(x) for x in set(stops[stops["FQRELEVANTFUERMATSIMSIMBABAHNABGLEICH"] == 1]["$HALTEPUNKT:NR"])}
+    return fq_relevant_stops.intersection(stops_in_perimeter)
 
 
 def read_oev_teilwege_visum(path_oev_teilwege_visum):

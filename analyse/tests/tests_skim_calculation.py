@@ -6,12 +6,11 @@ import unittest
 import pandas as pd
 
 from analyse.skims import filter_legs_to_binnenverkehr_fq_legs, prepare_oevteilwege_visum, \
-    get_station_to_station_skims, read_stops_in_perimeter, read_fqrelevant_stops, read_oev_teilwege_visum, \
+    get_station_to_station_skims, read_stops_in_perimeter, read_fqrelevant_stops_in_perimeter, read_oev_teilwege_visum, \
     read_matsim_trips
 
 
 class MyTestCase(unittest.TestCase):
-
     def test_read_att_file(self):
         path_data = os.path.join("..", "..", "data_in", "test")
         path_att_file = os.path.join(path_data, "20180109_PerimeterSimbaBahn_Attribute.att")
@@ -25,8 +24,8 @@ class MyTestCase(unittest.TestCase):
         self.assertEquals(len(stops_in_perimeter_cnb), 127, msg="nb of stops in cnb-perimeter")
 
         # fq-relevant stops
-        stops_fq_relevant = read_fqrelevant_stops(path_att_file)
-        self.assertEquals(len(stops_fq_relevant), 1367, msg="nb of fq-relevant stops")
+        stops_fq_relevant = read_fqrelevant_stops_in_perimeter(path_att_file, stops_in_perimeter_ch)
+        self.assertEquals(len(stops_fq_relevant), 1336, msg="nb of fq-relevant stops")
 
     def test_skims_for_visum_teilwege(self):
         path_data = os.path.join("..", "..", "data_in", "test")
@@ -35,7 +34,7 @@ class MyTestCase(unittest.TestCase):
         path_att_file = os.path.join(path_data, "20180109_PerimeterSimbaBahn_Attribute.att")
 
         stop_ids_cnb = read_stops_in_perimeter(path_att_file, "ISTSIMBABAHNCNBPERIMETER")
-        stops_ids_fq_relevant = read_fqrelevant_stops(path_att_file)
+        stops_ids_fq_relevant = read_fqrelevant_stops_in_perimeter(path_att_file, stop_ids_cnb)
 
         df_oevteilwege_visum_prepared = read_oev_teilwege_visum(path_oev_teilwege_visum)
 
@@ -59,7 +58,7 @@ class MyTestCase(unittest.TestCase):
         path_att_file = os.path.join(path_data, "20180109_PerimeterSimbaBahn_Attribute.att")
 
         stop_ids_cnb = read_stops_in_perimeter(path_att_file, "ISTSIMBABAHNCNBPERIMETER")
-        stops_ids_fq_relevant = read_fqrelevant_stops(path_att_file)
+        stops_ids_fq_relevant = read_fqrelevant_stops_in_perimeter(path_att_file, stop_ids_cnb)
 
         df_trips_matsim = read_matsim_trips(path_trips_matsim)
 
@@ -75,17 +74,33 @@ class MyTestCase(unittest.TestCase):
         self.assertAlmostEqual(skims_bi_ins["distance"].iloc[0], 42.345000, places=5, msg="distanz")
         self.assertAlmostEqual(skims_bi_ins["PFAHRT"].iloc[0], 30.0, places=5, msg="pf")
 
-    def test_full_cnb_matsim_trips(self):
-
+    def test_full_cnb_matsim_trips_nettype_npvm(self):
         path_data = os.path.join("..", "..", "data_in", "test")
-        path_trips_matsim = os.path.join(path_data, "matsim_trips_full_cnb.txt")
+        path_trips_matsim = os.path.join(path_data, "matsim_trips_full_cnb_nettype_npvm_cnb1p4.txt")
         path_att_file = os.path.join(path_data, "20180109_PerimeterSimbaBahn_Attribute.att")
-
         df_trips = pd.read_csv(path_trips_matsim, sep="\t")
         stop_ids_cnb = read_stops_in_perimeter(path_att_file, "ISTSIMBABAHNCNBPERIMETER")
-        stops_ids_fq_relevant = read_fqrelevant_stops(path_att_file)
+        stops_ids_fq_relevant = read_fqrelevant_stops_in_perimeter(path_att_file, stop_ids_cnb)
+        print len(stop_ids_cnb)
         fq_legs_matsim = filter_legs_to_binnenverkehr_fq_legs(df_trips, stop_ids_cnb, stops_ids_fq_relevant)
-        self.assertEquals(len(fq_legs_matsim) > 0, True, msg="non empty")
+        print "anz in npvm: {}".format(len(fq_legs_matsim))
+        self.assertEquals(len(fq_legs_matsim) > 0, True,
+                          msg="filtered matsim trips with nettype npvm must be non empty")
+
+    def test_full_cnb_matsim_trips_nettype_cnb1p3(self):
+        path_data = os.path.join("..", "..", "data_in", "test")
+        path_trips_matsim = os.path.join(path_data, "matsim_trips_full_cnb_nettype_cnb1p3.txt")
+        path_stop_ids_cnb = os.path.join(path_data, "stop_id_in_cnb.csv")
+        path_stop_ids_cnb_normalspur = os.path.join(path_data, "stop_id_in_cnb_normalspur.csv")
+        df_trips = pd.read_csv(path_trips_matsim, sep="\t")
+        stop_ids_cnb = set(pd.read_csv(path_stop_ids_cnb, sep=";")["stop_id"].unique())
+        stop_ids_cnb_normalspur = set(pd.read_csv(path_stop_ids_cnb_normalspur, sep=";")["stop_id"].unique())
+        print len(stop_ids_cnb)
+        fq_legs_matsim = filter_legs_to_binnenverkehr_fq_legs(df_trips, stop_ids_cnb, stop_ids_cnb_normalspur,
+                                                              nettype="nettype_cnb1p3")
+        print "anz in cnb1p3: {}".format(len(fq_legs_matsim))
+        self.assertEquals(len(fq_legs_matsim) > 0, True,
+                          msg="filtered matsim trips with nettype cnb1pe must be non empty")
 
 
 if __name__ == '__main__':
