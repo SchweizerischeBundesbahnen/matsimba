@@ -331,7 +331,7 @@ class Run:
         analyse.plot.plot_score([self.path])
 
     @cache
-    def calc_einsteiger(self, codes=None, **kwargs):
+    def calc_einsteiger(self, stop_attributes=None, codes=None, **kwargs):
         def make_code(stop_id):
             a = stop_id.split("_")
             if len(a) == 2:
@@ -342,7 +342,10 @@ class Run:
         df = self.get_legs()
         df = pd.DataFrame(df[df.boarding_stop.notnull()])
 
-        df[CODE] = df[BOARDING_STOP].apply(make_code)
+        if stop_attributes is None:
+            df[CODE] = df[BOARDING_STOP].apply(make_code)
+        else:
+            df = df.merge(right=stop_attributes, how="left", left_on="boarding_stop", right_on="stop_id")
 
         df = self._do(df, value=PF, aggfunc="sum", **kwargs)
 
