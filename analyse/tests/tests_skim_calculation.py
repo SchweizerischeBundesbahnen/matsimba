@@ -44,15 +44,15 @@ class MyTestCase(unittest.TestCase):
         path_stop_ids_cnb_normalspur = os.path.join(path_data, "stop_id_in_cnb_normalspur.csv")
 
         df_trips_matsim = pd.read_csv(path_trips_matsim, sep="\t")
-        stop_ids_cnb = set(pd.read_csv(path_stop_ids_cnb, sep=";")["stop_id"].unique())
-        stop_ids_cnb_normalspur = set(pd.read_csv(path_stop_ids_cnb_normalspur, sep=";")["stop_id"].unique())
+        stop_ids_cnb = {str(x) for x in set(pd.read_csv(path_stop_ids_cnb, sep=";")["stop_id"].unique())}
+        stop_ids_cnb_normalspur = {str(x) for x in set(pd.read_csv(path_stop_ids_cnb_normalspur, sep=";")["stop_id"].unique())}
 
         fq_legs_matsim = filter_legs_to_binnenverkehr_fq_legs(df_trips_matsim, stop_ids_cnb,
                                                               stop_ids_cnb_normalspur)
 
         skims_matsim = get_station_to_station_skims(fq_legs_matsim, factor=10.0)
         skims_bi_ins = skims_matsim[
-            (skims_matsim["first_stop"] == 1279) & (skims_matsim["last_stop"] == 1984)]
+            (skims_matsim["first_stop"] == '1279') & (skims_matsim["last_stop"] == '1984')]
 
         self.assertEquals(skims_bi_ins["bz_hhmmss"].iloc[0], "00:32:02", msg="trip over midnight!")
         self.assertAlmostEqual(skims_bi_ins["uh"].iloc[0], 1.0, places=5, msg="umsteigehäufigkeit")

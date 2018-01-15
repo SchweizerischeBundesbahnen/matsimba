@@ -21,7 +21,7 @@ required_attributes_visum = {"LINNAME", "$OEVTEILWEG:QBEZNR", "ZBEZNR", "WEGIND"
 
 def is_simba_line(line_id):
     #TODO: should directly use 01_Datenherkunft of route in routeAttributes.xml
-    if line_id.split("_")[0] == "S2016":
+    if line_id.split("_")[0] == "S16":
             return True
     else:
         return False
