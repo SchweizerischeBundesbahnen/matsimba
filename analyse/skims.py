@@ -138,7 +138,6 @@ def filter_to_binnenverkehr(df_legs, stops_in_perimeter, from_simba_visum=False)
     if len(df_legs_merged) != len(df_legs):
         raise ValueError(
             "nb of legs changed. before: {}. after: {}".format(len(df_legs), len(df_legs_merged)))
-    print "hier: {}".format(len(df_legs_merged[(df_legs_merged.start_in_cnb) & (df_legs_merged.end_in_cnb)]))
     return df_legs_merged[(df_legs_merged.start_in_cnb) & (df_legs_merged.end_in_cnb)]
 
 

@@ -81,9 +81,7 @@ class MyTestCase(unittest.TestCase):
         df_trips = pd.read_csv(path_trips_matsim, sep="\t")
         stop_ids_cnb = read_stops_in_perimeter(path_att_file, "ISTSIMBABAHNCNBPERIMETER")
         stops_ids_fq_relevant = read_fqrelevant_stops_in_perimeter(path_att_file, stop_ids_cnb)
-        print len(stop_ids_cnb)
         fq_legs_matsim = filter_legs_to_binnenverkehr_fq_legs(df_trips, stop_ids_cnb, stops_ids_fq_relevant)
-        print "anz in npvm: {}".format(len(fq_legs_matsim))
         self.assertEquals(len(fq_legs_matsim) > 0, True,
                           msg="filtered matsim trips with nettype npvm must be non empty")
 
@@ -95,10 +93,8 @@ class MyTestCase(unittest.TestCase):
         df_trips = pd.read_csv(path_trips_matsim, sep="\t")
         stop_ids_cnb = set(pd.read_csv(path_stop_ids_cnb, sep=";")["stop_id"].unique())
         stop_ids_cnb_normalspur = set(pd.read_csv(path_stop_ids_cnb_normalspur, sep=";")["stop_id"].unique())
-        print len(stop_ids_cnb)
         fq_legs_matsim = filter_legs_to_binnenverkehr_fq_legs(df_trips, stop_ids_cnb, stop_ids_cnb_normalspur,
                                                               nettype="nettype_cnb1p3")
-        print "anz in cnb1p3: {}".format(len(fq_legs_matsim))
         self.assertEquals(len(fq_legs_matsim) > 0, True,
                           msg="filtered matsim trips with nettype cnb1pe must be non empty")
 
