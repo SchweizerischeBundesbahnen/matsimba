@@ -1,10 +1,7 @@
 import pandas as pd
 from variable import *
 import analyse.run
-import gzip
 
-from contextlib import closing
-from xml.etree import ElementTree as etree
 
 path_count_linkvolumes = r"/opt/sbb/hdd/u222223/MATSim/simulations/CH/zaehldaten/link_count_data_astra15.csv"
 path_mikro = r"/opt/sbb/hdd/u222223/MATSim/mikrozensus/2015/20171212_Input_MZMV_Kalibrationsvergleich.csv"
@@ -94,18 +91,3 @@ class Reference:
         df = self.get_count_stations().groupby("name").sum()[["volume"]] / 2.0
         return df.rename(columns={"volume": "ASTRA"})
 
-    @staticmethod
-    def load_stop_attributes(stop_attributes):
-        with gzip.open(stop_attributes) as xml_file:
-            objectAttributes = etree.parse(xml_file).getroot()
-            _dict = {}
-            for _object in objectAttributes:
-                stop_id = _object.attrib["id"]
-                _dict[stop_id] = {}
-                for attribute in _object:
-                    _dict[stop_id][attribute.attrib["name"]] = attribute.text
-
-        df = pd.DataFrame.from_dict(_dict, orient="index")
-        df.index.name = "stop_id"
-        df.reset_index(inplace=True)
-        return df

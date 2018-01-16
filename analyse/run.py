@@ -131,9 +131,15 @@ class Run:
     def get_stop_points(self):
         return self._get("stop_points")
 
+    def get_stop_attributes(self):
+        return self._get("stop_attributes")
+
     def _get(self, name, reload_data=False):
         self._load_data(name, reload_data=reload_data)
         return self.data[name]
+
+    def load_stop_attributes(self, path):
+        self.data["stop_attributes"] = analyse.reader.get_stop_attributes(path)
 
     def load_stop_points(self):
         self.data["stop_points"] = analyse.reader.get_stops(self.path)

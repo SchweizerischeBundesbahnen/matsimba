@@ -4,14 +4,15 @@ import pandas as pd
 import gzip
 import xml.etree.ElementTree as ET
 import logging
+from xml.etree import ElementTree as etree
 
 
 def get_stops(folder):
     transitfiles = glob.glob(os.path.join(folder, "*transitSchedule.xml.gz"))
-    if len(transitfiles)==0:
+    if len(transitfiles) == 0:
         logging.warn("No transitSchedule.xml.gz found")
         return None
-    
+
     with gzip.open(transitfiles[0], 'rb') as f:
         file_content = f.read()
         tree = ET.fromstring(file_content)
@@ -61,4 +62,17 @@ def get_persons_from_xml(folder, attributes_file=None, persons_file=None):
             return pd.DataFrame.from_dict(persons)
 
 
+def get_stop_attributes(path):
+    with gzip.open(path) as xml_file:
+        objectAttributes = etree.parse(xml_file).getroot()
+        _dict = {}
+        for _object in objectAttributes:
+            stop_id = _object.attrib["id"]
+            _dict[stop_id] = {}
+            for attribute in _object:
+                _dict[stop_id][attribute.attrib["name"]] = attribute.text
 
+    df = pd.DataFrame.from_dict(_dict, orient="index")
+    df.index.name = "stop_id"
+    df.reset_index(inplace=True)
+    return df
