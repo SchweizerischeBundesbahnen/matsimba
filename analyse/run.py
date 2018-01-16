@@ -213,7 +213,8 @@ class Run:
         df = self.merge_legs_persons()
 
         if ref is not None:
-            self.merge_link_id_to_name(ref.get_count_stations()[["link_id", "name"]])
+            #self.merge_link_id_to_name(ref.get_count_stations()[["link_id", "name"]])
+            pass
         else:
             logging.info("Without ref_run, I cannot merge the link_ids to the names")
 
