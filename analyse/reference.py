@@ -55,7 +55,7 @@ class Reference:
         return mzmv
 
     def get_pt_run(self):
-        teilwege = pd.read_csv(r"\\V00925\Simba\20_Modelle\80_MatSim\60_Kalibration\30_FQKal+\teilwege_fqal14.att", sep=";",
+        teilwege = pd.read_csv(self.path_pt_legs, sep=";",
                           skiprows=12)
 
         teilwege.rename(columns={"$OEVTEILWEG:QBEZNR": "QBEZNR",
