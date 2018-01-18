@@ -355,7 +355,10 @@ class Run:
     def calc_einsteiger(self, codes=None, **kwargs):
         df = self.get_legs()
         df = pd.DataFrame(df[df.boarding_stop.notnull()])
-        df = df.merge(right=self.get_stop_attributes(), how="left", left_on="boarding_stop", right_on="stop_id")
+        try:
+            df = df.merge(right=self.get_stop_attributes(), how="left", left_on="boarding_stop", right_on="stop_id")
+        except KeyError as e:
+            logging.warn(e)
 
         df = self._do(df, value=PF, aggfunc="sum", **kwargs)
 
