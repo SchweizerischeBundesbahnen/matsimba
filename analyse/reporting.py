@@ -30,15 +30,23 @@ def _make_report(datas, filename):
     writer = pd.ExcelWriter(filename, engine='xlsxwriter')
 
     worksheet = writer.book.add_worksheet("TableOfContents")
+    _sheets = {}
     for i, data in enumerate(datas):
-        worksheet.write_url(i + 1, 1, url="internal:'%s'!A1" % data.name, string=data.name)
+        sheet = data.name[:20]
+        if sheet in _sheets:
+            _sheets[sheet] += 1
+            sheet+str(_sheets[sheet])
+        else:
+            _sheets[sheet] = 1
+        data.sheet = sheet
+        worksheet.write_url(i + 1, 1, url="internal:'%s'!A1" % data.sheet, string=data.name)
 
     for data in datas:
         df = data.df
         buf = get_buffer(data.fig)
         sheet = writer.book.add_worksheet(data.name)
         sheet.insert_image('A1', "aa", {'image_data': buf})
-        df.to_excel(writer, sheet_name=data.name + "_data", startrow=1, startcol=1)
+        df.to_excel(writer, sheet_name=data.sheet + "_data", startrow=1, startcol=1)
 
     writer.save()
 
