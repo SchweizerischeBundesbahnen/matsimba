@@ -10,7 +10,6 @@ class SheetData:
         self.df = df
         self.fig = fig
         self.name = name
-        self.fig.suptitle(name)
 
 
 def make_report(runs, filename, ref=None, stop_attributes=None):
