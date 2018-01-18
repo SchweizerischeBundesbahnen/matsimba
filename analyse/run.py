@@ -140,7 +140,7 @@ class Run:
         return self.data[name]
 
     def load_stop_attributes(self, path):
-        self.data["stop_attributes"] = analyse.reader.get_stop_attributes(path)
+        self.data["stop_attributes"] = analyse.reader.get_attributes(path)
 
     def load_stop_points(self):
         self.data["stop_points"] = analyse.reader.get_stops(self.path)
