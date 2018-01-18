@@ -354,7 +354,10 @@ class Run:
     @cache
     def calc_einsteiger(self, codes=None, **kwargs):
         df = self.get_legs()
-        df = pd.DataFrame(df[df.boarding_stop.notnull()])
+
+        if "boarding_stop" in df.columns:
+            df = pd.DataFrame(df[df.boarding_stop.notnull()])
+
         try:
             df = df.merge(right=self.get_stop_attributes(), how="left", left_on="boarding_stop", right_on="stop_id")
             df.rename(columns={"03_Stop_Code": "03_Stop_Code_boarding"}, inplace=True)
