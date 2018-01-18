@@ -181,8 +181,11 @@ class Run:
         df[PF] = 1.0
         df[PKM] = df[DISTANCE]
 
-    def prepare(self, stop_ids_perimeter=None, defining_stop_ids=None, ref=None, persons=None):
+    def prepare(self, stop_ids_perimeter=None, defining_stop_ids=None, ref=None, persons=None, stop_attribute_path=None):
         self.unload_data()
+
+        if stop_attribute_path is not None:
+            self.load_stop_attributes(stop_attribute_path)
 
         if persons is not None:
             logging.info("Using a special dataframe for persons")
@@ -348,6 +351,7 @@ class Run:
     def calc_einsteiger(self, codes=None, **kwargs):
         df = self.get_legs()
         df = pd.DataFrame(df[df.boarding_stop.notnull()])
+        df = df.merge(right=self.get_stop_attributes(), how="left", left_on="boarding_stop", right_on="stop_id")
 
         df = self._do(df, value=PF, aggfunc="sum", **kwargs)
 
