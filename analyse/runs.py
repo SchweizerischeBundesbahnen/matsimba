@@ -124,6 +124,13 @@ class RunsList(list):
         df = self.get_vehicles(**kwargs)
         return self._plot(df=df, title="Fahrzeuge", **kwargs)
 
+    def get_pt_pkm_operator(self, **kwargs):
+        return self._get(analyse.run.Run.calc_pt_pkm_operator, **kwargs)
+
+    def plot_pt_pkm_operator(self, **kwargs):
+        df = self.get_pt_pkm_operator(**kwargs)
+        return self._plot(df=df, title="", **kwargs)
+
     def prepare(self, **kwargs):
         for run in self:
             run.prepare(**kwargs)

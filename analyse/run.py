@@ -135,12 +135,18 @@ class Run:
     def get_stop_attributes(self):
         return self._get("stop_attributes")
 
+    def get_route_attributes(self):
+        return self._get("route_attributes")
+
     def _get(self, name, reload_data=False):
         self._load_data(name, reload_data=reload_data)
         return self.data[name]
 
     def load_stop_attributes(self, path):
         self.data["stop_attributes"] = analyse.reader.get_attributes(path)
+
+    def load_route_attributes(self, path):
+        self.data["route_attributes"] = analyse.reader.get_attributes(path, "route_id")
 
     def load_stop_points(self):
         self.data["stop_points"] = analyse.reader.get_stops(self.path)
@@ -185,11 +191,14 @@ class Run:
         df[PF] = 1.0
         df[PKM] = df[DISTANCE]
 
-    def prepare(self, stop_ids_perimeter=None, defining_stop_ids=None, ref=None, persons=None, stop_attribute_path=None):
+    def prepare(self, stop_ids_perimeter=None, defining_stop_ids=None, ref=None, persons=None, stop_attribute_path=None, route_attribute_path=None):
         self.unload_data()
 
         if stop_attribute_path is not None:
             self.load_stop_attributes(stop_attribute_path)
+
+        if route_attribute_path is not None:
+            self.load_route_attributes(route_attribute_path)
 
         if persons is not None:
             logging.info("Using a special dataframe for persons")
@@ -371,6 +380,26 @@ class Run:
 
         gc.collect()
         return df
+
+    @cache
+    def calc_pt_pkm_operator(self, operators, **kwargs):
+        df = self.get_legs()
+
+        if "boarding_stop" in df.columns:
+            df = pd.DataFrame(df[df.boarding_stop.notnull()])
+
+        try:
+            df = df.merge(right=self.get_route_attributes(), how="left", left_on="route", right_on="route_id")
+        except KeyError as e:
+            logging.warn(e)
+
+        df = self._do(df, value=PKM, aggfunc="sum", by="06_OperatorName", **kwargs)
+        df = df.loc[operators]
+
+        gc.collect()
+        return df
+
+
 
     @cache
     def calc_vehicles(self, names=None, **kwargs):

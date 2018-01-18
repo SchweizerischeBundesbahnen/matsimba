@@ -64,6 +64,7 @@ class Reference:
                                  "ABFAHRT": "start_time",
                                  "ANKUNFT": "end_time",
                                  "WEITE": "distance",
+                                 "FAHRZEITPROFIL\LINIENROUTE\LINIE\BETREIBER\NAME": "06_OperatorName",
                                  "STARTFZPELEM\LINIENROUTENELEMENT\HALTEPUNKT\HALTESTELLENBEREICH\HALTESTELLE\CODE": "03_Stop_Code_boarding",
                                  "ENDFZPELEM\LINIENROUTENELEMENT\HALTEPUNKT\HALTESTELLENBEREICH\HALTESTELLE\CODE": "03_Stop_Code_alighting"
                                  }, inplace=True)
