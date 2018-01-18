@@ -303,12 +303,12 @@ def plot_multi(df, cols=2.0, stacked=False, kind="bar", rotate=False, xs_index=N
 
     min_y = np.inf
     max_y = -np.inf
-    for ax in axs:
+    for ax in fig.get_axes():
         lim = ax.get_ylim()
         min_y = min(min_y, lim[0])
         max_y = max(max_y, lim[1])
 
-    for ax in axs:
+    for ax in fig.get_axes():
         ax.set_ylim([min_y, max_y])
 
     fig.tight_layout()
