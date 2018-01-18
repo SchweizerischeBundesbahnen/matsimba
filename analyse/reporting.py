@@ -35,7 +35,7 @@ def _make_report(datas, filename):
         sheet = data.name[:20]
         if sheet in _sheets:
             _sheets[sheet] += 1
-            sheet = sheet+str(_sheets[sheet])
+            sheet = sheet + str(_sheets[sheet])
         else:
             _sheets[sheet] = 1
         data.sheet = sheet
@@ -151,7 +151,8 @@ def get_datas(runs, ref, stop_attributes):
     ### Distanzklasse
 
     try:
-        df, fig = runs.plot_pkm_distr_trips(foreach=[MAIN_MODE], percent=True, rotate=True, ref_run=mzmv)
+        df, fig = runs.plot_pkm_distr_trips(foreach=[MAIN_MODE], percent=True, rotate=True, ref_run=mzmv,
+                                            inverse_percent_axis=True)
         datas.append(SheetData(df, fig, "Distanzklasse"))
     except Exception as e:
         logging.error(e)
@@ -164,9 +165,9 @@ def get_datas(runs, ref, stop_attributes):
     except Exception as e:
         logging.error(e)
 
-
     try:
-        df, fig = runs.plot_pkm_distr_trips(foreach=[SUBPOPULATION, CARAVAIL, SEASON_TICKET, MAIN_MODE], percent=True, rotate=True, ref_run=mzmv,
+        df, fig = runs.plot_pkm_distr_trips(foreach=[SUBPOPULATION, CARAVAIL, SEASON_TICKET, MAIN_MODE], percent=True,
+                                            rotate=True, ref_run=mzmv,
                                             inverse_percent_axis=True,
                                             percent_level=[SUBPOPULATION, CARAVAIL, SEASON_TICKET])
         datas.append(SheetData(df, fig, "Distanzklasse pro Subpopulation, PW-Verfuergbarkeit und OV-Abonnement"))
