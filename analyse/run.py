@@ -399,8 +399,6 @@ class Run:
         gc.collect()
         return df
 
-
-
     @cache
     def calc_vehicles(self, names=None, **kwargs):
         df = self.get_linkvolumes()

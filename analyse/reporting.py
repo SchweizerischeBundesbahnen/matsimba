@@ -1,6 +1,5 @@
 import pandas as pd
 import io
-from PIL import Image
 from variable import *
 import logging
 
@@ -184,6 +183,13 @@ def get_datas(runs, ref, stop_attributes):
     try:
         df, fig = runs.plot_vehicles(by="name", names=ref.get_count_stations().name.unique().tolist(),
                                      ref_df=ref.get_count_stations_volume())
+        datas.append(SheetData(df, fig, "Link counts"))
+    except Exception as e:
+        logging.error(e)
+
+    try:
+        df, fig = runs.plot_vehicles(operators=ref.operators,
+                                     ref_run=ref.get_pt_run())
         datas.append(SheetData(df, fig, "Link counts"))
     except Exception as e:
         logging.error(e)
