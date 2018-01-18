@@ -44,7 +44,7 @@ def _make_report(datas, filename):
     for data in datas:
         df = data.df
         buf = get_buffer(data.fig)
-        sheet = writer.book.add_worksheet(data.name)
+        sheet = writer.book.add_worksheet(data.sheet)
         sheet.insert_image('A1', "aa", {'image_data': buf})
         df.to_excel(writer, sheet_name=data.sheet + "_data", startrow=1, startcol=1)
 
