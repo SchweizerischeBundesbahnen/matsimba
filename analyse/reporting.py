@@ -51,51 +51,94 @@ def get_datas(runs, ref, stop_attributes):
 
     mzmv = ref.mzmv = ref.get_mzmv_run()
 
-    df, ax = runs.plot_nb_trips(by=MAIN_MODE, foreach=SUBPOPULATION, ref_run=mzmv, percent=True)
-    datas.append(SheetData(df, ax, "#trips 1"))
+    try:
+        df, ax = runs.plot_nb_trips(by=MAIN_MODE, foreach=SUBPOPULATION, ref_run=mzmv, percent=True)
+        datas.append(SheetData(df, ax, "#trips 1"))
+    except Exception as e:
+        logging.error(e)
 
-    df, ax = runs.plot_nb_trips(by=MAIN_MODE, foreach=[SUBPOPULATION, SEASON_TICKET], ref_run=mzmv, percent=True)
-    datas.append(SheetData(df, ax, "#trips 2"))
+    try:
+        df, ax = runs.plot_nb_trips(by=MAIN_MODE, foreach=[SUBPOPULATION, SEASON_TICKET], ref_run=mzmv, percent=True)
+        datas.append(SheetData(df, ax, "#trips 2"))
+    except Exception as e:
+        logging.error(e)
 
-    df, fig = runs.plot_nb_trips(by=MAIN_MODE, foreach=[SUBPOPULATION, RAUMTYP], ref_run=mzmv, percent=True)
-    datas.append(SheetData(df, fig, "#trips 3"))
+    try:
+        df, fig = runs.plot_nb_trips(by=MAIN_MODE, foreach=[SUBPOPULATION, RAUMTYP], ref_run=mzmv, percent=True)
+        datas.append(SheetData(df, fig, "#trips 3"))
+    except Exception as e:
+        logging.error(e)
 
-    df, fig = runs.plot_nb_trips(by=MAIN_MODE, foreach=[SUBPOPULATION, CARAVAIL], ref_run=mzmv, percent=True)
-    datas.append(SheetData(df, fig, "#trips 4"))
+    try:
+        df, fig = runs.plot_nb_trips(by=MAIN_MODE, foreach=[SUBPOPULATION, CARAVAIL], ref_run=mzmv, percent=True)
+        datas.append(SheetData(df, fig, "#trips 4"))
+    except Exception as e:
+        logging.error(e)
 
-    df, ax = runs.plot_pkm_trips(by=MAIN_MODE, foreach=SUBPOPULATION, ref_run=mzmv, percent=True)
-    datas.append(SheetData(df, ax, "pkm trips 1"))
+    try:
+        df, ax = runs.plot_pkm_trips(by=MAIN_MODE, foreach=SUBPOPULATION, ref_run=mzmv, percent=True)
+        datas.append(SheetData(df, ax, "pkm trips 1"))
+    except Exception as e:
+        logging.error(e)
 
-    df, ax = runs.plot_pkm_trips(by=MAIN_MODE, foreach=[SUBPOPULATION, SEASON_TICKET], ref_run=mzmv, percent=True)
-    datas.append(SheetData(df, ax, "pkm trips 2"))
+    try:
+        df, ax = runs.plot_pkm_trips(by=MAIN_MODE, foreach=[SUBPOPULATION, SEASON_TICKET], ref_run=mzmv, percent=True)
+        datas.append(SheetData(df, ax, "pkm trips 2"))
+    except Exception as e:
+        logging.error(e)
 
-    df, fig = runs.plot_pkm_trips(by=MAIN_MODE, foreach=[SUBPOPULATION, RAUMTYP], ref_run=mzmv, percent=True)
-    datas.append(SheetData(df, fig, "pkm trips 3"))
+    try:
+        df, fig = runs.plot_pkm_trips(by=MAIN_MODE, foreach=[SUBPOPULATION, RAUMTYP], ref_run=mzmv, percent=True)
+        datas.append(SheetData(df, fig, "pkm trips 3"))
+    except Exception as e:
+        logging.error(e)
 
-    df, fig = runs.plot_pkm_trips(by=MAIN_MODE, foreach=[SUBPOPULATION, CARAVAIL], ref_run=mzmv, percent=True)
-    datas.append(SheetData(df, fig, "pkm trips 4"))
+    try:
+        df, fig = runs.plot_pkm_trips(by=MAIN_MODE, foreach=[SUBPOPULATION, CARAVAIL], ref_run=mzmv, percent=True)
+        datas.append(SheetData(df, fig, "pkm trips 4"))
+    except Exception as e:
+        logging.error(e)
 
-    df, fig = runs.plot_pkm_distr_trips(foreach=[MAIN_MODE], percent=True, rotate=True, ref_run=mzmv)
-    datas.append(SheetData(df, fig, "pkm distribution"))
+    try:
+        df, fig = runs.plot_pkm_distr_trips(foreach=[MAIN_MODE], percent=True, rotate=True, ref_run=mzmv)
+        datas.append(SheetData(df, fig, "pkm distribution"))
+    except Exception as e:
+        logging.error(e)
 
-    df, fig = runs.plot_pkm_distr_trips(foreach=[SUBPOPULATION, MAIN_MODE, SEASON_TICKET], percent=True,
-                                        rotate=True, ref_run=mzmv, inverse_percent_axis=True,
-                                        percent_level=[SUBPOPULATION, MAIN_MODE])
-    datas.append(SheetData(df, fig, "pkm distribution 2"))
+    try:
+        df, fig = runs.plot_pkm_distr_trips(foreach=[SUBPOPULATION, MAIN_MODE, SEASON_TICKET], percent=True,
+                                            rotate=True, ref_run=mzmv, inverse_percent_axis=True,
+                                            percent_level=[SUBPOPULATION, MAIN_MODE])
+        datas.append(SheetData(df, fig, "pkm distribution 2"))
+    except Exception as e:
+        logging.error(e)
 
-    df, fig = runs.plot_pkm_distr_legs(foreach=[IS_SIMBA_FQ], percent=True, inverse_percent_axis=True,
-                                       rotate=True)
-    datas.append(SheetData(df, fig, "simba_legs"))
+    try:
+        df, fig = runs.plot_pkm_distr_legs(foreach=[IS_SIMBA_FQ], percent=True, inverse_percent_axis=True,
+                                           rotate=True)
+        datas.append(SheetData(df, fig, "simba_legs"))
+    except Exception as e:
+        logging.error(e)
 
-    df, fig = runs.plot_einsteiger(by=CODE, codes=ref.stations, ref_run=ref.get_pt_run(), stop_attributes=stop_attributes)
-    datas.append(SheetData(df, fig, "Einsteiger"))
+    try:
+        df, fig = runs.plot_einsteiger(by=CODE, codes=ref.stations, ref_run=ref.get_pt_run(),
+                                       stop_attributes=stop_attributes)
+        datas.append(SheetData(df, fig, "Einsteiger"))
+    except Exception as e:
+        logging.error(e)
 
-    df, fig = runs.plot_einsteiger(by=CODE, codes=ref.stations,
-                                   foreach=[SUBPOPULATION, SEASON_TICKET], stop_attributes=stop_attributes)
-    datas.append(SheetData(df, fig, "Einsteiger 2"))
+    try:
+        df, fig = runs.plot_einsteiger(by=CODE, codes=ref.stations,
+                                       foreach=[SUBPOPULATION, SEASON_TICKET], stop_attributes=stop_attributes)
+        datas.append(SheetData(df, fig, "Einsteiger 2"))
+    except Exception as e:
+        logging.error(e)
 
-    df, fig = runs.plot_vehicles(by="name", names=ref.get_count_stations().name.unique().tolist(),
-                                 ref_df=ref.get_count_stations_volume())
-    datas.append(SheetData(df, fig, "Link counts"))
+    try:
+        df, fig = runs.plot_vehicles(by="name", names=ref.get_count_stations().name.unique().tolist(),
+                                     ref_df=ref.get_count_stations_volume())
+        datas.append(SheetData(df, fig, "Link counts"))
+    except Exception as e:
+        logging.error(e)
 
     return datas
