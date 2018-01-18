@@ -284,7 +284,6 @@ class Run:
         def make_percent(df):
             if inverse_percent_axis:
                 logging.warn("Be carefull with inverse_percent_axis")
-                not_percent_col = [c for c in df.columns.names if c not in percent_level]
                 df = df.stack(percent_level)
 
                 _df = df.sum(axis=1)
