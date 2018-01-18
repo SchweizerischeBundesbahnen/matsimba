@@ -72,8 +72,6 @@ class Reference:
         teilwege[trip_id] = teilwege.QBEZNR.map(str)+"_"+teilwege.ZBEZNR.map(str)+"_"+teilwege.WEGIND.map(str)
         teilwege[leg_id] = teilwege[trip_id]+"_"+teilwege.TWEGIND.map(str)
 
-        teilwege["boarding_stop"] = teilwege.VONHPUNKTNR.map(int).map(str) + "_" + teilwege.START_CODE
-        teilwege["alighting_stop"] = teilwege.NACHHPUNKTNR.map(int).map(str) + "_" + teilwege.END_CODE
         teilwege[PKM] = teilwege[PF]*teilwege.distance
         teilwege["mode"] = "pt"
         teilwege[SUBPOPULATION] = self.subpopulation
