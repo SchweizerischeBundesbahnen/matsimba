@@ -35,7 +35,7 @@ def _make_report(datas, filename):
         sheet = data.name[:20]
         if sheet in _sheets:
             _sheets[sheet] += 1
-            sheet = str(_sheets[sheet])
+            sheet = sheet+str(_sheets[sheet])
         else:
             _sheets[sheet] = 1
         data.sheet = sheet
