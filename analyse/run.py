@@ -367,6 +367,7 @@ class Run:
         df = self._do(df, value=PF, aggfunc="sum", **kwargs)
 
         if codes is not None:
+
             df = df.loc[codes]
 
         gc.collect()
