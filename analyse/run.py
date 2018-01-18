@@ -87,11 +87,12 @@ dtypes = {u'activity_id': str,
 
 
 class Run:
-    def __init__(self, path=None, name=None, scale_factor=1.0):
+    def __init__(self, path=None, name=None, runId=None, scale_factor=1.0):
         self.path = path
         self.name = name
         self.scale_factor = scale_factor
 
+        self.runId = runId
         self.data = {}
 
         self.trip_persons_merged = False
@@ -152,7 +153,10 @@ class Run:
         try:
             time1 = time.time()
             sep = keys[name]["sep"]
-            path = os.path.join(self.path, keys[name]["path"])
+            filename = keys[name]["path"]
+            if self.runId is not None:
+                filename = self.runId+"."+filename
+            path = os.path.join(self.path, filename)
             logging.info("Starting loading data %s: %s " % (name, path))
             self.data[name] = pd.read_csv(path, sep=sep, encoding="utf-8", dtype=dtypes).reset_index(drop=True)
             logging.info("%s loaded in %i seconds" % (name, time.time() - time1))
