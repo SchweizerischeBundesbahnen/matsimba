@@ -64,8 +64,8 @@ class Reference:
                                  "ABFAHRT": "start_time",
                                  "ANKUNFT": "end_time",
                                  "WEITE": "distance",
-                                 "STARTFZPELEM\LINIENROUTENELEMENT\HALTEPUNKT\CODE": "START_CODE",
-                                 "ENDFZPELEM\LINIENROUTENELEMENT\HALTEPUNKT\CODE": "END_CODE"
+                                 "STARTFZPELEM\LINIENROUTENELEMENT\HALTEPUNKT\HALTESTELLENBEREICH\HALTESTELLE\CODE": "03_Stop_Code_boarding",
+                                 "ENDFZPELEM\LINIENROUTENELEMENT\HALTEPUNKT\HALTESTELLENBEREICH\HALTESTELLE\CODE": "03_Stop_Code_alighting"
                                  }, inplace=True)
 
         teilwege = teilwege[teilwege.VONHPUNKTNR.notnull()]

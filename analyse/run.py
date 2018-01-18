@@ -357,6 +357,7 @@ class Run:
         df = pd.DataFrame(df[df.boarding_stop.notnull()])
         try:
             df = df.merge(right=self.get_stop_attributes(), how="left", left_on="boarding_stop", right_on="stop_id")
+            df.replace(columns={"03_Stop_Code": "03_Stop_Code_boarding"}, inplace=True)
         except KeyError as e:
             logging.warn(e)
 
