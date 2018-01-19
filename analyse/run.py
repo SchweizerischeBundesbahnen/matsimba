@@ -305,13 +305,15 @@ class Run:
             if inverse_percent_axis:
                 do = False
                 if df.columns.nlevels > 1:
-                        do = True
-                        df.stack(percent_level)
+                    do = True
+                    df = df.stack(percent_level)
                 _df = df.sum(axis=1)
                 df = df.divide(_df, axis=0)
+                print df.columns
                 if do:
-                        df = df.unstack(percent_level)
-                        df = df.swaplevel(0, 1, axis=1)
+                    print df.columns
+                    df = df.unstack(percent_level)
+                    df = df.swaplevel(0, 1, axis=1)
             else:
                 df = df.divide(df.sum(level=percent_level))
             return df
