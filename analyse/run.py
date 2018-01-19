@@ -403,6 +403,16 @@ class Run:
         return df
 
     @cache
+    def calc_dist_distr_pt_legs(self, inverse_percent_axis=False, rotate=True, **kwargs):
+        self.create_distance_class_for_legs()
+        df = self._do(self.get_legs(), by=CAT_DIST, value=PF, aggfunc="sum", rotate=rotate,
+                      inverse_percent_axis=inverse_percent_axis, **kwargs)
+        if inverse_percent_axis:
+            return df
+        else:
+            return df.cumsum()
+
+    @cache
     def calc_vehicles(self, names=None, **kwargs):
         df = self.get_linkvolumes()
         df = self._do(df, value=VOLUME, aggfunc="sum", **kwargs)

@@ -91,12 +91,19 @@ class RunsList(list):
     def get_pkm_distr_trips(self, **kwargs):
         return self._get(analyse.run.Run.calc_dist_distr_trips, **kwargs)
 
+    def get_pt_pkm_distr_trips(self, **kwargs):
+        return self._get(analyse.run.Run.calc_dist_distr_pt_legs, **kwargs)
+
     def plot_pkm_distr_legs(self, **kwargs):
         df = self.get_pkm_distr_legs(**kwargs)
         return self._plot(df=df, kind="line", title="", xs_index=analyse.run.distance_labels, **kwargs)
 
     def plot_pkm_distr_trips(self, **kwargs):
         df = self.get_pkm_distr_trips(**kwargs)
+        return self._plot(df=df, kind="line", title="", xs_index=analyse.run.distance_labels, **kwargs)
+
+    def plot_pt_pkm_distr_legs(self, **kwargs):
+        df = self.get_pt_pkm_distr_legs(**kwargs)
         return self._plot(df=df, kind="line", title="", xs_index=analyse.run.distance_labels, **kwargs)
 
     def plot_nb_legs(self, **kwargs):
