@@ -21,7 +21,8 @@ class Reference:
         self.path_mikro = path_mikro
         self.path_pt_legs = path_pt_legs
 
-        self.stations = ["ZUE", "ZMUS", "BN", "W", "ZOER", "BS", "ZSTH", "GE", "LS", "SIO"]
+        self.stations = ['ZUE', 'BN', 'W', 'ZOER', 'BS', 'ZSTH', 'GE', 'LS', 'LZ', "OL", "ZHDB", "BI"]
+
         self.count_stations = ['WALLISELLEN (AB)',
                                'MUTTENZ, HARD (AB)',
                                'BADEN, BAREGGTUNNEL (AB)',
