@@ -207,6 +207,10 @@ class Run:
         df = self.get_trips()
         df.loc[df.main_mode == TRANSIT_WALK, MAIN_MODE] = WALK_AGGR
         df.loc[df.main_mode == WALK, MAIN_MODE] = WALK_AGGR
+        df.loc[df.main_mode == "detPt", "main_mode"] = "pt"
+
+        df = self.get_legs()
+        df.loc[df["mode"] == "detPt", "mode"] = "pt"
 
         self._set_dummy_pf()
 
