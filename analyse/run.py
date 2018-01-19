@@ -111,6 +111,12 @@ class Run:
     def get_legs(self):
         return self._get("legs")
 
+    def get_pt_legs(self):
+        df = self.get_legs()
+        if "boarding_stop" in df.columns:
+            df = pd.DataFrame(df[df.boarding_stop.notnull()])
+        return df
+
     def get_vehjourneys(self):
         return self._get("vehjourneys")
 
@@ -365,10 +371,7 @@ class Run:
 
     @cache
     def calc_einsteiger(self, codes=None, **kwargs):
-        df = self.get_legs()
-
-        if "boarding_stop" in df.columns:
-            df = pd.DataFrame(df[df.boarding_stop.notnull()])
+        df = self.get_pt_legs()
 
         try:
             df = df.merge(right=self.get_stop_attributes(), how="left", left_on="boarding_stop", right_on="stop_id")
@@ -387,11 +390,7 @@ class Run:
 
     @cache
     def calc_pt_pkm(self, indices, **kwargs):
-        df = self.get_legs()
-
-        if "boarding_stop" in df.columns:
-            df = pd.DataFrame(df[df.boarding_stop.notnull()])
-
+        df = self.get_pt_legs()
         try:
             df = df.merge(right=self.get_route_attributes(), how="left", left_on="route", right_on="route_id")
         except KeyError as e:
