@@ -6,6 +6,9 @@ import analyse.plot
 import json
 import time
 import numpy as np
+import analyse.skims
+from variable import *
+import gc
 
 _cache = {}
 
@@ -30,16 +33,6 @@ def cache(func):
 
     return f
 
-
-person_id = "person_id"
-mode_trip = "main_mode"
-mode_leg = "mode"
-column_run = "Run"
-trip_id = "journey_id"
-leg_id = "trip_id"
-distance_field = "distance"
-boarding_id = "boarding"
-alighting_id = "alighting"
 
 keys = {"acts":
             {"path": "matsim_activities.txt", "sep": "\t"},
@@ -68,7 +61,7 @@ def _start_logging():
     logger.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()
     ch.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s')
     ch.setFormatter(formatter)
     logger.addHandler(ch)
 
@@ -94,11 +87,12 @@ dtypes = {u'activity_id': str,
 
 
 class Run:
-    def __init__(self, path, name, scale_factor):
+    def __init__(self, path=None, name=None, runId=None, scale_factor=1.0):
         self.path = path
         self.name = name
         self.scale_factor = scale_factor
 
+        self.runId = runId
         self.data = {}
 
         self.trip_persons_merged = False
@@ -116,6 +110,12 @@ class Run:
 
     def get_legs(self):
         return self._get("legs")
+
+    def get_pt_legs(self):
+        df = self.get_legs()
+        if "boarding_stop" in df.columns:
+            df = pd.DataFrame(df[df.boarding_stop.notnull()])
+        return df
 
     def get_vehjourneys(self):
         return self._get("vehjourneys")
@@ -138,9 +138,21 @@ class Run:
     def get_stop_points(self):
         return self._get("stop_points")
 
+    def get_stop_attributes(self):
+        return self._get("stop_attributes")
+
+    def get_route_attributes(self):
+        return self._get("route_attributes")
+
     def _get(self, name, reload_data=False):
         self._load_data(name, reload_data=reload_data)
         return self.data[name]
+
+    def load_stop_attributes(self, path):
+        self.data["stop_attributes"] = analyse.reader.get_attributes(path)
+
+    def load_route_attributes(self, path):
+        self.data["route_attributes"] = analyse.reader.get_attributes(path, "route_id")
 
     def load_stop_points(self):
         self.data["stop_points"] = analyse.reader.get_stops(self.path)
@@ -153,10 +165,13 @@ class Run:
         try:
             time1 = time.time()
             sep = keys[name]["sep"]
-            path = os.path.join(self.path, keys[name]["path"])
+            filename = keys[name]["path"]
+            if self.runId is not None:
+                filename = self.runId+"."+filename
+            path = os.path.join(self.path, filename)
             logging.info("Starting loading data %s: %s " % (name, path))
             self.data[name] = pd.read_csv(path, sep=sep, encoding="utf-8", dtype=dtypes).reset_index(drop=True)
-            logging.info("%s loaded in %i seconds" % (name,  time.time()-time1))
+            logging.info("%s loaded in %i seconds" % (name, time.time() - time1))
         except Exception as e:
             logging.error(e.message)
 
@@ -172,6 +187,89 @@ class Run:
             self._load_data(name)
         if with_stop_points:
             self.load_stop_points()
+
+    def _set_dummy_pf(self):
+        df = self.get_legs()
+        df[PF] = 1.0
+        df[PKM] = df[DISTANCE]
+
+        df = self.get_trips()
+        df[PF] = 1.0
+        df[PKM] = df[DISTANCE]
+
+    def prepare(self, stop_ids_perimeter=None, defining_stop_ids=None, ref=None, persons=None, stop_attribute_path=None, route_attribute_path=None):
+        self.unload_data()
+
+        if stop_attribute_path is not None:
+            self.load_stop_attributes(stop_attribute_path)
+
+        if route_attribute_path is not None:
+            self.load_route_attributes(route_attribute_path)
+
+        if persons is not None:
+            logging.info("Using a special dataframe for persons")
+            self.data["persons"] = persons
+
+        df = self.get_trips()
+        df.loc[df.main_mode == TRANSIT_WALK, MAIN_MODE] = WALK_AGGR
+        df.loc[df.main_mode == WALK, MAIN_MODE] = WALK_AGGR
+        df.loc[df.main_mode == "detPt", "main_mode"] = "pt"
+
+        df = self.get_legs()
+        df.loc[df["mode"] == "detPt", "mode"] = "pt"
+
+        self._set_dummy_pf()
+
+        if stop_ids_perimeter is not None and defining_stop_ids is not None:
+            df = self.get_legs()
+            df = df[df.line.notnull()]
+            fq_legs = analyse.skims.filter_legs_to_binnenverkehr_fq_legs(df, stop_ids_perimeter=stop_ids_perimeter,
+                                                                         defining_stop_ids=defining_stop_ids)
+            df = self.get_legs()
+            df[IS_SIMBA_FQ] = False
+            df.loc[df.trip_id.isin(fq_legs.trip_id), IS_SIMBA_FQ] = True
+
+            self.journey_has_transfer()
+            self.journey_is_simba()
+            self.journey_has_simba_transfer()
+        else:
+            logging.info("Without stop_ids_perimeter oder defining_stop_ids, I cannot accurately campute is_simba_fq")
+
+        df = self.merge_trips_persons()
+        df = self.merge_legs_persons()
+
+        self.create_starttime_class_for_legs()
+        if ref is not None:
+            #self.merge_link_id_to_name(ref.get_count_stations()[["link_id", "name"]])
+            pass
+        else:
+            logging.info("Without ref_run, I cannot merge the link_ids to the names")
+
+    def journey_has_simba_transfer(self):
+        df = self.get_legs()
+        df = df[(df["mode"] == "pt") & (df[IS_SIMBA_FQ])].groupby(["journey_id"])[["trip_id"]].count()
+        j_ids = df[df.trip_id > 1].index
+
+        df = self.get_trips()
+        df["hasSIMBATransfer"] = False
+        df.loc[df.journey_id.isin(j_ids), "hasSIMBATransfer"] = True
+
+    def journey_has_transfer(self):
+        df = self.get_legs()
+        df = df[(df["mode"] == "pt")].groupby(["journey_id"])[["trip_id"]].count()
+        j_ids = df[df.trip_id > 1].index
+
+        df = self.get_trips()
+        df["hasTransfer"] = False
+        df.loc[df.journey_id.isin(j_ids), "hasTransfer"] = True
+
+    def journey_is_simba(self):
+        df = self.get_legs()
+        j_ids = df[df[IS_SIMBA_FQ]].journey_id.unique()
+
+        df = self.get_trips()
+        df[IS_SIMBA_FQ] = False
+        df.loc[df.journey_id.isin(j_ids), IS_SIMBA_FQ] = True
 
     def merge_trips_persons(self):
         if not self.trip_persons_merged:
@@ -194,40 +292,78 @@ class Run:
             self.link_merged = True
         return self.get_linkvolumes()
 
-    def _do(self, df, by, value, foreach=None, aggfunc="count", percent=None, **kwargs):
+    def _do(self, df, by, value, foreach=None, aggfunc="count", percent=None, inverse_percent_axis=False,
+            percent_level=None, **kwargs):
+        def check_variable(values):
+            if not isinstance(values, list):
+                values = [values]
+            for _value in values:
+                if _value not in df.columns:
+                    df[_value] = "Undefined"
+
+        def make_percent(df):
+            if inverse_percent_axis:
+                do = False
+                if df.columns.nlevels > 1:
+                    do = True
+                    df = df.stack(percent_level)
+                _df = df.sum(axis=1)
+                df = df.divide(_df, axis=0)
+                if do:
+                    df = df.unstack(percent_level)
+                    df = df.swaplevel(0, 1, axis=1)
+            else:
+                df = df.divide(df.sum(level=percent_level))
+            return df
+
+        check_variable(by)
+        check_variable(foreach)
+
         if foreach is not None:
-            df = df.pivot_table(index=by, columns=foreach, values=value, aggfunc=aggfunc).fillna(0)*self.scale_factor
-            if percent:
-                df = df.divide(df.sum())
-            return df.fillna(0)
+            df = df.pivot_table(index=by, columns=foreach, values=value, aggfunc=aggfunc) * self.scale_factor
         else:
-            return df.groupby(by).agg({value: aggfunc})*self.scale_factor
+            df = df.groupby(by).agg({value: aggfunc}) * self.scale_factor
+
+        if percent:
+            df = make_percent(df)
+
+        return df.fillna(0)
 
     @cache
     def calc_nb_trips(self, by=mode_trip, **kwargs):
-        return self._do(self.get_trips(), by=by, value=trip_id, aggfunc="count", **kwargs)
+        return self._do(self.get_trips(), by=by, value=PF, aggfunc="sum", **kwargs)
 
     @cache
     def calc_nb_legs(self, **kwargs):
-        return self._do(self.get_legs(), value=leg_id, aggfunc="count", **kwargs)
+        return self._do(self.get_legs(), value=PF, aggfunc="sum", **kwargs)
 
     @cache
     def calc_dist_trips(self, **kwargs):
-        return self._do(self.get_trips(), value=distance_field, aggfunc="sum", **kwargs)
+        return self._do(self.get_trips(), value=PKM, aggfunc="sum", **kwargs)
 
     @cache
     def calc_dist_legs(self, **kwargs):
-        return self._do(self.get_legs(), value=distance_field, aggfunc="sum", **kwargs)
+        return self._do(self.get_legs(), value=PKM, aggfunc="sum", **kwargs)
 
     @cache
-    def calc_dist_distr_trips(self, **kwargs):
+    def calc_dist_distr_trips(self, inverse_percent_axis=False, rotate=True, **kwargs):
         self.create_distance_class_for_trips()
-        return self._do(self.get_trips(), by="cat_dist", value=trip_id, aggfunc="count", **kwargs).cumsum()
+        df = self._do(self.get_trips(), by=CAT_DIST, value=PF, aggfunc="sum", rotate=rotate,
+                      inverse_percent_axis=inverse_percent_axis, **kwargs)
+        if inverse_percent_axis:
+            return df
+        else:
+            return df.cumsum()
 
     @cache
-    def calc_dist_distr_legs(self, **kwargs):
+    def calc_dist_distr_legs(self, inverse_percent_axis=False, rotate=True, **kwargs):
         self.create_distance_class_for_legs()
-        return self._do(self.get_legs(), by="cat_dist", value=leg_id, aggfunc="count", **kwargs).cumsum()
+        df = self._do(self.get_legs(), by=CAT_DIST, value=PF, aggfunc="sum", rotate=rotate,
+                      inverse_percent_axis=inverse_percent_axis, **kwargs)
+        if inverse_percent_axis:
+            return df
+        else:
+            return df.cumsum()
 
     def plot_timing(self):
         analyse.plot.plot_timing(self.path)
@@ -237,41 +373,65 @@ class Run:
 
     @cache
     def calc_einsteiger(self, codes=None, **kwargs):
-        def make_code(stop_id):
-            a = stop_id.split("_")
-            if len(a) == 2:
-                return a[1]
-            else:
-                return None
+        df = self.get_pt_legs()
 
-        df = self.get_legs()
-        df = pd.DataFrame(df[df.boarding_stop.notnull()])
+        try:
+            df = df.merge(right=self.get_stop_attributes(), how="left", left_on="boarding_stop", right_on="stop_id")
+            df.rename(columns={"03_Stop_Code": "03_Stop_Code_boarding"}, inplace=True)
+        except KeyError as e:
+            logging.warn(e)
 
-        df["CODE"] = df["boarding_stop"].apply(make_code)
-
-        df = self._do(df, value=leg_id, aggfunc="count", **kwargs)
+        df = self._do(df, value=PF, aggfunc="sum", **kwargs)
 
         if codes is not None:
+
             df = df.loc[codes]
 
+        gc.collect()
         return df
+
+    @cache
+    def calc_pt_pkm(self, indices, **kwargs):
+        df = self.get_pt_legs()
+        try:
+            df = df.merge(right=self.get_route_attributes(), how="left", left_on="route", right_on="route_id")
+        except KeyError as e:
+            logging.warn(e)
+
+        df = self._do(df, value=PKM, aggfunc="sum",  **kwargs)
+        df = df.loc[indices]
+
+        gc.collect()
+        return df
+
+    @cache
+    def calc_dist_distr_pt_legs(self, inverse_percent_axis=False, rotate=True, **kwargs):
+        self.create_distance_class_for_legs()
+        df = self.get_pt_legs()
+        try:
+            df = df.merge(right=self.get_route_attributes(), how="left", left_on="route", right_on="route_id")
+        except KeyError as e:
+            logging.warn(e)
+
+        df = self._do(df, by=CAT_DIST, value=PF, aggfunc="sum", rotate=rotate,
+                      inverse_percent_axis=inverse_percent_axis, **kwargs)
+        if inverse_percent_axis:
+            return df
+        else:
+            return df.cumsum()
 
     @cache
     def calc_vehicles(self, names=None, **kwargs):
         df = self.get_linkvolumes()
-        df = self._do(df, value="volume", aggfunc="sum", **kwargs)
+        df = self._do(df, value=VOLUME, aggfunc="sum", **kwargs)
         if names is not None:
             df = df.loc[names]
         return df
 
     @staticmethod
-    def _create_distance_class(df, column="distance", classes=None, labels=None, category_column="cat_dist"):
-        if classes is None:
-            classes = np.array([-1, 0 , 2, 4, 6, 8, 10, 15, 20, 25, 30, 40, 50, 100, 150, 200, 250, 300, np.inf])*1000.0
-            labels = []
-            for i in range(len(classes) - 2):
-                labels.append("%i-%i km" % (classes[i] / 1000.0, classes[i+1] / 1000.0))
-            labels.append("-")
+    def _create_distance_class(df, column=DISTANCE, category_column=CAT_DIST):
+        classes = distance_classes
+        labels = distance_labels
 
         df[category_column] = pd.cut(df[column], classes, labels=labels)
 
@@ -281,4 +441,20 @@ class Run:
     def create_distance_class_for_trips(self, **kwargs):
         self._create_distance_class(self.get_trips(), **kwargs)
 
+    @staticmethod
+    def _create_starttime_class(df):
+        logging.info("creating start_time category")
+        df[CAT_START_TIME] = df[START_TIME] // (60*60)
 
+    def create_starttime_class_for_legs(self):
+        self._create_starttime_class(self.get_legs())
+
+    def create_starttime_class_for_trips(self):
+        self._create_starttime_class(self.get_trips())
+
+
+
+
+distance_classes = np.array([-1, 0, 2, 4, 6, 8, 10, 15, 20, 25, 30, 40, 50, 100, 150, 200, 250, 300, np.inf]) * 1000.0
+distance_labels = ["0", "0-2", "2-4", "4-6", "6-8", "8-10", "10-15", "15-20", "20-25", "25-30", "30-40", "40-50",
+                   "50-100", "100-150", "150-200", "200-250", "250-300", "300+"]

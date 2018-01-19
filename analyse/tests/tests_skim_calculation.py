@@ -35,7 +35,6 @@ class MyTestCase(unittest.TestCase):
         self.assertAlmostEqual(skims_bv_nese["distance"].iloc[0], 10.11100000, places=5, msg="distanz")
         self.assertAlmostEqual(skims_bv_nese["PFAHRT"].iloc[0], 14.573, places=5, msg="pf")
 
-
     def test_skims_for_matsim_legs(self):
         path_data = os.path.join("..", "..", "data_in", "test")
 
