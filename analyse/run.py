@@ -443,11 +443,11 @@ class Run:
     def _create_starttime_class(df):
         df[CAT_START_TIME] = df[START_TIME] // (60*60)
 
-    def create_starttime_class_for_legs(self, **kwargs):
-        self._create_starttime_class(self.get_legs(), **kwargs)
+    def create_starttime_class_for_legs(self):
+        self._create_starttime_class(self.get_legs())
 
-    def create_starttime_class_for_trips(self, **kwargs):
-        self._create_starttime_class(self.get_trips(), **kwargs)
+    def create_starttime_class_for_trips(self):
+        self._create_starttime_class(self.get_trips())
 
 
 
