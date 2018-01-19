@@ -441,6 +441,7 @@ class Run:
 
     @staticmethod
     def _create_starttime_class(df):
+        logging.info("creating start_time category")
         df[CAT_START_TIME] = df[START_TIME] // (60*60)
 
     def create_starttime_class_for_legs(self):
