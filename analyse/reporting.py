@@ -188,7 +188,7 @@ def get_datas(runs, ref, stop_attributes):
         logging.error(e)
 
     try:
-        df, fig = runs.plot_pt_pkm_operator(operators=ref.operators,
+        df, fig = runs.plot_pt_pkm(by="t 06_OperatorName", indices=ref.operators,
                                      ref_run=ref.get_pt_run())
         datas.append(SheetData(df, fig, "OV PKM pro Betreiber"))
     except Exception as e:

@@ -382,7 +382,7 @@ class Run:
         return df
 
     @cache
-    def calc_pt_pkm_operator(self, operators, **kwargs):
+    def calc_pt_pkm(self, indices, **kwargs):
         df = self.get_legs()
 
         if "boarding_stop" in df.columns:
@@ -393,8 +393,8 @@ class Run:
         except KeyError as e:
             logging.warn(e)
 
-        df = self._do(df, value=PKM, aggfunc="sum", by="06_OperatorName", **kwargs)
-        df = df.loc[operators]
+        df = self._do(df, value=PKM, aggfunc="sum",  **kwargs)
+        df = df.loc[indices]
 
         gc.collect()
         return df
