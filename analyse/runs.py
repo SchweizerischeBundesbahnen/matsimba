@@ -91,7 +91,7 @@ class RunsList(list):
     def get_pkm_distr_trips(self, **kwargs):
         return self._get(analyse.run.Run.calc_dist_distr_trips, **kwargs)
 
-    def get_pt_pkm_distr_trips(self, **kwargs):
+    def get_pt_pkm_distr_legs(self, **kwargs):
         return self._get(analyse.run.Run.calc_dist_distr_pt_legs, **kwargs)
 
     def plot_pkm_distr_legs(self, **kwargs):
