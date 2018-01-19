@@ -309,9 +309,7 @@ class Run:
                     df = df.stack(percent_level)
                 _df = df.sum(axis=1)
                 df = df.divide(_df, axis=0)
-                print df.columns
                 if do:
-                    print df.columns
                     df = df.unstack(percent_level)
                     df = df.swaplevel(0, 1, axis=1)
             else:
