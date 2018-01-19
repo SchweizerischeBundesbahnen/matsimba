@@ -24,3 +24,6 @@ SEASON_TICKET = "season_ticket"
 PF = "PF"
 PKM = "PKM"
 CARAVAIL = "carAvail"
+START_TIME="start_time"
+CAT_START_TIME="cat_start_time"
+
