@@ -441,7 +441,7 @@ class Run:
 
     @staticmethod
     def _create_starttime_class(df, category_column=CAT_START_TIME):
-        df[category_column] = pd[START_TIME] // (60*60)
+        df[category_column] = df[START_TIME] // (60*60)
 
     def create_starttime_class_for_legs(self, **kwargs):
         self._create_starttime_class(self.get_legs(), **kwargs)
