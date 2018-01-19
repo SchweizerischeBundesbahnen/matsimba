@@ -205,6 +205,10 @@ def get_datas(runs, ref, stop_attributes):
     except Exception as e:
         logging.error(e)
 
-
+    try:
+        df, fig = runs.plot_nb_legs(by=CAT_START_TIME, foreach="mode", kind="line", ref_run=ref.get_pt_run())
+        datas.append(SheetData(df, fig, "Tagesganglinien pro Mode (Teilwege)"))
+    except Exception as e:
+        logging.error(e)
 
     return datas
