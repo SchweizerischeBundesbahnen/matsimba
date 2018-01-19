@@ -194,4 +194,11 @@ def get_datas(runs, ref, stop_attributes):
     except Exception as e:
         logging.error(e)
 
+    try:
+        df, fig = runs.plot_pt_pkm(by="08_TSysName",
+                                   indices=ref.tsys_names, ref_run=ref.get_pt_run())
+        datas.append(SheetData(df, fig, "OV PKM pro VSys"))
+    except Exception as e:
+        logging.error(e)
+
     return datas

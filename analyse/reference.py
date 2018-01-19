@@ -22,6 +22,10 @@ class Reference:
         self.path_pt_legs = path_pt_legs
 
         self.stations = ['ZUE', 'BN', 'W', 'ZOER', 'BS', 'ZSTH', 'GE', 'LS', 'LZ', "OL", "ZHDB", "BI"]
+        self.tsys_names = ['GB', 'LB', 'FUN', 'BUS', 'NFB', 'NFO', 'KB', 'M', 'NFT', 'T',
+                           'FV-RV - ProduktC', 'RV - ProduktD', 'IPV - Regionalverkehr',
+                           'FV - ProduktA', 'FV - ProduktB', 'IPV - HGV',
+                           'IPV - Konventionell', 'BAT', 'FAE']
 
         self.count_stations = ['WALLISELLEN (AB)',
                                'MUTTENZ, HARD (AB)',
@@ -75,6 +79,7 @@ class Reference:
                                  "ABFAHRT": "start_time",
                                  "ANKUNFT": "end_time",
                                  "WEITE": "distance",
+                                 r"OEVVSYS\NAME": r"08_TSysName",
                                  "FAHRZEITPROFIL\LINIENROUTE\LINIE\BETREIBER\NAME": "06_OperatorName",
                                  "STARTFZPELEM\LINIENROUTENELEMENT\HALTEPUNKT\HALTESTELLENBEREICH\HALTESTELLE\CODE": "03_Stop_Code_boarding",
                                  "ENDFZPELEM\LINIENROUTENELEMENT\HALTEPUNKT\HALTESTELLENBEREICH\HALTESTELLE\CODE": "03_Stop_Code_alighting"
