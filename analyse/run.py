@@ -238,6 +238,7 @@ class Run:
         df = self.merge_trips_persons()
         df = self.merge_legs_persons()
 
+        self.create_starttime_class_for_legs()
         if ref is not None:
             #self.merge_link_id_to_name(ref.get_count_stations()[["link_id", "name"]])
             pass
