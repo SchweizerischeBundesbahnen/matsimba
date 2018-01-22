@@ -7,6 +7,7 @@ import json
 import time
 import numpy as np
 import analyse.skims
+from analyse.skims import get_legs_simba_binnenverkehr_fq
 from variable import *
 import gc
 
@@ -117,6 +118,13 @@ class Run:
             df = pd.DataFrame(df[df.boarding_stop.notnull()])
         return df
 
+    def get_simba_binnenverkehr_fq_legs(self, name_perimeter_attribute):
+        stop_attributes = self.get_stop_attributes()
+        stops_in_perimeter = stop_attributes[stop_attributes[name_perimeter_attribute] == "1"][STOP_ID].unique()
+        stops_in_fq = stop_attributes[stop_attributes[FQ_RELEVANT] == "1"][STOP_ID].unique()
+        df = get_legs_simba_binnenverkehr_fq(self.get_pt_legs(), stops_in_perimeter, stops_in_fq)
+        return df
+
     def get_vehjourneys(self):
         return self._get("vehjourneys")
 
@@ -223,8 +231,8 @@ class Run:
         if stop_ids_perimeter is not None and defining_stop_ids is not None:
             df = self.get_legs()
             df = df[df.line.notnull()]
-            fq_legs = analyse.skims.filter_legs_to_binnenverkehr_fq_legs(df, stop_ids_perimeter=stop_ids_perimeter,
-                                                                         defining_stop_ids=defining_stop_ids)
+            fq_legs = analyse.skims.get_legs_simba_binnenverkehr_fq(df, stop_ids_perimeter=stop_ids_perimeter,
+                                                                    defining_stop_ids=defining_stop_ids)
             df = self.get_legs()
             df[IS_SIMBA_FQ] = False
             df.loc[df.trip_id.isin(fq_legs.trip_id), IS_SIMBA_FQ] = True

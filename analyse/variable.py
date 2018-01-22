@@ -26,4 +26,6 @@ PKM = "PKM"
 CARAVAIL = "carAvail"
 START_TIME="start_time"
 CAT_START_TIME="cat_start_time"
+FQ_RELEVANT = "07_FQ_relevant"
+STOP_ID = "stop_id"
 

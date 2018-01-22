@@ -5,7 +5,7 @@ import unittest
 
 import pandas as pd
 
-from analyse.skims import filter_legs_to_binnenverkehr_fq_legs, prepare_oevteilwege_visum, \
+from analyse.skims import get_legs_simba_binnenverkehr_fq, prepare_oevteilwege_visum, \
     get_station_to_station_skims, read_stops_in_perimeter, read_fqrelevant_stops_in_perimeter, read_oev_teilwege_visum, \
     read_matsim_trips
 
@@ -38,8 +38,8 @@ class MyTestCase(unittest.TestCase):
 
         df_oevteilwege_visum_prepared = read_oev_teilwege_visum(path_oev_teilwege_visum)
 
-        fq_legs_visum = filter_legs_to_binnenverkehr_fq_legs(df_oevteilwege_visum_prepared, stop_ids_cnb,
-                                                             stops_ids_fq_relevant, from_simba_visum=True)
+        fq_legs_visum = get_legs_simba_binnenverkehr_fq(df_oevteilwege_visum_prepared, stop_ids_cnb,
+                                                        stops_ids_fq_relevant, from_simba_visum=True)
 
         skims_visum = get_station_to_station_skims(fq_legs_visum, from_simba_visum=True)
         skims_bv_nese = skims_visum[
@@ -62,8 +62,8 @@ class MyTestCase(unittest.TestCase):
 
         df_trips_matsim = read_matsim_trips(path_trips_matsim)
 
-        fq_legs_matsim = filter_legs_to_binnenverkehr_fq_legs(df_trips_matsim, stop_ids_cnb,
-                                                              stops_ids_fq_relevant)
+        fq_legs_matsim = get_legs_simba_binnenverkehr_fq(df_trips_matsim, stop_ids_cnb,
+                                                         stops_ids_fq_relevant)
 
         skims_matsim = get_station_to_station_skims(fq_legs_matsim, factor=10.0)
         skims_bi_ins = skims_matsim[
@@ -81,7 +81,7 @@ class MyTestCase(unittest.TestCase):
         df_trips = pd.read_csv(path_trips_matsim, sep="\t")
         stop_ids_cnb = read_stops_in_perimeter(path_att_file, "ISTSIMBABAHNCNBPERIMETER")
         stops_ids_fq_relevant = read_fqrelevant_stops_in_perimeter(path_att_file, stop_ids_cnb)
-        fq_legs_matsim = filter_legs_to_binnenverkehr_fq_legs(df_trips, stop_ids_cnb, stops_ids_fq_relevant)
+        fq_legs_matsim = get_legs_simba_binnenverkehr_fq(df_trips, stop_ids_cnb, stops_ids_fq_relevant)
         self.assertEquals(len(fq_legs_matsim) > 0, True,
                           msg="filtered matsim trips with nettype npvm must be non empty")
 
@@ -93,8 +93,8 @@ class MyTestCase(unittest.TestCase):
         df_trips = pd.read_csv(path_trips_matsim, sep="\t")
         stop_ids_cnb = set(pd.read_csv(path_stop_ids_cnb, sep=";")["stop_id"].unique())
         stop_ids_cnb_normalspur = set(pd.read_csv(path_stop_ids_cnb_normalspur, sep=";")["stop_id"].unique())
-        fq_legs_matsim = filter_legs_to_binnenverkehr_fq_legs(df_trips, stop_ids_cnb, stop_ids_cnb_normalspur,
-                                                              nettype="nettype_cnb1p3")
+        fq_legs_matsim = get_legs_simba_binnenverkehr_fq(df_trips, stop_ids_cnb, stop_ids_cnb_normalspur,
+                                                         nettype="nettype_cnb1p3")
         self.assertEquals(len(fq_legs_matsim) > 0, True,
                           msg="filtered matsim trips with nettype cnb1pe must be non empty")
 

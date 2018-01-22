@@ -154,8 +154,8 @@ def filter_to_journeys_with_at_least_one_leg_in_defining_stops(df_legs, defining
     return df_legs_res[cols]
 
 
-def filter_legs_to_binnenverkehr_fq_legs(df_legs, stop_ids_perimeter, defining_stop_ids,
-                                         from_simba_visum=False, nettype = "nettype_npvm"):
+def get_legs_simba_binnenverkehr_fq(df_legs, stop_ids_perimeter, defining_stop_ids,
+                                    from_simba_visum=False, nettype = "nettype_npvm"):
     if nettype == "nettype_npvm":
         is_simba_line = is_simba_line_nettype_npvm
     elif nettype == "nettype_cnb1p3":
