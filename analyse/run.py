@@ -88,7 +88,8 @@ dtypes = {u'activity_id': str,
 
 
 class Run:
-    def __init__(self, path=None, name=None, runId=None, scale_factor=1.0):
+    def __init__(self, path=None, name=None, runId=None, scale_factor=1.0, perimeter_attribute="09_SIMBA_CH_Perimeter",
+                 datenherkunft_attribute="SBB_Simba.CH_2016"):
         self.path = path
         self.name = name
         self.scale_factor = scale_factor
@@ -99,6 +100,8 @@ class Run:
         self.trip_persons_merged = False
         self.legs_persons_merged = False
         self.link_merged = False
+        self.name_perimeter_attribute = perimeter_attribute
+        self.name_datenherkunft_attribute = datenherkunft_attribute
 
     def get_persons(self):
         return self._get("persons")
@@ -114,22 +117,20 @@ class Run:
 
     def get_pt_legs(self):
         df = self.get_legs()
-        if "boarding_stop" in df.columns:
-            df = pd.DataFrame(df[df.boarding_stop.notnull()])
-        return df
 
-    def set_simba_binnenverkehr_fq_attributes(self, name_perimeter_attribute, name_datenherkunft_attribute):
+        df = pd.DataFrame(df[df.boarding_stop.notnull()])
+
         stop_attributes = self.get_stop_attributes()
-        stops_in_perimeter = stop_attributes[stop_attributes[name_perimeter_attribute] == "1"][STOP_ID].unique()
+        stops_in_perimeter = stop_attributes[stop_attributes[self.name_perimeter_attribute] == "1"][STOP_ID].unique()
         stops_in_fq = stop_attributes[stop_attributes[FQ_RELEVANT] == "1"][STOP_ID].unique()
         route_attributes = self.get_route_attributes()
-        routes_simba = route_attributes[route_attributes["01_Datenherkunft"] == name_datenherkunft_attribute][
+        routes_simba = route_attributes[route_attributes["01_Datenherkunft"] == self.name_datenherkunft_attribute][
             "route_id"].unique()
-        df = set_simba_binnenverkehr_fq_attributes(self.get_pt_legs(), stops_in_perimeter, stops_in_fq, routes_simba)
+        df = set_simba_binnenverkehr_fq_attributes(df, stops_in_perimeter, stops_in_fq, routes_simba)
         return df
 
-    def filter_to_simba_binnenverkehr_fq_legs(self, name_perimeter_attribute, name_datenherkunft_attribute):
-        df = self.set_simba_binnenverkehr_fq_attributes(name_perimeter_attribute, name_datenherkunft_attribute)
+    def filter_to_simba_binnenverkehr_fq_legs(self):
+        df = self.get_pt_legs(self.name_perimeter_attribute, self.name_datenherkunft_attribute)
         return df[df[IS_SIMBA] & df.is_binnenverkehr_simba & df.journey_has_fq_leg]
 
     def get_vehjourneys(self):
