@@ -93,6 +93,7 @@ class Reference:
 
         teilwege[PKM] = teilwege[PF] * teilwege.distance
         teilwege["mode"] = "pt"
+        teilwege[IS_SIMBA] = True
         teilwege[SUBPOPULATION] = self.subpopulation
 
         pt_run = analyse.run.Run(name=name)
