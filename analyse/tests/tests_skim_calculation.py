@@ -73,14 +73,14 @@ class MyTestCase(unittest.TestCase):
 
     def test_full_cnb_matsim_trips_nettype_npvm(self):
         path_data = os.path.join("..", "..", "data_in", "test")
-        run = Run()
+        run = Run(perimeter_attribute="09_SIMBA_CNB_Perimeter", datenherkunft_attribute="SBB_Simba.CH_2016")
         run.load_stop_attributes(os.path.join(path_data, "stopAttributes.xml.gz"))
         run.load_route_attributes(os.path.join(path_data, "routeAttributes.xml.gz"))
         run.data["legs"] = pd.read_csv(os.path.join(path_data, "matsim_trips.txt"), sep="\t")
-        self.assertEqual(len(run.data["legs"]), 204145)
-        df_processed = run.set_simba_binnenverkehr_fq_attributes("09_SIMBA_CNB_Perimeter", "SBB_Simba.CH_2016")
+        self.assertEqual(len(run.get_legs()), 204145)
+        df_processed = run.get_pt_legs()
         self.assertEqual(len(df_processed), 204145)
-        fq_legs_matsim = run.filter_to_simba_binnenverkehr_fq_legs("09_SIMBA_CNB_Perimeter", "SBB_Simba.CH_2016")
+        fq_legs_matsim = run.filter_to_simba_binnenverkehr_fq_legs()
         self.assertEqual(len(fq_legs_matsim), 4152)
         self.assertEquals(len(fq_legs_matsim) > 0, True,
                           msg="filtered matsim trips with nettype npvm must be non empty")

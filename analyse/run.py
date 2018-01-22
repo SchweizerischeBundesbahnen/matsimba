@@ -130,7 +130,7 @@ class Run:
         return df
 
     def filter_to_simba_binnenverkehr_fq_legs(self):
-        df = self.get_pt_legs(self.name_perimeter_attribute, self.name_datenherkunft_attribute)
+        df = self.get_pt_legs()
         return df[df[IS_SIMBA] & df.is_binnenverkehr_simba & df.journey_has_fq_leg]
 
     def get_vehjourneys(self):
