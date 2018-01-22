@@ -79,6 +79,8 @@ class Reference:
                                  "ABFAHRT": "start_time",
                                  "ANKUNFT": "end_time",
                                  "WEITE": "distance",
+                                 "VONHPUNKTNR": "boarding_stop",
+                                 "NACHHPUNKTNR": "alighting_stop",
                                  r"OEVVSYS\NAME": r"08_TSysName",
                                  "FAHRZEITPROFIL\LINIENROUTE\LINIE\BETREIBER\NAME": "06_OperatorName",
                                  "STARTFZPELEM\LINIENROUTENELEMENT\HALTEPUNKT\HALTESTELLENBEREICH\HALTESTELLE\CODE": "03_Stop_Code_boarding",
