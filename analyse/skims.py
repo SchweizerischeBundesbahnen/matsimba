@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: cp1252-*-
 import pandas as pd
-
+import logging
 from analyse.variable import IS_SIMBA, JOURNEY_ID, TRIP_ID, BOARDING_STOP, START_TIME, ALIGHTING_STOP, END_TIME, STOP_ID
 from vimapy.helpers import hhmmss_to_seconds, seconds_to_hhmmss
 
@@ -10,13 +10,17 @@ pd.options.mode.chained_assignment = None
 
 # noinspection PyShadowingNames
 def set_is_simba_leg(df_legs, routes_simba):
+    logging.info("setting is_simba")
     if not IS_SIMBA in df_legs.columns:
         df_legs[IS_SIMBA] = df_legs.route.apply(lambda x: x in routes_simba)
+
+    logging.info("done setting is_simba")
     return df_legs
 
 
 def set_binnenverkehr_attributes(df_legs, stops_in_perimeter):
     # get information of first leg per journey
+    logging.info("setting binnernverkehr attributes")
     df_legs_filtered = df_legs[df_legs[IS_SIMBA]]
     first_leg = df_legs_filtered[[JOURNEY_ID, TRIP_ID]].groupby(JOURNEY_ID).min().reset_index()
     first_leg.columns = [JOURNEY_ID, "start_id"]
@@ -41,10 +45,12 @@ def set_binnenverkehr_attributes(df_legs, stops_in_perimeter):
         raise ValueError(
             "nb of legs changed. before: {}. after: {}".format(nb_legs_before, len(df_legs)))
     df_legs["is_binnenverkehr_simba"] = df_legs["start_simba_stop_in_perimeter"] & df_legs["last_simba_stop_in_perimeter"]
+    logging.info("done setting binnernverkehr attributes")
     return df_legs
 
 
 def set_is_fq_journey(df_legs, defining_stop_ids):
+    logging.info("setting fq journey attributes")
     df_legs_filered = df_legs[df_legs[IS_SIMBA] & df_legs["is_binnenverkehr_simba"]]
     df_legs_filered["leg_is_fq"] = df_legs_filered[BOARDING_STOP].isin(defining_stop_ids) & \
                                    df_legs_filered[ALIGHTING_STOP].isin(defining_stop_ids)
@@ -56,6 +62,7 @@ def set_is_fq_journey(df_legs, defining_stop_ids):
     if len(df_legs) != nb_legs_before:
         raise ValueError(
             "nb of legs changed. before: {}. after: {}".format(len(df_legs), nb_legs_before))
+    logging.info("done setting fq journey attributes")
     return df_legs
 
 
