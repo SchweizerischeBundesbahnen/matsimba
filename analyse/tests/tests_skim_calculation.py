@@ -7,6 +7,7 @@ import pandas as pd
 
 from analyse.run import Run
 from analyse.skims import read_matsim_trips
+from analyse.variable import DISTANCE, PF
 
 
 class MyTestCase(unittest.TestCase):
@@ -75,10 +76,14 @@ class MyTestCase(unittest.TestCase):
 
     def test_cnb_matsim_trips_skims(self):
         path_data = os.path.join("..", "..", "data_in", "test")
-        run = Run(perimeter_attribute="09_SIMBA_CNB_Perimeter", datenherkunft_attribute="SBB_Simba.CH_2016")
+        run = Run(perimeter_attribute="09_SIMBA_CNB_Perimeter",
+                  datenherkunft_attribute="SBB_Simba.CH_2016",
+                  scale_factor=10)
         run.load_stop_attributes(os.path.join(path_data, "stopAttributes.xml.gz"))
         run.load_route_attributes(os.path.join(path_data, "routeAttributes.xml.gz"))
         run.data["legs"] = read_matsim_trips(os.path.join(path_data, "matsim_trips.txt"))
+        run.data["journeys"] = pd.DataFrame(columns=[DISTANCE])
+        run._set_dummy_pf()
         self.assertEqual(len(run.get_legs()), 204145)
         df_processed = run.get_pt_legs()
         self.assertEqual(len(df_processed), 204145)
@@ -86,6 +91,8 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(len(fq_legs_matsim), 4152)
         self.assertEquals(len(fq_legs_matsim) > 0, True,
                           msg="filtered matsim trips with nettype npvm must be non empty")
+        skims = run.get_skims_simba()
+        self.assertEqual(len(skims), 220)
 
 if __name__ == '__main__':
     unittest.main()

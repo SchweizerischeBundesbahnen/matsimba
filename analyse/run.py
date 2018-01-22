@@ -135,7 +135,7 @@ class Run:
             df = set_simba_binnenverkehr_fq_attributes(df, stops_in_perimeter, stops_in_fq, routes_simba)
 
             self.data["pt_legs"] = df[cols+[IS_SIMBA, "is_binnenverkehr_simba", "journey_has_fq_leg",
-                                            "start_time_first_stop", "end_time_last_stop"]]
+                                            "start_time_first_stop", "end_time_last_stop", "first_stop", "last_stop"]]
 
         return pd.DataFrame(self.data["pt_legs"])
 
@@ -143,9 +143,10 @@ class Run:
         df = self.get_pt_legs()
         return df[df[IS_SIMBA] & df.is_binnenverkehr_simba & df.journey_has_fq_leg]
 
-    def get_simba_stop_to_simba_stop_pt_skims(self):
+    def get_skims_simba(self):
         df = self.filter_to_simba_binnenverkehr_fq_legs()
         skims = get_station_to_station_skims(df)
+        return skims
 
     def get_vehjourneys(self):
         return self._get("vehjourneys")
@@ -221,11 +222,11 @@ class Run:
     def _set_dummy_pf(self):
         df = self.get_legs()
         df[PF] = self.scale_factor
-        df[PKM] = df[DISTANCE]*self[PF]
+        df[PKM] = df[DISTANCE]*df[PF]
 
         df = self.get_trips()
         df[PF] = self.scale_factor
-        df[PKM] = df[DISTANCE]*self[PF]
+        df[PKM] = df[DISTANCE]*df[PF]
 
     def prepare(self, stop_ids_perimeter=None, defining_stop_ids=None, ref=None, persons=None, stop_attribute_path=None, route_attribute_path=None):
         self.unload_data()
