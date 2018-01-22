@@ -100,7 +100,7 @@ class Reference:
         c = teilwege.WEGIND.apply(lambda x: to_int(0, 0, x))
         teilwege[trip_id] = a + b + c
 
-        teilwege[leg_id] = teilwege[trip_id] + "_" + teilwege.TWEGIND.map(str)
+        teilwege[leg_id] = teilwege[trip_id].map(str) + "_" + teilwege.TWEGIND.map(str)
 
         teilwege[PKM] = teilwege[PF] * teilwege.distance
         teilwege["mode"] = "pt"
