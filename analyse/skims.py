@@ -29,6 +29,7 @@ def set_binnenverkehr_attributes(df_legs, stops_in_perimeter):
     first_leg = first_leg[[JOURNEY_ID, "start_id", BOARDING_STOP, START_TIME]]
     first_leg.columns = [JOURNEY_ID, "start_id", "first_stop", "start_time_first_stop"]
 
+    logging.info("get information of last leg per journey")
     # get information of last leg per journey
     last_leg = df_legs_filtered[[JOURNEY_ID, TRIP_ID]].groupby(JOURNEY_ID).max().reset_index()
     last_leg.columns = [JOURNEY_ID, "last_id"]
@@ -36,6 +37,7 @@ def set_binnenverkehr_attributes(df_legs, stops_in_perimeter):
     last_leg = last_leg[[JOURNEY_ID, "last_id", ALIGHTING_STOP, END_TIME]]
     last_leg.columns = [JOURNEY_ID, "last_id", "last_stop", "end_time_last_stop"]
 
+    logging.info("combine information on first and last leg per journey")
     # combine information on first and last leg per journey
     first_last_leg_info = first_leg.merge(last_leg, on=JOURNEY_ID)
     first_last_leg_info["start_simba_stop_in_perimeter"] = first_last_leg_info["first_stop"].isin(stops_in_perimeter)
