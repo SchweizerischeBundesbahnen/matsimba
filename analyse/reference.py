@@ -87,7 +87,7 @@ class Reference:
                                  "ENDFZPELEM\LINIENROUTENELEMENT\HALTEPUNKT\HALTESTELLENBEREICH\HALTESTELLE\CODE": "03_Stop_Code_alighting"
                                  }, inplace=True)
 
-        teilwege = teilwege[teilwege.VONHPUNKTNR.notnull()]
+        teilwege = teilwege[teilwege.boarding_stop.notnull()]
         teilwege[trip_id] = teilwege.QBEZNR.map(str) + "_" + teilwege.ZBEZNR.map(str) + "_" + teilwege.WEGIND.map(str)
         teilwege[leg_id] = teilwege[trip_id] + "_" + teilwege.TWEGIND.map(str)
 
