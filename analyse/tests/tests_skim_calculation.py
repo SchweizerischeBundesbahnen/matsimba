@@ -82,6 +82,7 @@ class MyTestCase(unittest.TestCase):
         stop_ids_cnb = read_stops_in_perimeter(path_att_file, "ISTSIMBABAHNCNBPERIMETER")
         stops_ids_fq_relevant = read_fqrelevant_stops_in_perimeter(path_att_file, stop_ids_cnb)
         fq_legs_matsim = get_legs_simba_binnenverkehr_fq(df_trips, stop_ids_cnb, stops_ids_fq_relevant)
+        self.assertEqual(len(fq_legs_matsim), 4153)
         self.assertEquals(len(fq_legs_matsim) > 0, True,
                           msg="filtered matsim trips with nettype npvm must be non empty")
 
