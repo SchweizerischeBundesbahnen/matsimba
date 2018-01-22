@@ -20,6 +20,7 @@ def set_is_simba_leg(df_legs, routes_simba):
 
 def set_binnenverkehr_attributes(df_legs, stops_in_perimeter):
     # get information of first leg per journey
+    stops_in_perimeter = set(stops_in_perimeter)
     logging.info("setting binnernverkehr attributes")
     df_legs_filtered = df_legs[df_legs[IS_SIMBA]]
     first_leg = df_legs_filtered[[JOURNEY_ID, TRIP_ID]].groupby(JOURNEY_ID).min().reset_index()
@@ -51,6 +52,7 @@ def set_binnenverkehr_attributes(df_legs, stops_in_perimeter):
 
 def set_is_fq_journey(df_legs, defining_stop_ids):
     logging.info("setting fq journey attributes")
+    defining_stop_ids = set(defining_stop_ids)
     df_legs_filered = df_legs[df_legs[IS_SIMBA] & df_legs["is_binnenverkehr_simba"]]
     df_legs_filered["leg_is_fq"] = df_legs_filered[BOARDING_STOP].isin(defining_stop_ids) & \
                                    df_legs_filered[ALIGHTING_STOP].isin(defining_stop_ids)
