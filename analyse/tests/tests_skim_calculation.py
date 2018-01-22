@@ -86,11 +86,10 @@ class MyTestCase(unittest.TestCase):
         run._set_dummy_pf()
         self.assertEqual(len(run.get_legs()), 204145)
         df_processed = run.get_pt_legs()
-        self.assertEqual(len(df_processed), 204145)
+        self.assertEqual(len(df_processed), 36901)
         fq_legs_matsim = run.filter_to_simba_binnenverkehr_fq_legs()
         self.assertEqual(len(fq_legs_matsim), 4152)
-        self.assertEquals(len(fq_legs_matsim) > 0, True,
-                          msg="filtered matsim trips with nettype npvm must be non empty")
+
         skims = run.get_skims_simba()
         self.assertEqual(len(skims), 220)
 

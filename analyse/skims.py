@@ -14,7 +14,6 @@ def set_is_simba_leg(df_legs, routes_simba):
     logging.info("setting is_simba")
     if not IS_SIMBA in df_legs.columns:
         df_legs[IS_SIMBA] = df_legs.route.apply(lambda x: x in routes_simba)
-
     logging.info("done setting is_simba")
     return df_legs
 
