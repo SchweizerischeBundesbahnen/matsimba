@@ -117,6 +117,7 @@ class Run:
 
     def get_pt_legs(self):
         df = self.get_legs()
+        cols = list(df.columns)
 
         df = pd.DataFrame(df[df.boarding_stop.notnull()])
 
@@ -127,7 +128,7 @@ class Run:
         routes_simba = route_attributes[route_attributes["01_Datenherkunft"] == self.name_datenherkunft_attribute][
             "route_id"].unique()
         df = set_simba_binnenverkehr_fq_attributes(df, stops_in_perimeter, stops_in_fq, routes_simba)
-        return df
+        return df[cols+[IS_SIMBA, "is_binnenverkehr_simba", "journey_has_fq_leg"]]
 
     def filter_to_simba_binnenverkehr_fq_legs(self):
         df = self.get_pt_legs()

@@ -6,6 +6,8 @@ import unittest
 import pandas as pd
 
 from analyse.run import Run
+from analyse.skims import read_matsim_trips
+
 
 class MyTestCase(unittest.TestCase):
     # def test_read_att_file(self):
@@ -76,7 +78,7 @@ class MyTestCase(unittest.TestCase):
         run = Run(perimeter_attribute="09_SIMBA_CNB_Perimeter", datenherkunft_attribute="SBB_Simba.CH_2016")
         run.load_stop_attributes(os.path.join(path_data, "stopAttributes.xml.gz"))
         run.load_route_attributes(os.path.join(path_data, "routeAttributes.xml.gz"))
-        run.data["legs"] = pd.read_csv(os.path.join(path_data, "matsim_trips.txt"), sep="\t")
+        run.data["legs"] = read_matsim_trips(os.path.join(path_data, "matsim_trips.txt"))
         self.assertEqual(len(run.get_legs()), 204145)
         df_processed = run.get_pt_legs()
         self.assertEqual(len(df_processed), 204145)
