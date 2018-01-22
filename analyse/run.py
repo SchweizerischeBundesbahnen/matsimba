@@ -461,12 +461,54 @@ class Run:
             return df.cumsum()
 
     @cache
+    def calc_pt_dist_distr_trips(self, only_simba=False, **kwargs):
+        if only_simba:
+            df = self.filter_to_simba_binnenverkehr_fq_legs()
+        else:
+            df = self.get_pt_legs()
+
+        agg_dict = {PF: "sum", DISTANCE: "sum", SUBPOPULATION: "min"}
+        if "foreach" in kwargs:
+            for a in kwargs["foreach"]:
+                agg_dict[a] = "first"
+
+        df = df.groupby("journey_id").agg(agg_dict)
+
+        self._create_distance_class(df)
+
+        return self._do(df, by=CAT_DIST, value=PF, accsum="sum", percent=True, **kwargs).cumsum()
+
+
+    @cache
     def calc_vehicles(self, names=None, **kwargs):
         df = self.get_linkvolumes()
         df = self._do(df, value=VOLUME, aggfunc="sum", **kwargs)
         if names is not None:
             df = df.loc[names]
         return df
+
+    @cache
+    def calc_pt_uh(self, simba_only=False):
+        if simba_only:
+            df = self.filter_to_simba_binnenverkehr_fq_legs()
+        else:
+            df = self.get_pt_legs()
+        df = df.groupby(JOURNEY_ID).count()
+        df["nb_transfer"] = df["trip_id"] - 1
+        return self._do(df, by="nb_transfer", value="mode", accsum="count", percent=True)
+
+    @cache
+    def calc_pt_nb_trips(self, simba_only=False, by="mode", **kwargs):
+        if simba_only:
+            df = self.filter_to_simba_binnenverkehr_fq_legs()
+        else:
+            df = self.get_pt_legs()
+        columns = [PF, by]
+        if "foreach" in kwargs:
+            columns += kwargs["foreach"]
+        df = df.groupby(JOURNEY_ID)[columns].min()
+
+        return self._do(df, by=by, value=PF, aggfunc="sum", **kwargs)
 
     @staticmethod
     def _create_distance_class(df, column=DISTANCE, category_column=CAT_DIST):
