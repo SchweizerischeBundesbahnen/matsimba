@@ -5,7 +5,7 @@ import analyse.run
 path_count_linkvolumes = r"/opt/sbb/hdd/u222223/MATSim/simulations/CH/zaehldaten/link_count_data_astra15.csv"
 path_mikro = r"/opt/sbb/hdd/u222223/MATSim/mikrozensus/2015/20171212_Input_MZMV_Kalibrationsvergleich.csv"
 path_count_ea = r"/opt/sbb/hdd/u222223/MATSim/simulations/CH/zaehldaten/stop_count_data_fqkal+14_alles.csv"
-
+import math
 
 class Reference:
     pt_run = None
@@ -88,7 +88,18 @@ class Reference:
                                  }, inplace=True)
 
         teilwege = teilwege[teilwege.boarding_stop.notnull()]
-        teilwege[trip_id] = teilwege.QBEZNR.map(str) + "_" + teilwege.ZBEZNR.map(str) + "_" + teilwege.WEGIND.map(str)
+
+        digits_z = int(math.log10(teilwege.ZBEZNR.max())) + 1
+        digits_i = int(math.log10(teilwege.WEGIND.max())) + 1
+
+        def to_int(q, z, i):
+            return q * 10 ** (digits_i + digits_z) + z * 10 ** (digits_i) + i
+
+        a = teilwege.QBEZNR.apply(lambda x: to_int(x, 0, 0))
+        b = teilwege.ZBEZNR.apply(lambda x: to_int(0, x, 0))
+        c = teilwege.WEGIND.apply(lambda x: to_int(0, 0, x))
+        teilwege[trip_id] = a + b + c
+
         teilwege[leg_id] = teilwege[trip_id] + "_" + teilwege.TWEGIND.map(str)
 
         teilwege[PKM] = teilwege[PF] * teilwege.distance
