@@ -1,6 +1,7 @@
 import analyse.compare
 import analyse.plot
 import pandas as pd
+import analyse.run
 
 
 class RunsList(list):
@@ -10,19 +11,33 @@ class RunsList(list):
                 return e
 
     @staticmethod
-    def _plot(df, kind="bar", title="", **kwargs):
+    def _plot(df, kind="bar", title="", cols=2.0, xs_index=None, **kwargs):
+        """
+        :param df:
+        :param kind:
+        :param title:
+        :param cols:
+        :param xs_index: is used to sort the x axis for plotting
+        :param kwargs:
+        :return:
+        """
         if "foreach" in kwargs:
-            fig, axs = analyse.plot.plot_multi(df=df, cols=2.0, kind=kind, **kwargs)
+            fig, axs = analyse.plot.plot_multi(df=df, cols=cols, kind=kind, xs_index=xs_index, **kwargs)
             fig.suptitle(title, fontsize=16)
             fig.tight_layout(rect=[0, 0.03, 1, 0.95])
             return df, fig
 
         else:
-            ax = df.plot(kind=kind, title=title)
-            analyse.plot.move_legend(ax)
-            return df, ax
+            if xs_index is None:
+                xs_index = df.index
 
-    def _get(self, method, foreach=None, ref_df=None, **kwargs):
+            ax = df.loc[xs_index].plot(kind=kind, title=title, figsize=(10, 5))
+            analyse.plot.move_legend(ax)
+            fig = ax.figure
+            fig.tight_layout()
+            return df, fig
+
+    def _get(self, method, foreach=None, ref_df=None, ref_run=None, **kwargs):
         names = [r.name for r in self]
         data = [method.im_func(r, foreach=foreach, **kwargs) for r in self]
         df = analyse.compare.concat(data, names)
@@ -31,13 +46,12 @@ class RunsList(list):
             df.columns = df.columns.droplevel()
 
         else:
-            n = len(df.columns.levels)-1
+            n = len(df.columns.levels) - 1
 
             for i in range(n):
                 df = df.stack()
-            df = df.swaplevel(0, len(df.index.levels)-1, axis=0)
-
-            #df.sort_index(inplace=True)
+            df = df.swaplevel(0, len(df.index.levels) - 1, axis=0)
+            # df.sort_index(inplace=True)
 
         columns = [r.name for r in self]
 
@@ -45,7 +59,14 @@ class RunsList(list):
             df = pd.concat([df, ref_df], axis=1)
             columns = ref_df.columns.tolist() + columns
 
-        return df[columns]
+        if ref_run is not None:
+            _runs = RunsList()
+            _runs.append(ref_run)
+            _df = _runs._get(method=method, foreach=foreach, **kwargs)
+            df = pd.concat([_df, df], axis=1)
+            columns = _df.columns.tolist() + columns
+
+        return df[columns].sort_index()
 
     def get_nb_trips(self, **kwargs):
         return self._get(analyse.run.Run.calc_nb_trips, **kwargs)
@@ -54,58 +75,69 @@ class RunsList(list):
         df = self.get_nb_trips(**kwargs)
         return self._plot(df=df, title="#trips pro %s und runs" % kwargs["by"], **kwargs)
 
-    def get_dist_trips(self, **kwargs):
+    def get_pkm_trips(self, **kwargs):
         return self._get(analyse.run.Run.calc_dist_trips, **kwargs)
 
-    def plot_dist_trips(self, **kwargs):
-        df = self.get_dist_trips(**kwargs)
-        return self._plot(df=df, title="distance trips pro %s und runs" % kwargs["by"], **kwargs)
+    def plot_pkm_trips(self, **kwargs):
+        df = self.get_pkm_trips(**kwargs)
+        return self._plot(df=df, title="pkm trips pro %s und runs" % kwargs["by"], **kwargs)
 
     def get_nb_legs(self, **kwargs):
         return self._get(analyse.run.Run.calc_nb_legs, **kwargs)
 
-    def get_dist_distr_legs(self, **kwargs):
+    def get_pkm_distr_legs(self, **kwargs):
         return self._get(analyse.run.Run.calc_dist_distr_legs, **kwargs)
 
-    def get_dist_distr_trips(self, **kwargs):
+    def get_pkm_distr_trips(self, **kwargs):
         return self._get(analyse.run.Run.calc_dist_distr_trips, **kwargs)
 
-    def plot_dist_distr_legs(self, **kwargs):
-        df = self.get_dist_distr_legs(**kwargs)
-        return self._plot(df=df, kind="line", title="", **kwargs)
+    def get_pt_pkm_distr_legs(self, **kwargs):
+        return self._get(analyse.run.Run.calc_dist_distr_pt_legs, **kwargs)
 
-    def plot_dist_distr_trips(self, **kwargs):
-        df = self.get_dist_distr_trips(**kwargs)
-        return self._plot(df=df, kind="line", title="", **kwargs)
+    def plot_pkm_distr_legs(self, **kwargs):
+        df = self.get_pkm_distr_legs(**kwargs)
+        return self._plot(df=df, kind="line", title="", xs_index=analyse.run.distance_labels, **kwargs)
+
+    def plot_pkm_distr_trips(self, **kwargs):
+        df = self.get_pkm_distr_trips(**kwargs)
+        return self._plot(df=df, kind="line", title="", xs_index=analyse.run.distance_labels, **kwargs)
+
+    def plot_pt_pkm_distr_legs(self, **kwargs):
+        df = self.get_pt_pkm_distr_legs(**kwargs)
+        return self._plot(df=df, kind="line", title="", xs_index=analyse.run.distance_labels, **kwargs)
 
     def plot_nb_legs(self, **kwargs):
         df = self.get_nb_legs(**kwargs)
         return self._plot(df=df, title="#legs pro %s und runs" % kwargs["by"], **kwargs)
 
-    def get_dist_legs(self, **kwargs):
+    def get_pkm_legs(self, **kwargs):
         return self._get(analyse.run.Run.calc_dist_legs, **kwargs)
 
-    def plot_dist_legs(self, **kwargs):
-        df = self.get_dist_legs(**kwargs)
-        return self._plot(df=df, title="distance legs pro %s und runs" % kwargs["by"], **kwargs)
+    def plot_pkm_legs(self, **kwargs):
+        df = self.get_pkm_legs(**kwargs)
+        return self._plot(df=df, title="pkm legs pro %s und runs" % kwargs["by"], **kwargs)
 
     def get_einsteiger(self, **kwargs):
         return self._get(analyse.run.Run.calc_einsteiger, **kwargs)
 
     def plot_einsteiger(self, **kwargs):
         df = self.get_einsteiger(**kwargs)
-        if df.index.size>100:
-            raise ValueError("Index size to large to be plotted")
         return self._plot(df=df, title="Einsteiger pro CODE", **kwargs)
 
     def get_vehicles(self, **kwargs):
         return self._get(analyse.run.Run.calc_vehicles, **kwargs)
 
-    def plot_vehicles(self,  **kwargs):
+    def plot_vehicles(self, **kwargs):
         df = self.get_vehicles(**kwargs)
-        if df.index.size>100:
-            raise ValueError("Index size to large to be plotted")
         return self._plot(df=df, title="Fahrzeuge", **kwargs)
 
+    def get_pt_pkm(self, **kwargs):
+        return self._get(analyse.run.Run.calc_pt_pkm, **kwargs)
 
+    def plot_pt_pkm(self, **kwargs):
+        df = self.get_pt_pkm(**kwargs)
+        return self._plot(df=df, title="", **kwargs)
 
+    def prepare(self, **kwargs):
+        for run in self:
+            run.prepare(**kwargs)

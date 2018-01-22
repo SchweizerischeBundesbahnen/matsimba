@@ -89,7 +89,7 @@ def prepare_matsim_trips(df_matsim_trips):
 def filter_to_simba_legs(df_legs, is_simba_line, from_simba_visum=False):
     test_columns_of_legs(df_legs, required_attributes, from_simba_visum=from_simba_visum)
     if not from_simba_visum:
-        legs_simba = df_legs[df_legs.line.apply(is_simba_line)].sort(["journey_id", "start_time"])
+        legs_simba = df_legs[df_legs.line.apply(is_simba_line)].sort_values(["journey_id", "start_time"])
     else:
         legs_simba = df_legs
     return legs_simba
@@ -220,7 +220,7 @@ def get_station_to_station_skims(df_legs, factor=1.0, from_simba_visum=False):
                                               skim_per_station_to_station["PFAHRT"]
     skim_per_station_to_station["distance"] /= 1000.0
     skim_per_station_to_station = skim_per_station_to_station.reset_index()
-    skim_per_station_to_station = skim_per_station_to_station.sort("PFAHRT", ascending=False)
+    skim_per_station_to_station = skim_per_station_to_station.sort_values("PFAHRT", ascending=False)
     cols_out = ["first_stop", "last_stop", "PFAHRT", "bz", "bz_hhmmss", "uh", "distance"]
     return skim_per_station_to_station[cols_out]
 
