@@ -73,7 +73,7 @@ class MyTestCase(unittest.TestCase):
     #     self.assertAlmostEqual(skims_bi_ins["distance"].iloc[0], 42.345000, places=5, msg="distanz")
     #     self.assertAlmostEqual(skims_bi_ins["PFAHRT"].iloc[0], 30.0, places=5, msg="pf")
 
-    def test_full_cnb_matsim_trips_nettype_npvm(self):
+    def test_cnb_matsim_trips_skims(self):
         path_data = os.path.join("..", "..", "data_in", "test")
         run = Run(perimeter_attribute="09_SIMBA_CNB_Perimeter", datenherkunft_attribute="SBB_Simba.CH_2016")
         run.load_stop_attributes(os.path.join(path_data, "stopAttributes.xml.gz"))
