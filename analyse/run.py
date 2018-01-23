@@ -73,7 +73,8 @@ analyse.plot.set_matplotlib_params()
 dtypes = {u'activity_id': str,
           u'person_id': str,
           u'trip_id': str,
-          u'boarding_stop': str,
+          u'boarding_stop': int,
+          u'alighting_stop': int,
           u'alighting': str,
           u'link_id': str,
           u'work': str,
@@ -128,9 +129,8 @@ class Run:
             df[END_TIME] = df[END_TIME].apply(int)
 
             stop_attributes = self.get_stop_attributes()
-            stops_in_perimeter = stop_attributes[stop_attributes[self.name_perimeter_attribute] == "1"][STOP_ID].apply(
-                int).apply(str).unique()
-            stops_in_fq = stop_attributes[stop_attributes[FQ_RELEVANT] == "1"][STOP_ID].apply(int).apply(str).unique()
+            stops_in_perimeter = stop_attributes[stop_attributes[self.name_perimeter_attribute] == "1"][STOP_ID].unique()
+            stops_in_fq = stop_attributes[stop_attributes[FQ_RELEVANT] == "1"][STOP_ID].unique()
 
             route_attributes = self.get_route_attributes()
             routes_simba = route_attributes[route_attributes["01_Datenherkunft"] == self.name_datenherkunft_attribute][
@@ -189,7 +189,7 @@ class Run:
         self._load_data(name, reload_data=reload_data)
         df = self.data[name]
         if self.sample is not None:
-            df = df.sample(self.sample, axis=0)
+            df = df.sample(self.sample, axis=0, replace=True)
         return df
 
     def load_stop_attributes(self, path):

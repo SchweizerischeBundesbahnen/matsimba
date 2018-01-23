@@ -115,10 +115,10 @@ class Reference:
                                  #"ENDFZPELEM\LINIENROUTENELEMENT\HALTEPUNKT\HALTESTELLENBEREICH\HALTESTELLE\CODE": "03_Stop_Code_alighting"
                                  }, inplace=True)
 
-        teilwege[BOARDING_STOP] = teilwege[BOARDING_STOP].astype(str)
-        teilwege[ALIGHTING_STOP] = teilwege[ALIGHTING_STOP].astype(str)
-
         teilwege = teilwege[teilwege.boarding_stop.notnull()]
+
+        teilwege[BOARDING_STOP] = teilwege[BOARDING_STOP].map(int)
+        teilwege[ALIGHTING_STOP] = teilwege[ALIGHTING_STOP].map(int)
 
         make_journey_id(teilwege)
         make_leg_id(teilwege)
