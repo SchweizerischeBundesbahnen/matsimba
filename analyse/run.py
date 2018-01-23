@@ -436,24 +436,8 @@ class Run:
         return df
 
     @cache
-    def calc_dist_distr_pt_legs(self, inverse_percent_axis=False, rotate=True, **kwargs):
-        self.create_distance_class_for_legs()
-        df = self.get_pt_legs()
-        try:
-            df = df.merge(right=self.get_route_attributes(), how="left", left_on="route", right_on="route_id")
-        except KeyError as e:
-            logging.warn(e)
-
-        df = self._do(df, by=CAT_DIST, value=PF, aggfunc="sum", rotate=rotate,
-                      inverse_percent_axis=inverse_percent_axis, **kwargs)
-        if inverse_percent_axis:
-            return df
-        else:
-            return df.cumsum()
-
-    @cache
-    def calc_pt_dist_distr_trips(self, only_simba=False, **kwargs):
-        if only_simba:
+    def calc_pt_dist_distr_trips(self, simba_only=False, **kwargs):
+        if simba_only:
             df = self.filter_to_simba_binnenverkehr_fq_legs()
         else:
             df = self.get_pt_legs()
