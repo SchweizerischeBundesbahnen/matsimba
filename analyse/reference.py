@@ -12,10 +12,8 @@ def make_journey_id(df):
     digits_z = int(math.log10(df.ZBEZNR.max())) + 1
     digits_i = int(math.log10(df.WEGIND.max())) + 1
 
-    print digits_z, digits_i
-
     def to_int(q, z, i):
-        return q * (10 ** (digits_i + digits_z)) + z * (10 ** (digits_i)) + i
+        return q * (10 ** (digits_i + digits_z)) + z * (10 ** digits_i) + i
 
     a = df.QBEZNR.apply(lambda x: to_int(x, 0, 0))
     b = df.ZBEZNR.apply(lambda x: to_int(0, x, 0))
