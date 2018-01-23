@@ -314,3 +314,29 @@ def plot_multi(df, cols=2.0, stacked=False, kind="bar", rotate=False, xs_index=N
 
     fig.tight_layout()
     return fig, axs
+
+
+def plot_scatter(df, ref_name, cols=2.0, **kwargs):
+    n = len(df.columns)
+    nrows = int(math.ceil(n / cols))
+    ncols = int(cols)
+
+    min_x = 10
+    fig, axs = plt.subplots(nrows=nrows, ncols=ncols, figsize=(max(ncols * 5, min_x), nrows * 4))
+
+    def plot(ax, x, y):
+        ax.scatter(x, y, alpha=0.5)
+        #ax.set_xlim([0, 250000])
+        #ax.set_ylim([0, 250000])
+        ax.plot(x, x, 'g', label='fitted line')
+        return ax
+
+    _run_names = [c for c in df.columns if c != ref_name]
+    for i, run_name in enumerate(df.columns):
+        ax = fig.get_axes()[i]
+        plot(ax, df[ref_name], df[run_name])
+        ax.set_xlabel(ref_name)
+        ax.set_ylabel(run_name)
+
+    fig.tight_layout()
+    return fig

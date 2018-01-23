@@ -151,6 +151,11 @@ class RunsList(list):
         df = self._get(analyse.run.Run.calc_pt_uh, **kwargs)
         return self._plot(df=df, title="", **kwargs)
 
+    def plot_pt_skims(self, pt_run, **kwargs):
+        df = self._get(analyse.run.Run.get_skim_simba, ref_run=pt_run, **kwargs)
+        fig = analyse.plot.plot_scatter(df=df, ref_name=pt_run.name, title="", **kwargs)
+        return df, fig
+
     def prepare(self, **kwargs):
         for run in self:
             run.prepare(**kwargs)

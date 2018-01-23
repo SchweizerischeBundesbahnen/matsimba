@@ -115,7 +115,7 @@ class Run:
     def get_legs(self):
         return self._get("legs")
 
-    def get_pt_legs(self, cols_for_skims=False):
+    def get_pt_legs(self):
         df = self.get_legs()
 
         if "pt_legs" not in self.data:
@@ -136,10 +136,7 @@ class Run:
             "route_id"].unique()
 
             df = set_simba_binnenverkehr_fq_attributes(df, stops_in_perimeter, stops_in_fq, routes_simba)
-            if cols_for_skims:
-                cols_ = cols + ["is_binnenverkehr_simba", "journey_has_fq_leg"]
-            else:
-                cols_ = cols+["is_binnenverkehr_simba", "journey_has_fq_leg",
+            cols_ = cols+["is_binnenverkehr_simba", "journey_has_fq_leg",
                                             "start_time_first_stop", "end_time_last_stop", "first_stop", "last_stop"]
             if IS_SIMBA not in cols_:
                 cols_.append(IS_SIMBA)
@@ -152,10 +149,13 @@ class Run:
         df = self.get_pt_legs()
         return df[df[IS_SIMBA] & df.is_binnenverkehr_simba & df.journey_has_fq_leg]
 
-    def get_skims_simba(self):
+    def get_skims_simba(self, **kwargs):
         df = self.filter_to_simba_binnenverkehr_fq_legs()
         skims = get_station_to_station_skims(df)
         return skims
+
+    def get_skim_simba(self, name, **kwargs):
+        return self.get_skims_simba()[[name]]
 
     def get_vehjourneys(self):
         return self._get("vehjourneys")
@@ -476,14 +476,14 @@ class Run:
         return df
 
     @cache
-    def calc_pt_uh(self, simba_only=False):
+    def calc_pt_uh(self, simba_only=False, **kwargs):
         if simba_only:
             df = self.filter_to_simba_binnenverkehr_fq_legs()
         else:
             df = self.get_pt_legs()
         df = df.groupby(JOURNEY_ID).count()
         df["nb_transfer"] = df["trip_id"] - 1
-        return self._do(df, by="nb_transfer", value="mode", accsum="count", percent=True)
+        return self._do(df, by="nb_transfer", value="mode", accsum="count", percent=True, **kwargs)
 
     @cache
     def calc_pt_nb_trips(self, simba_only=False, by="mode", **kwargs):
