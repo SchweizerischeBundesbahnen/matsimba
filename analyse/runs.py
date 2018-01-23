@@ -32,6 +32,7 @@ class RunsList(list):
                 xs_index = df.index
 
             ax = df.loc[xs_index].plot(kind=kind, title=title, figsize=(10, 5))
+            ax.set_xticklabels(xs_index)
             analyse.plot.move_legend(ax)
             fig = ax.figure
             fig.tight_layout()
@@ -140,7 +141,7 @@ class RunsList(list):
 
     def plot_pt_dist_distr_trips(self, **kwargs):
         df = self._get(analyse.run.Run.calc_pt_dist_distr_trips, **kwargs)
-        return self._plot(df=df, title="", **kwargs)
+        return self._plot(df=df, title="", kind="line", xs_index=analyse.run.distance_labels, **kwargs)
 
     def plot_pt_nb_trips(self, **kwargs):
         df = self._get(analyse.run.Run.calc_pt_nb_trips, **kwargs)

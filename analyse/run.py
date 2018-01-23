@@ -455,8 +455,10 @@ class Run:
 
         agg_dict = {PF: "sum", DISTANCE: "sum", SUBPOPULATION: "min"}
         if "foreach" in kwargs:
-            for a in kwargs["foreach"]:
-                agg_dict[a] = "first"
+            foreach = kwargs["foreach"]
+            if foreach is not None:
+                for a in foreach:
+                    agg_dict[a] = "first"
 
         df = df.groupby("journey_id").agg(agg_dict)
 
@@ -491,7 +493,9 @@ class Run:
             df = self.get_pt_legs()
         columns = [PF, by]
         if "foreach" in kwargs:
-            columns += kwargs["foreach"]
+            foreach = kwargs["foreach"]
+            if foreach is not None:
+                columns += foreach
         df = df.groupby(JOURNEY_ID)[columns].min()
 
         return self._do(df, by=by, value=PF, aggfunc="sum", **kwargs)

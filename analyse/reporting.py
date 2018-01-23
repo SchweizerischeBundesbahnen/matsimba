@@ -180,12 +180,12 @@ def get_datas(runs, ref, stop_attributes):
     except Exception as e:
         logging.error(e)
 
-    try:
-        df, fig = runs.plot_vehicles(by="name", names=ref.get_count_stations().name.unique().tolist(),
-                                     ref_df=ref.get_count_stations_volume())
-        datas.append(SheetData(df, fig, "Link counts"))
-    except Exception as e:
-        logging.error(e)
+    #try:
+    #    df, fig = runs.plot_vehicles(by="name", names=ref.get_count_stations().name.unique().tolist(),
+    #                                 ref_df=ref.get_count_stations_volume())
+    #    datas.append(SheetData(df, fig, "Link counts"))
+    #except Exception as e:
+    #    logging.error(e)
 
     try:
         df, fig = runs.plot_pt_pkm(by="06_OperatorName", indices=ref.operators, ref_run=ref.get_pt_run())
@@ -208,6 +208,25 @@ def get_datas(runs, ref, stop_attributes):
     try:
         df, fig = runs.plot_nb_legs(by=CAT_START_TIME, foreach="mode", kind="line", ref_run=ref.get_pt_run())
         datas.append(SheetData(df, fig, "Tagesganglinien pro Mode (Teilwege)"))
+    except Exception as e:
+        logging.error(e)
+
+    try:
+        df, fig = runs.plot_pt_pkm(by="mode", simba_only=True, ref_run=ref.get_pt_run())
+        datas.append(SheetData(df, fig, "Simba pt pkm"))
+    except Exception as e:
+        logging.error(e)
+
+    try:
+        df, fig = runs.plot_pt_nb_trips(by="mode", simba_only=True,
+                                        ref_run=ref.get_pt_run())
+        datas.append(SheetData(df, fig, "Simba pt nb"))
+    except Exception as e:
+        logging.error(e)
+
+    try:
+        df, fig = runs.plot_pt_dist_distr_trips(simba_only=True, ref_run=ref.get_pt_run(), rotate=True)
+        datas.append(SheetData(df, fig, "Simba dist distr"))
     except Exception as e:
         logging.error(e)
 
