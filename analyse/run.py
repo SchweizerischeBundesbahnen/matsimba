@@ -127,12 +127,12 @@ class Run:
             df = pd.DataFrame(df[df[BOARDING_STOP].notnull() & df[ALIGHTING_STOP].notnull()])
             df[START_TIME] = df[START_TIME].apply(int)
             df[END_TIME] = df[END_TIME].apply(int)
-            df[BOARDING_STOP] = df[BOARDING_STOP].apply(int)
-            df[ALIGHTING_STOP] = df[ALIGHTING_STOP].apply(int)
+            df[BOARDING_STOP] = df[BOARDING_STOP].apply(float)
+            df[ALIGHTING_STOP] = df[ALIGHTING_STOP].apply(float)
 
             stop_attributes = self.get_stop_attributes()
-            stops_in_perimeter = stop_attributes[stop_attributes[self.name_perimeter_attribute] == "1"][STOP_ID].map(int).unique()
-            stops_in_fq = stop_attributes[stop_attributes[FQ_RELEVANT] == "1"][STOP_ID].map(int).unique()
+            stops_in_perimeter = stop_attributes[stop_attributes[self.name_perimeter_attribute] == "1"][STOP_ID].map(float).unique()
+            stops_in_fq = stop_attributes[stop_attributes[FQ_RELEVANT] == "1"][STOP_ID].map(float).unique()
 
             route_attributes = self.get_route_attributes()
             routes_simba = route_attributes[route_attributes["01_Datenherkunft"] == self.name_datenherkunft_attribute][
