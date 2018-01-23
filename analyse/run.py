@@ -102,6 +102,7 @@ class Run:
         self.link_merged = False
         self.name_perimeter_attribute = perimeter_attribute
         self.name_datenherkunft_attribute = datenherkunft_attribute
+        self.sample = None
 
     def get_persons(self):
         return self._get("persons")
@@ -186,7 +187,10 @@ class Run:
 
     def _get(self, name, reload_data=False):
         self._load_data(name, reload_data=reload_data)
-        return self.data[name]
+        df = self.data[name]
+        if self.sample is not None:
+            df = df.sample(self.sample, axis=0)
+        return df
 
     def load_stop_attributes(self, path):
         self.data["stop_attributes"] = analyse.reader.get_attributes(path)
@@ -210,7 +214,8 @@ class Run:
                 filename = self.runId+"."+filename
             path = os.path.join(self.path, filename)
             logging.info("Starting loading data %s: %s " % (name, path))
-            self.data[name] = pd.read_csv(path, sep=sep, encoding="utf-8", dtype=dtypes).reset_index(drop=True)
+            df = pd.read_csv(path, sep=sep, encoding="utf-8", dtype=dtypes).reset_index(drop=True)
+            self.data[name] = df
             logging.info("%s loaded in %i seconds" % (name, time.time() - time1))
         except Exception as e:
             logging.error(e.message)
