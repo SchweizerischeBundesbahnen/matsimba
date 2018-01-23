@@ -131,7 +131,6 @@ class Reference:
         pt_run = analyse.run.Run(name=name)
         pt_run.data["legs"] = teilwege
         self.pt_run = pt_run
-        analyse.run.Run._create_starttime_class(self.pt_run.get_legs())
 
     def get_pt_run(self):
         return self.pt_run
