@@ -453,7 +453,7 @@ class Run:
         else:
             df = self.get_pt_legs()
 
-        agg_dict = {PF: "sum", DISTANCE: "sum", SUBPOPULATION: "min"}
+        agg_dict = {PF: "first", DISTANCE: "sum"}
         if "foreach" in kwargs:
             foreach = kwargs["foreach"]
             if foreach is not None:
@@ -465,7 +465,6 @@ class Run:
         self._create_distance_class(df)
 
         return self._do(df, by=CAT_DIST, value=PF, accsum="sum", percent=True, **kwargs).cumsum()
-
 
     @cache
     def calc_vehicles(self, names=None, **kwargs):
