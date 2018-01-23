@@ -231,13 +231,13 @@ def get_datas(runs, ref, stop_attributes):
         logging.error(e)
 
     try:
-        runs.plot_pt_uh(simba_only=True, ref_run=ref.get_pt_run())
+        df, fig = runs.plot_pt_uh(simba_only=True, ref_run=ref.get_pt_run())
         datas.append(SheetData(df, fig, "Simba UH"))
     except Exception as e:
         logging.error(e)
 
     try:
-        runs.plot_pt_skims(name="bz", pt_run=ref.get_pt_run())
+        df, fig = runs.plot_pt_skims(name="bz", pt_run=ref.get_pt_run())
         datas.append(SheetData(df, fig, "Simba  BZ"))
     except Exception as e:
         logging.error(e)
