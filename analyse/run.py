@@ -401,16 +401,17 @@ class Run:
         return df
 
     @cache
-    def calc_pt_pkm(self, indices=None, **kwargs):
-        df = self.get_pt_legs()
+    def calc_pt_pkm(self, simba_only=False, **kwargs):
+        if simba_only:
+            df = self.filter_to_simba_binnenverkehr_fq_legs()
+        else:
+            df = self.get_pt_legs()
         try:
             df = df.merge(right=self.get_route_attributes(), how="left", left_on="route", right_on="route_id")
         except KeyError as e:
             logging.warn(e)
 
         df = self._do(df, value=PKM, aggfunc="sum", **kwargs)
-        if indices is not None:
-            df = df.loc[indices]
 
         gc.collect()
         return df
