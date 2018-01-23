@@ -11,8 +11,8 @@ class SheetData:
         self.name = name
 
 
-def make_report(runs, filename, ref=None, stop_attributes=None):
-    datas = get_datas(runs=runs, ref=ref, stop_attributes=stop_attributes)
+def make_report(runs, filename, ref=None):
+    datas = get_datas(runs=runs, ref=ref)
     _make_report(datas=datas, filename=filename)
 
 
@@ -53,7 +53,7 @@ def _make_report(datas, filename):
         buf.close()
 
 
-def get_datas(runs, ref, stop_attributes):
+def get_datas(runs, ref):
     datas = []
 
     mzmv = ref.mzmv = ref.get_mzmv_run()
@@ -174,8 +174,7 @@ def get_datas(runs, ref, stop_attributes):
         logging.error(e)
 
     try:
-        df, fig = runs.plot_einsteiger(by="03_Stop_Code_boarding", codes=ref.stations, ref_run=ref.get_pt_run(),
-                                       stop_attributes=stop_attributes)
+        df, fig = runs.plot_einsteiger(by="03_Stop_Code_boarding", codes=ref.stations, ref_run=ref.get_pt_run())
         datas.append(SheetData(df, fig, "Ausgewahlte Bahnhoefe Einsteiger"))
     except Exception as e:
         logging.error(e)
