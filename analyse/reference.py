@@ -106,16 +106,19 @@ class Reference:
         teilwege.rename(columns={"$OEVTEILWEG:QBEZNR": "QBEZNR",
                                  "PFAHRT": PF,
                                  "ZEIT": "duration",
-                                 "ABFAHRT": "start_time",
-                                 "ANKUNFT": "end_time",
-                                 "WEITE": "distance",
-                                 "VONHPUNKTNR": "boarding_stop",
-                                 "NACHHPUNKTNR": "alighting_stop",
+                                 "ABFAHRT": START_TIME,
+                                 "ANKUNFT": END_TIME,
+                                 "WEITE": DISTANCE,
+                                 "VONHPUNKTNR": BOARDING_STOP,
+                                 "NACHHPUNKTNR": ALIGHTING_STOP,
                                  r"OEVVSYS\NAME": r"08_TSysName",
                                  "FAHRZEITPROFIL\LINIENROUTE\LINIE\BETREIBER\NAME": "06_OperatorName",
                                  "STARTFZPELEM\LINIENROUTENELEMENT\HALTEPUNKT\HALTESTELLENBEREICH\HALTESTELLE\CODE": "03_Stop_Code_boarding",
                                  "ENDFZPELEM\LINIENROUTENELEMENT\HALTEPUNKT\HALTESTELLENBEREICH\HALTESTELLE\CODE": "03_Stop_Code_alighting"
                                  }, inplace=True)
+
+        teilwege[BOARDING_STOP] = teilwege[BOARDING_STOP].astype(str)
+        teilwege[ALIGHTING_STOP] = teilwege[ALIGHTING_STOP].astype(str)
 
         teilwege = teilwege[teilwege.boarding_stop.notnull()]
 
