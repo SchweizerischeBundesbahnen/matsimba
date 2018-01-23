@@ -280,31 +280,6 @@ class Run:
         else:
             logging.info("Without ref_run, I cannot merge the link_ids to the names")
 
-    def journey_has_simba_transfer(self):
-        df = self.get_legs()
-        df = df[(df["mode"] == "pt") & (df[IS_SIMBA_FQ])].groupby(["journey_id"])[["trip_id"]].count()
-        j_ids = df[df.trip_id > 1].index
-
-        df = self.get_trips()
-        df["hasSIMBATransfer"] = False
-        df.loc[df.journey_id.isin(j_ids), "hasSIMBATransfer"] = True
-
-    def journey_has_transfer(self):
-        df = self.get_legs()
-        df = df[(df["mode"] == "pt")].groupby(["journey_id"])[["trip_id"]].count()
-        j_ids = df[df.trip_id > 1].index
-
-        df = self.get_trips()
-        df["hasTransfer"] = False
-        df.loc[df.journey_id.isin(j_ids), "hasTransfer"] = True
-
-    def journey_is_simba(self):
-        df = self.get_legs()
-        j_ids = df[df[IS_SIMBA_FQ]].journey_id.unique()
-
-        df = self.get_trips()
-        df[IS_SIMBA_FQ] = False
-        df.loc[df.journey_id.isin(j_ids), IS_SIMBA_FQ] = True
 
     def merge_trips_persons(self):
         if not self.trip_persons_merged:
