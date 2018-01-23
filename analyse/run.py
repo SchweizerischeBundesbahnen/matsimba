@@ -418,9 +418,9 @@ class Run:
 
     @cache
     def calc_dist_distr_pt_legs(self, inverse_percent_axis=False, rotate=True, **kwargs):
-
-        self.create_distance_class_for_legs()
         df = self.get_pt_legs()
+        self._create_distance_class(df)
+
         try:
             df = df.merge(right=self.get_route_attributes(), how="left", left_on="route", right_on="route_id")
         except KeyError as e:
