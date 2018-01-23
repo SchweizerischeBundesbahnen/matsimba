@@ -73,8 +73,8 @@ analyse.plot.set_matplotlib_params()
 dtypes = {u'activity_id': str,
           u'person_id': str,
           u'trip_id': str,
-          u'boarding_stop': str,
-          u'alighting_stop': str,
+          u'boarding_stop': float,
+          u'alighting_stop': float,
           u'alighting': str,
           u'link_id': str,
           u'work': str,
@@ -155,6 +155,7 @@ class Run:
     def get_skims_simba(self, **kwargs):
         df = self.filter_to_simba_binnenverkehr_fq_legs()
         skims = get_station_to_station_skims(df)
+        skims.set_index(["first_stop", "last_stop"], inplace=True)
         return skims
 
     def get_skim_simba(self, name, **kwargs):
@@ -195,7 +196,9 @@ class Run:
         return df
 
     def load_stop_attributes(self, path):
-        self.data["stop_attributes"] = analyse.reader.get_attributes(path)
+        df = analyse.reader.get_attributes(path)
+        df[STOP_ID] = df[STOP_ID].map(float)
+        self.data["stop_attributes"] = df
 
     def load_route_attributes(self, path):
         self.data["route_attributes"] = analyse.reader.get_attributes(path, "route_id")
@@ -488,9 +491,9 @@ class Run:
             df = self.filter_to_simba_binnenverkehr_fq_legs()
         else:
             df = self.get_pt_legs()
-        df = df.groupby(JOURNEY_ID).count()
+        df = df.groupby(JOURNEY_ID).agg({TRIP_ID: "count", PF: "first"})
         df["nb_transfer"] = df["trip_id"] - 1
-        return self._do(df, by="nb_transfer", value="mode", accsum="count", percent=True, **kwargs)
+        return self._do(df, by="nb_transfer", value=PF, accsum="sum", percent=True, **kwargs)
 
     @cache
     def calc_pt_nb_trips(self, simba_only=False, by="mode", **kwargs):

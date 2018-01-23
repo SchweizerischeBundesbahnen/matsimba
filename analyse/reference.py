@@ -117,8 +117,8 @@ class Reference:
 
         teilwege = teilwege[teilwege.boarding_stop.notnull()]
 
-        teilwege[BOARDING_STOP] = teilwege[BOARDING_STOP].map(str)
-        teilwege[ALIGHTING_STOP] = teilwege[ALIGHTING_STOP].map(str)
+        teilwege[BOARDING_STOP] = teilwege[BOARDING_STOP].map(float)
+        teilwege[ALIGHTING_STOP] = teilwege[ALIGHTING_STOP].map(float)
 
         make_journey_id(teilwege)
         make_leg_id(teilwege)
