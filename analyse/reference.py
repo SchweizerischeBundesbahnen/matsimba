@@ -7,6 +7,36 @@ path_mikro = r"/opt/sbb/hdd/u222223/MATSim/mikrozensus/2015/20171212_Input_MZMV_
 path_count_ea = r"/opt/sbb/hdd/u222223/MATSim/simulations/CH/zaehldaten/stop_count_data_fqkal+14_alles.csv"
 import math
 
+
+def make_journey_id(df):
+    digits_z = int(math.log10(df.ZBEZNR.max())) + 1
+    digits_i = int(math.log10(df.WEGIND.max())) + 1
+
+    print digits_z, digits_i
+
+    def to_int(q, z, i):
+        return q * (10 ** (digits_i + digits_z)) + z * (10 ** (digits_i)) + i
+
+    a = df.QBEZNR.apply(lambda x: to_int(x, 0, 0))
+    b = df.ZBEZNR.apply(lambda x: to_int(0, x, 0))
+    c = df.WEGIND.apply(lambda x: to_int(0, 0, x))
+    df[trip_id] = a + b + c
+    return df
+
+
+def make_leg_id(df):
+    digits_j = int(math.log10(df.journey_id.max())) + 1
+    digits_tw = int(math.log10(df.TWEGIND.max())) + 1
+
+    def to_int(j, tw):
+        return j * (10 ** (digits_tw)) + tw
+
+    a = df.journey_id.apply(lambda x: to_int(x, 0))
+    b = df.TWEGIND.apply(lambda x: to_int(0, x))
+    df[leg_id] = a + b
+    return df
+
+
 class Reference:
     pt_run = None
     mzmv_run = None
@@ -76,31 +106,24 @@ class Reference:
         teilwege.rename(columns={"$OEVTEILWEG:QBEZNR": "QBEZNR",
                                  "PFAHRT": PF,
                                  "ZEIT": "duration",
-                                 "ABFAHRT": "start_time",
-                                 "ANKUNFT": "end_time",
-                                 "WEITE": "distance",
-                                 "VONHPUNKTNR": "boarding_stop",
-                                 "NACHHPUNKTNR": "alighting_stop",
+                                 "ABFAHRT": START_TIME,
+                                 "ANKUNFT": END_TIME,
+                                 "WEITE": DISTANCE,
+                                 "VONHPUNKTNR": BOARDING_STOP,
+                                 "NACHHPUNKTNR": ALIGHTING_STOP,
                                  r"OEVVSYS\NAME": r"08_TSysName",
                                  "FAHRZEITPROFIL\LINIENROUTE\LINIE\BETREIBER\NAME": "06_OperatorName",
                                  "STARTFZPELEM\LINIENROUTENELEMENT\HALTEPUNKT\HALTESTELLENBEREICH\HALTESTELLE\CODE": "03_Stop_Code_boarding",
                                  "ENDFZPELEM\LINIENROUTENELEMENT\HALTEPUNKT\HALTESTELLENBEREICH\HALTESTELLE\CODE": "03_Stop_Code_alighting"
                                  }, inplace=True)
 
+        teilwege[BOARDING_STOP] = teilwege[BOARDING_STOP].astype(str)
+        teilwege[ALIGHTING_STOP] = teilwege[ALIGHTING_STOP].astype(str)
+
         teilwege = teilwege[teilwege.boarding_stop.notnull()]
 
-        digits_z = int(math.log10(teilwege.ZBEZNR.max())) + 1
-        digits_i = int(math.log10(teilwege.WEGIND.max())) + 1
-
-        def to_int(q, z, i):
-            return q * 10 ** (digits_i + digits_z) + z * 10 ** (digits_i) + i
-
-        a = teilwege.QBEZNR.apply(lambda x: to_int(x, 0, 0))
-        b = teilwege.ZBEZNR.apply(lambda x: to_int(0, x, 0))
-        c = teilwege.WEGIND.apply(lambda x: to_int(0, 0, x))
-        teilwege[trip_id] = a + b + c
-
-        teilwege[leg_id] = teilwege[trip_id].map(str) + "_" + teilwege.TWEGIND.map(str)
+        make_journey_id(teilwege)
+        make_leg_id(teilwege)
 
         teilwege[PKM] = teilwege[PF] * teilwege.distance
         teilwege["mode"] = "pt"
