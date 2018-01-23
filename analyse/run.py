@@ -451,7 +451,7 @@ class Run:
 
         self._create_distance_class(df)
 
-        return self._do(df, by=CAT_DIST, value=PF, accsum="sum", percent=True, **kwargs).cumsum()
+        return self._do(df, by=CAT_DIST, value=PF, aggfunc="sum", percent=True, **kwargs).cumsum()
 
     @cache
     def calc_vehicles(self, names=None, **kwargs):
@@ -469,7 +469,7 @@ class Run:
             df = self.get_pt_legs()
         df = df.groupby(JOURNEY_ID).agg({TRIP_ID: "count", PF: "first"})
         df["nb_transfer"] = df["trip_id"] - 1
-        return self._do(df, by="nb_transfer", value=PF, accsum="sum", percent=True, **kwargs)
+        return self._do(df, by="nb_transfer", value=PF, aggfunc="sum", percent=True, **kwargs)
 
     @cache
     def calc_pt_nb_trips(self, simba_only=False, by="mode", **kwargs):
