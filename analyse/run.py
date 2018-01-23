@@ -303,7 +303,7 @@ class Run:
         return self.get_linkvolumes()
 
     def _do(self, df, by, value, foreach=None, aggfunc="count", percent=None, inverse_percent_axis=False,
-            percent_level=None, **kwargs):
+            percent_level=None, indices=None, **kwargs):
         def check_variable(values):
             if not isinstance(values, list):
                 values = [values]
@@ -337,7 +337,10 @@ class Run:
         if percent:
             df = make_percent(df)
 
-        return df.fillna(0)
+        df = df.fillna(0)
+        if indices is not None:
+            df = df.loc[indices]
+        return df
 
     @cache
     def calc_nb_trips(self, by=mode_trip, **kwargs):

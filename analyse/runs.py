@@ -37,7 +37,7 @@ class RunsList(list):
             fig.tight_layout()
             return df, fig
 
-    def _get(self, method, foreach=None, ref_df=None, ref_run=None, indices=None, **kwargs):
+    def _get(self, method, foreach=None, ref_df=None, ref_run=None, **kwargs):
         names = [r.name for r in self]
         data = [method.im_func(r, foreach=foreach, **kwargs) for r in self]
         df = analyse.compare.concat(data, names)
@@ -67,8 +67,6 @@ class RunsList(list):
             columns = _df.columns.tolist() + columns
 
         df = df[columns].sort_index()
-        if indices is not None:
-            df = df.loc[indices]
         return df
 
     def get_nb_trips(self, **kwargs):
