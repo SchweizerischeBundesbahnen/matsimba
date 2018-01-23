@@ -122,10 +122,7 @@ class Run:
 
             cols = list(df.columns)
 
-            df = pd.DataFrame(df[(df[BOARDING_STOP].notnull()) & (df[ALIGHTING_STOP].notnull()) &
-                              (df[BOARDING_STOP] != "null") & (df[ALIGHTING_STOP] != "null")])
-            df[BOARDING_STOP] = df[BOARDING_STOP].apply(int).apply(str)
-            df[ALIGHTING_STOP] = df[ALIGHTING_STOP].apply(int).apply(str)
+            df = pd.DataFrame(df[df[BOARDING_STOP].notnull() & df[ALIGHTING_STOP].notnull()])
             df[START_TIME] = df[START_TIME].apply(int)
             df[END_TIME] = df[END_TIME].apply(int)
 
@@ -140,11 +137,14 @@ class Run:
 
             df = set_simba_binnenverkehr_fq_attributes(df, stops_in_perimeter, stops_in_fq, routes_simba)
             if cols_for_skims:
-                cols_ = cols + [IS_SIMBA, "is_binnenverkehr_simba", "journey_has_fq_leg"]
+                cols_ = cols + ["is_binnenverkehr_simba", "journey_has_fq_leg"]
             else:
-                cols_ = cols+[IS_SIMBA, "is_binnenverkehr_simba", "journey_has_fq_leg",
+                cols_ = cols+["is_binnenverkehr_simba", "journey_has_fq_leg",
                                             "start_time_first_stop", "end_time_last_stop", "first_stop", "last_stop"]
-            self.data["pt_legs"] = df[cols_]
+            if IS_SIMBA not in cols_:
+                cols_.append(IS_SIMBA)
+
+            self.data["pt_legs"] = df
 
         return pd.DataFrame(self.data["pt_legs"])
 
