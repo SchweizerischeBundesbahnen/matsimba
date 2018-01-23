@@ -236,7 +236,7 @@ class Run:
         df[PF] = self.scale_factor
         df[PKM] = df[DISTANCE]*df[PF]
 
-    def prepare(self, stop_ids_perimeter=None, defining_stop_ids=None, ref=None, persons=None, stop_attribute_path=None, route_attribute_path=None):
+    def prepare(self, ref=None, persons=None, stop_attribute_path=None, route_attribute_path=None):
         self.unload_data()
 
         if stop_attribute_path is not None:
@@ -258,21 +258,6 @@ class Run:
         df.loc[df["mode"] == "detPt", "mode"] = "pt"
 
         self._set_dummy_pf()
-
-        if stop_ids_perimeter is not None and defining_stop_ids is not None:
-            df = self.get_legs()
-            df = df[df.line.notnull()]
-            fq_legs = analyse.skims.set_simba_binnenverkehr_fq_attributes(df, stop_ids_perimeter=stop_ids_perimeter,
-                                                                          stop_ids_fq=defining_stop_ids)
-            df = self.get_legs()
-            df[IS_SIMBA_FQ] = False
-            df.loc[df.trip_id.isin(fq_legs.trip_id), IS_SIMBA_FQ] = True
-
-            self.journey_has_transfer()
-            self.journey_is_simba()
-            self.journey_has_simba_transfer()
-        else:
-            logging.info("Without stop_ids_perimeter oder defining_stop_ids, I cannot accurately campute is_simba_fq")
 
         df = self.merge_trips_persons()
         df = self.merge_legs_persons()
