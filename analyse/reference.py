@@ -39,7 +39,7 @@ class Reference:
     pt_run = None
     mzmv_run = None
 
-    def __init__(self, path_astra, path_mikro, path_pt_legs, is_cnb=True, pt_run_name="SIMBA.Bahn.16"):
+    def __init__(self, path_astra=None, path_mikro=None, path_pt_legs=None, is_cnb=True, pt_run_name="SIMBA.Bahn.16"):
         self.is_cnb = is_cnb
         self.subpopulation = "regular"
         if is_cnb:
@@ -78,14 +78,17 @@ class Reference:
 
         self.operators = ["SBB-FV", "SBB-RV", r"Thurbo", r"Lyria", "Region Alps"]
 
-        self.load_mzmv_run()
-        self.load_pt_run(pt_run_name)
+        if self.path_mikro:
+            self.load_mzmv_run()
+        if self.path_pt_legs:
+            self.load_pt_run(pt_run_name)
 
     def load_mzmv_run(self):
         df = pd.read_csv(self.path_mikro, sep=",", dtype={"link_id": str})
         df[SUBPOPULATION] = self.subpopulation
         df = df.rename(columns={u'Weglaenge': "distance"})
         df = df.rename(columns={u'Pkm': "PKM"})
+        df = df.rename(columns={ u"Profession": r"work: employment status" })
         df.distance = df.distance * 1000.0
 
         if self.is_cnb:
@@ -103,7 +106,6 @@ class Reference:
     def load_pt_run(self, name):
         teilwege = pd.read_csv(self.path_pt_legs, sep=";",
                                skiprows=12)
-
         teilwege.rename(columns={"$OEVTEILWEG:QBEZNR": "QBEZNR",
                                  "PFAHRT": PF,
                                  "ZEIT": "duration",
