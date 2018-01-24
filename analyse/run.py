@@ -297,7 +297,7 @@ class Run:
         return self.get_linkvolumes()
 
     def _do(self, df, by, value, foreach=None, aggfunc="count", percent=None, inverse_percent_axis=False,
-            percent_level=None, indices=None, **kwargs):
+            percent_level=None, **kwargs):
         def check_variable(values):
             if not isinstance(values, list):
                 values = [values]
@@ -332,8 +332,6 @@ class Run:
             df = make_percent(df)
 
         df = df.fillna(0)
-        if indices is not None:
-            df = df.loc[indices]
         return df
 
     @cache

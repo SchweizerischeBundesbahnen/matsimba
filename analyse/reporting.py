@@ -186,11 +186,11 @@ def get_datas(runs, ref):
     #except Exception as e:
     #    logging.error(e)
 
-    try:
-        df, fig = runs.plot_pt_pkm(by="06_OperatorName", indices=ref.operators, ref_run=ref.get_pt_run())
-        datas.append(SheetData(df, fig, "OV PKM pro Betreiber"))
-    except Exception as e:
-        logging.error(e)
+   # try:
+   #     df, fig = runs.plot_pt_pkm(by="06_OperatorName", indices=ref.operators, ref_run=ref.get_pt_run())
+   #     datas.append(SheetData(df, fig, "OV PKM pro Betreiber"))
+   # except Exception as e:
+   #     logging.error(e)
 
     try:
         df, fig = runs.plot_pt_pkm(by="08_TSysName", indices=ref.tsys_names, ref_run=ref.get_pt_run())
@@ -240,5 +240,16 @@ def get_datas(runs, ref):
     except Exception as e:
         logging.error(e)
 
+    try:
+        df, fig = runs.plot_pt_skims(name="uh", pt_run=ref.get_pt_run())
+        datas.append(SheetData(df, fig, "Simba  UH"))
+    except Exception as e:
+        logging.error(e)
+
+    try:
+        df, fig = runs.plot_pt_skims(name="Dist", pt_run=ref.get_pt_run())
+        datas.append(SheetData(df, fig, "Simba  Dist"))
+    except Exception as e:
+        logging.error(e)
 
     return datas
