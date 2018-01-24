@@ -135,10 +135,10 @@ class Run:
             stops_in_fq = stop_attributes[stop_attributes[FQ_RELEVANT] == "1"][STOP_ID].map(float).unique()
 
             route_attributes = self.get_route_attributes()
-            routes_simba = route_attributes[route_attributes["01_Datenherkunft"] == self.name_datenherkunft_attribute][
-            "route_id"].unique()
+            route_attributes[IS_SIMBA_ROUTE] = False
+            route_attributes.loc[route_attributes["01_Datenherkunft"] == self.name_datenherkunft_attribute, IS_SIMBA_ROUTE] = True
 
-            df = set_simba_binnenverkehr_fq_attributes(df, stops_in_perimeter, stops_in_fq, routes_simba)
+            df = set_simba_binnenverkehr_fq_attributes(df, stops_in_perimeter, stops_in_fq, route_attributes)
             cols_ = cols+["is_binnenverkehr_simba", "journey_has_fq_leg",
                                             "start_time_first_stop", "end_time_last_stop", "first_stop", "last_stop"]
             if IS_SIMBA not in cols_:
@@ -248,7 +248,7 @@ class Run:
         df[PKM] = df[DISTANCE]*df[PF]
 
     def prepare(self, ref=None, persons=None, stop_attribute_path=None, route_attribute_path=None):
-        self.unload_data()
+        #self.unload_data()
 
         if stop_attribute_path is not None:
             self.load_stop_attributes(stop_attribute_path)

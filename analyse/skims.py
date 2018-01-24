@@ -2,8 +2,7 @@
 # -*- coding: cp1252-*-
 import pandas as pd
 import logging
-from analyse.variable import IS_SIMBA, JOURNEY_ID, TRIP_ID, BOARDING_STOP, START_TIME, ALIGHTING_STOP, END_TIME, \
-    STOP_ID, PF, DISTANCE
+from analyse.variable import *
 from vimapy.helpers import hhmmss_to_seconds, seconds_to_hhmmss
 
 pd.options.mode.chained_assignment = None
@@ -13,7 +12,9 @@ pd.options.mode.chained_assignment = None
 def set_is_simba_leg(df_legs, routes_simba):
     logging.info("setting is_simba")
     if IS_SIMBA not in df_legs.columns:
-        df_legs[IS_SIMBA] = df_legs.route.apply(lambda x: x in routes_simba)
+        df_legs = df_legs.merge(routes_simba, how="left", left_on="route", right_on="route_id")
+        df_legs[IS_SIMBA] = False
+        df_legs.loc[df_legs[IS_SIMBA_ROUTE], IS_SIMBA] = True
     logging.info("done setting is_simba")
     return df_legs
 
