@@ -39,13 +39,13 @@ def set_binnenverkehr_attributes(df_legs, stops_in_perimeter):
 
     logging.info("combine information on first and last leg per journey")
     # combine information on first and last leg per journey
-    first_last_leg_info = first_leg.merge(last_leg, on=JOURNEY_ID)
+    first_last_leg_info = first_leg.merge(last_leg, on=JOURNEY_ID, how="inner")
     first_last_leg_info["start_simba_stop_in_perimeter"] = first_last_leg_info["first_stop"].isin(stops_in_perimeter)
     first_last_leg_info["last_simba_stop_in_perimeter"] = first_last_leg_info["last_stop"].isin(stops_in_perimeter)
     nb_legs_before = len(df_legs)
     df_legs = df_legs.merge(first_last_leg_info, on=JOURNEY_ID, how="left") # TODO: merge possible with inplace? => DM
-    df_legs["start_simba_stop_in_perimeter"] = df_legs["start_simba_stop_in_perimeter"].fillna(False)
-    df_legs["last_simba_stop_in_perimeter"] = df_legs["last_simba_stop_in_perimeter"].fillna(False)
+    df_legs["start_simba_stop_in_perimeter"].fillna(False, inplace=True)
+    df_legs["last_simba_stop_in_perimeter"].fillna(False, inplace=True)
     if len(df_legs) != nb_legs_before:
         raise ValueError(
             "nb of legs changed. before: {}. after: {}".format(nb_legs_before, len(df_legs)))
