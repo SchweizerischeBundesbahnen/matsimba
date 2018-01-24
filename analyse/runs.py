@@ -138,7 +138,7 @@ class RunsList(list):
 
     def plot_pt_pkm_distr_legs(self, **kwargs):
         df = self._get(analyse.run.Run.calc_dist_distr_pt_legs, **kwargs)
-        return self._plot(df=df, kind="line", title="dads", **kwargs)
+        return self._plot(df=df, kind="line", title="dads", xs_index=analyse.run.distance_labels, **kwargs)
 
     def plot_pt_nb_trips(self, **kwargs):
         df = self._get(analyse.run.Run.calc_pt_nb_trips, **kwargs)
