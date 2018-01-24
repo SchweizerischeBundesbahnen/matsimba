@@ -242,12 +242,6 @@ def get_datas(runs, ref):
         logging.error(e)
 
     try:
-        df, fig = runs.plot_pt_skims(name="boarding scatter", pt_run=ref.get_pt_run())
-        datas.append(SheetData(df, fig, "Simba  Dist"))
-    except Exception as e:
-        logging.error(e)
-
-    try:
         df = runs.get_pt_table(pt_run=ref.get_pt_run())
         datas.append(SheetData(df, None, "Table"))
     except Exception as e:
@@ -255,7 +249,7 @@ def get_datas(runs, ref):
 
     try:
         df, fig = runs.plot_boarding_scatter(by="03_Stop_Code_boarding", pt_run=ref.get_pt_run())
-        datas.append(SheetData(df, None, "Boarding scatter"))
+        datas.append(SheetData(df, fig, "Boarding scatter"))
     except Exception as e:
         logging.error(e)
 
