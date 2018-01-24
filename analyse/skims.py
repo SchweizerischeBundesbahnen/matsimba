@@ -25,7 +25,7 @@ def set_binnenverkehr_attributes(df_legs, stops_in_perimeter):
     df_legs_filtered = df_legs[df_legs[IS_SIMBA]]
     first_leg = df_legs_filtered[[JOURNEY_ID, TRIP_ID]].groupby(JOURNEY_ID).min().reset_index()
     first_leg.columns = [JOURNEY_ID, "start_id"]
-    first_leg = first_leg.merge(df_legs_filtered, left_on=[JOURNEY_ID, "start_id"], right_on=[JOURNEY_ID, TRIP_ID])
+    first_leg = first_leg.merge(df_legs_filtered, left_on=[JOURNEY_ID, "start_id"], right_on=[JOURNEY_ID, TRIP_ID], how="left")
     first_leg = first_leg[[JOURNEY_ID, "start_id", BOARDING_STOP, START_TIME]]
     first_leg.columns = [JOURNEY_ID, "start_id", "first_stop", "start_time_first_stop"]
 
@@ -33,7 +33,7 @@ def set_binnenverkehr_attributes(df_legs, stops_in_perimeter):
     # get information of last leg per journey
     last_leg = df_legs_filtered[[JOURNEY_ID, TRIP_ID]].groupby(JOURNEY_ID).max().reset_index()
     last_leg.columns = [JOURNEY_ID, "last_id"]
-    last_leg = last_leg.merge(df_legs_filtered, left_on=[JOURNEY_ID, "last_id"], right_on=[JOURNEY_ID, TRIP_ID])
+    last_leg = last_leg.merge(df_legs_filtered, left_on=[JOURNEY_ID, "last_id"], right_on=[JOURNEY_ID, TRIP_ID], how="left")
     last_leg = last_leg[[JOURNEY_ID, "last_id", ALIGHTING_STOP, END_TIME]]
     last_leg.columns = [JOURNEY_ID, "last_id", "last_stop", "end_time_last_stop"]
 
