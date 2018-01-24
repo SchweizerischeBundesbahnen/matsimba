@@ -431,10 +431,7 @@ class Run:
 
         df = self._do(df, by=CAT_DIST, value=PF, aggfunc="sum", rotate=rotate,
                       inverse_percent_axis=inverse_percent_axis, **kwargs)
-        if inverse_percent_axis:
-            return df
-        else:
-            return df.cumsum()
+        return df
 
     @cache
     def calc_pt_dist_distr_trips(self, simba_only=False, **kwargs):
@@ -454,7 +451,7 @@ class Run:
 
         self._create_distance_class(df)
 
-        return self._do(df, by=CAT_DIST, value=PF, aggfunc="sum", percent=True, **kwargs).cumsum()
+        return self._do(df, by=CAT_DIST, value=PF, aggfunc="sum", **kwargs)
 
     @cache
     def calc_vehicles(self, names=None, **kwargs):

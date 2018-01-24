@@ -316,7 +316,7 @@ def plot_multi(df, cols=2.0, stacked=False, kind="bar", rotate=False, xs_index=N
     return fig, axs
 
 
-def plot_scatter(df, ref_name, cols=2.0, **kwargs):
+def plot_scatter(df, ref_name, cols=2.0, title="", **kwargs):
     n = len(df.columns)
     nrows = int(math.ceil(n / cols))
     ncols = int(cols)
@@ -326,17 +326,16 @@ def plot_scatter(df, ref_name, cols=2.0, **kwargs):
 
     def plot(ax, x, y):
         ax.scatter(x, y, alpha=0.5)
-        #ax.set_xlim([0, 250000])
-        #ax.set_ylim([0, 250000])
         ax.plot(x, x, 'g', label='fitted line')
         return ax
 
-    _run_names = [c for c in df.columns if c != ref_name]
     for i, run_name in enumerate(df.columns):
         ax = fig.get_axes()[i]
         plot(ax, df[ref_name], df[run_name])
         ax.set_xlabel(ref_name)
         ax.set_ylabel(run_name)
 
+    fig.suptitle(title, fontsize=16)
+    fig.tight_layout(rect=[0, 0.03, 1, 0.95])
     fig.tight_layout()
     return fig
