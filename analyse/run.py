@@ -89,7 +89,7 @@ dtypes = {u'activity_id': str,
 
 
 class Run:
-    def __init__(self, path=None, name=None, runId=None, scale_factor=1.0, perimeter_attribute="09_SIMBA_CH_Perimeter",
+    def __init__(self, path=None, name=None, runId=None, scale_factor=1.0, perimeter_attribute="08_SIMBA_CH_Perimeter",
                  datenherkunft_attribute="SBB_Simba.CH_2016"):
         self.path = path
         self.name = name
