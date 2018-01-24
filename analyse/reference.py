@@ -90,6 +90,9 @@ class Reference:
 
         if self.is_cnb:
             df = pd.DataFrame(df[df.istCNB])
+        else:
+            df = pd.DataFrame(df[df.istCH])
+
         mzmv = analyse.run.Run(name="mzmv")
         mzmv.data["journeys"] = df
         self.mzmv = mzmv
