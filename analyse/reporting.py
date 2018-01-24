@@ -247,7 +247,7 @@ def get_datas(runs, ref):
         logging.error(e)
 
     try:
-        df, fig = runs.plot_pt_skims(name="Dist", pt_run=ref.get_pt_run())
+        df, fig = runs.plot_pt_skims(name="distance", pt_run=ref.get_pt_run())
         datas.append(SheetData(df, fig, "Simba  Dist"))
     except Exception as e:
         logging.error(e)
