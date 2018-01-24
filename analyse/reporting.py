@@ -221,7 +221,7 @@ def get_datas(runs, ref):
 
     try:
         title = r"OEV Teilwege pro VSys und Distanzklasse"
-        df, fig = runs.plot_pt_pkm_distr_legs(ref_run=ref.get_pt_run(), foreach=["08_TSysName"], rotate=True, percent=True, title=title)
+        df, fig = runs.plot_pt_pkm_distr_legs(ref_run=ref.get_pt_run(), foreach=["08_TSysName"], rotate=True, percent=False, title=title)
         datas.append(SheetData(df, fig, title))
     except Exception as e:
         logging.error(e)
