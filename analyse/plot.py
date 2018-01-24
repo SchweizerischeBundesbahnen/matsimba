@@ -337,5 +337,4 @@ def plot_scatter(df, ref_name, cols=2.0, title="", **kwargs):
 
     fig.suptitle(title, fontsize=16)
     fig.tight_layout(rect=[0, 0.03, 1, 0.95])
-    fig.tight_layout()
     return fig
