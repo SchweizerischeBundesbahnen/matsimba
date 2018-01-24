@@ -9,10 +9,9 @@ pd.options.mode.chained_assignment = None
 
 
 # noinspection PyShadowingNames
-def set_is_simba_leg(df_legs, routes_simba):
+def set_is_simba_leg(df_legs):
     logging.info("setting is_simba")
     if IS_SIMBA not in df_legs.columns:
-        df_legs = df_legs.merge(routes_simba, how="left", left_on="route", right_on="route_id")
         df_legs[IS_SIMBA] = False
         df_legs.loc[df_legs[IS_SIMBA_ROUTE], IS_SIMBA] = True
     logging.info("done setting is_simba")
@@ -74,9 +73,9 @@ def set_is_fq_journey(df_legs, defining_stop_ids):
     return df_legs
 
 
-def set_simba_binnenverkehr_fq_attributes(df_legs, stop_ids_perimeter, stop_ids_fq, routes_simba):
+def set_simba_binnenverkehr_fq_attributes(df_legs, stop_ids_perimeter, stop_ids_fq):
     df_legs.sort_values([JOURNEY_ID, TRIP_ID], inplace=True)
-    df_legs_simba = set_is_simba_leg(df_legs, routes_simba)
+    df_legs_simba = set_is_simba_leg(df_legs)
     df_legs_simba_binnenverkehr = set_binnenverkehr_attributes(df_legs_simba, stop_ids_perimeter)
     df = set_is_fq_journey(df_legs_simba_binnenverkehr, stop_ids_fq)
     return df

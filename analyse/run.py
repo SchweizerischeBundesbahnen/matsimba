@@ -100,6 +100,7 @@ class Run:
 
         self.trip_persons_merged = False
         self.legs_persons_merged = False
+        self.route_merged = False
         self.link_merged = False
         self.name_perimeter_attribute = perimeter_attribute
         self.name_datenherkunft_attribute = datenherkunft_attribute
@@ -134,11 +135,13 @@ class Run:
             stops_in_perimeter = stop_attributes[stop_attributes[self.name_perimeter_attribute] == "1"][STOP_ID].map(float).unique()
             stops_in_fq = stop_attributes[stop_attributes[FQ_RELEVANT] == "1"][STOP_ID].map(float).unique()
 
-            route_attributes = self.get_route_attributes()
-            route_attributes[IS_SIMBA_ROUTE] = False
-            route_attributes.loc[route_attributes["01_Datenherkunft"] == self.name_datenherkunft_attribute, IS_SIMBA_ROUTE] = True
+            if IS_SIMBA not in df.columns:
+                df = self.merge_route(df)
 
-            df = set_simba_binnenverkehr_fq_attributes(df, stops_in_perimeter, stops_in_fq, route_attributes)
+                df[IS_SIMBA_ROUTE] = False
+                df.loc[df["01_Datenherkunft"] == self.name_datenherkunft_attribute, IS_SIMBA_ROUTE] = True
+
+            df = set_simba_binnenverkehr_fq_attributes(df, stops_in_perimeter, stops_in_fq)
             cols_ = cols+["is_binnenverkehr_simba", "journey_has_fq_leg",
                                             "start_time_first_stop", "end_time_last_stop", "first_stop", "last_stop"]
             if IS_SIMBA not in cols_:
@@ -401,14 +404,22 @@ class Run:
             df = self.filter_to_simba_binnenverkehr_fq_legs()
         else:
             df = self.get_pt_legs()
-        try:
-            df = df.merge(right=self.get_route_attributes(), how="left", left_on="route", right_on="route_id")
-        except KeyError as e:
-            logging.warn(e)
+
+        df = self.merge_route(df)
 
         df = self._do(df, value=PKM, aggfunc="sum", **kwargs)
 
         gc.collect()
+        return df
+
+    def merge_route(self, df):
+        if self.route_merged:
+            return df
+        try:
+            df = df.merge(right=self.get_route_attributes(), how="left", left_on="route", right_on="route_id")
+            self.route_merged = True
+        except KeyError as e:
+            logging.warn(e)
         return df
 
     @cache
@@ -416,10 +427,7 @@ class Run:
         df = self.get_pt_legs()
         self._create_distance_class(df)
 
-        try:
-            df = df.merge(right=self.get_route_attributes(), how="left", left_on="route", right_on="route_id")
-        except KeyError as e:
-            logging.warn(e)
+        df = self.merge_route(df)
 
         df = self._do(df, by=CAT_DIST, value=PF, aggfunc="sum", rotate=rotate,
                       inverse_percent_axis=inverse_percent_axis, **kwargs)
