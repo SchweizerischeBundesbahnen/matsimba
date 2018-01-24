@@ -42,9 +42,10 @@ def _make_report(datas, filename):
 
     for data in datas:
         df = data.df
-        buf = get_buffer(data.fig)
-        sheet = writer.book.add_worksheet(data.sheet)
-        sheet.insert_image('A1', "aa", {'image_data': buf})
+        if data.fig is not None:
+            buf = get_buffer(data.fig)
+            sheet = writer.book.add_worksheet(data.sheet)
+            sheet.insert_image('A1', "aa", {'image_data': buf})
         df.to_excel(writer, sheet_name=data.sheet + "_data", startrow=1, startcol=1, merge_cells=False)
 
     writer.save()
@@ -56,7 +57,7 @@ def _make_report(datas, filename):
 def get_datas(runs, ref):
     datas = []
 
-    mzmv = ref.mzmv = ref.get_mzmv_run()
+    mzmv = ref.get_mzmv_run()
 
     try:
         df, ax = runs.plot_nb_trips(by=MAIN_MODE, ref_run=mzmv, percent=True)
@@ -211,18 +212,6 @@ def get_datas(runs, ref):
         logging.error(e)
 
     try:
-        df, fig = runs.plot_pt_pkm(by="mode", simba_only=True, ref_run=ref.get_pt_run())
-        datas.append(SheetData(df, fig, "Simba pt pkm"))
-    except Exception as e:
-        logging.error(e)
-
-    try:
-        df, fig = runs.plot_pt_nb_trips(by="mode", simba_only=True, ref_run=ref.get_pt_run())
-        datas.append(SheetData(df, fig, "Simba pt nb"))
-    except Exception as e:
-        logging.error(e)
-
-    try:
         df, fig = runs.plot_pt_dist_distr_trips(simba_only=True, ref_run=ref.get_pt_run(), rotate=True)
         datas.append(SheetData(df, fig, "Simba dist distr"))
     except Exception as e:
@@ -249,6 +238,24 @@ def get_datas(runs, ref):
     try:
         df, fig = runs.plot_pt_skims(name="distance", pt_run=ref.get_pt_run())
         datas.append(SheetData(df, fig, "Simba  Dist"))
+    except Exception as e:
+        logging.error(e)
+
+    try:
+        df, fig = runs.plot_pt_skims(name="boarding scatter", pt_run=ref.get_pt_run())
+        datas.append(SheetData(df, fig, "Simba  Dist"))
+    except Exception as e:
+        logging.error(e)
+
+    try:
+        df = runs.get_pt_table(pt_run=ref.get_pt_run())
+        datas.append(SheetData(df, None, "Table"))
+    except Exception as e:
+        logging.error(e)
+
+    try:
+        df, fig = runs.plot_boarding_scatter(by="03_Stop_Code_boarding", pt_run=ref.get_pt_run())
+        datas.append(SheetData(df, None, "Boarding scatter"))
     except Exception as e:
         logging.error(e)
 

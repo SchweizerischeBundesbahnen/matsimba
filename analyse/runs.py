@@ -153,6 +153,29 @@ class RunsList(list):
         fig = analyse.plot.plot_scatter(df=df, ref_name=pt_run.name, title="", **kwargs)
         return df, fig
 
+    def plot_boarding_scatter(self, pt_run, **kwargs):
+        df = self._get(analyse.run.Run.calc_einsteiger, ref_run=pt_run, **kwargs)
+        fig = analyse.plot.plot_scatter(df=df, ref_name=pt_run.name, title="", **kwargs)
+        return df, fig
+
+    def get_pt_table(self, pt_run, **kwargs):
+        df = self.get_pt_pkm(by="mode", simba_only=True, ref_run=pt_run)
+        df.index = ["Anzahl Personenkilometer"]
+
+        _df = self._get(analyse.run.Run.calc_pt_nb_trips, by="mode", simba_only=True, ref_run=pt_run)
+        _df.index = ["Anzahl Personenfahrten"]
+        df = df.append(_df)
+
+        _df = self._get(analyse.run.Run.calc_pt_uh, simba_only=True, ref_run=pt_run)
+        _df = _df.reset_index()
+        _df.loc[_df.nb_transfer > 0, "umstieg"] = "Anteil Bahnreisen mit Umsteigen"
+        _df.loc[_df.nb_transfer == 0, "umstieg"] = "Anteil direkte Bahnreisen"
+        _df = _df.groupby("umstieg").sum() * 100
+        _df.drop("nb_transfer", axis=1, inplace=True)
+
+        df = df.append(_df)
+        return df
+
     def prepare(self, **kwargs):
         for run in self:
             run.prepare(**kwargs)

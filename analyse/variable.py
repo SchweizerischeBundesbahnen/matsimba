@@ -31,6 +31,7 @@ CAT_START_TIME="cat_start_time"
 FQ_RELEVANT = "07_FQ_relevant"
 STOP_ID = "stop_id"
 IS_SIMBA = "is_simba"
+IS_SIMBA_ROUTE = "is_simba_route"
 JOURNEY_ID = "journey_id"
 TRIP_ID = "trip_id"
 
