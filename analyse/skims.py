@@ -31,7 +31,7 @@ def get_first_last(df, last=False):
     first_leg = df[[trip_id, leg_id]].groupby(trip_id).agg(agg)
     first_leg = first_leg.reset_index().set_index([trip_id, leg_id], verify_integrity=True)
     first_leg = first_leg.merge(df, left_index=True, right_on=[trip_id, leg_id], how="left")
-    first_leg = first_leg.set_index([trip_id, leg_id], verify_integrity=True)
+    first_leg = first_leg.set_index(trip_id, verify_integrity=True)
     first_leg = first_leg[[BOARDING_STOP, START_TIME]]
     first_leg.rename(columns={BOARDING_STOP: re_stop, START_TIME: re_start_time}, inplace=True)
     return first_leg
@@ -56,7 +56,6 @@ def set_binnenverkehr_attributes(df_legs, stops_in_perimeter):
     nb_legs_before = len(df_legs)
 
     first_last_leg_info = first_last_leg_info.reset_index()
-    first_last_leg_info.drop(leg_id, inplace=True, axis=1)
     df_legs = df_legs.merge(first_last_leg_info, on=trip_id, how="left") # TODO: merge possible with inplace? => DM
     df_legs["start_simba_stop_in_perimeter"].fillna(False, inplace=True)
     df_legs["last_simba_stop_in_perimeter"].fillna(False, inplace=True)
