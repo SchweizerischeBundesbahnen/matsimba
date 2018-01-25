@@ -29,7 +29,7 @@ def make_leg_id(df):
     def to_int(j, tw):
         return j * (10 ** (digits_tw)) + tw
 
-    a = df.journey_id.apply(lambda x: to_int(x, 0))
+    a = df[trip_id].apply(lambda x: to_int(x, 0))
     b = df.TWEGIND.apply(lambda x: to_int(0, x))
     df[leg_id] = a + b
     return df
