@@ -129,6 +129,9 @@ class Run:
             cols = list(df.columns)
 
             df = pd.DataFrame(df[df[BOARDING_STOP].notnull() & df[ALIGHTING_STOP].notnull()])
+
+            n = len(df)
+
             df[START_TIME] = df[START_TIME].apply(int)
             df[END_TIME] = df[END_TIME].apply(int)
             df[BOARDING_STOP] = df[BOARDING_STOP].apply(float)
@@ -149,6 +152,8 @@ class Run:
                                             "start_time_first_stop", "end_time_last_stop", "first_stop", "last_stop"]
             if IS_SIMBA not in cols_:
                 cols_.append(IS_SIMBA)
+            assert n == len(df)
+            #assert np.any(df.duplicated([trip_id, leg_id])) is False
 
             assert
             assert np.any(df.duplicated([trip_id, leg_id])) is False
