@@ -248,6 +248,13 @@ def get_datas(runs, ref):
         logging.exception(e)
 
     try:
+        title = "Bahn Wege - PF - Bhf-Bhf"
+        df, fig = runs.plot_pt_skims(name="PF", pt_run=ref.get_pt_run(), title=title)
+        datas.append(SheetData(df, fig, title))
+    except Exception as e:
+        logging.exception(e)
+
+    try:
         title = "Bahn Wege - UH - Bhf-Bhf"
         df, fig = runs.plot_pt_skims(name="uh", pt_run=ref.get_pt_run(), title=title)
         datas.append(SheetData(df, fig, title))
