@@ -72,8 +72,8 @@ analyse.plot.set_matplotlib_params()
 
 dtypes = {u'activity_id': str,
           u'person_id': str,
-          TRIP_ID: int,
-          JOURNEY_ID: int,
+          trip_id: int,
+          leg_id: int,
           u'boarding_stop': float,
           u'alighting_stop': float,
           u'alighting': str,
@@ -118,7 +118,7 @@ class Run:
 
     def get_legs(self):
         df = self._get("legs")
-        assert np.any(df.duplicated([JOURNEY_ID, TRIP_ID]) )  == False
+        assert np.any(df.duplicated([trip_id, leg_id]) )  == False
         return df
 
     def get_pt_legs(self):
@@ -150,6 +150,7 @@ class Run:
             if IS_SIMBA not in cols_:
                 cols_.append(IS_SIMBA)
 
+            assert np.any(df.duplicated([trip_id, leg_id])) == False
             self.data["pt_legs"] = df
 
         return pd.DataFrame(self.data["pt_legs"])
@@ -472,8 +473,8 @@ class Run:
             df = self.filter_to_simba_binnenverkehr_fq_legs()
         else:
             df = self.get_pt_legs()
-        df = df.groupby(JOURNEY_ID).agg({TRIP_ID: "count", PF: "first"})
-        df["nb_transfer"] = df["trip_id"] - 1
+        df = df.groupby(trip_id).agg({leg_id: "count", PF: "first"})
+        df["nb_transfer"] = df[leg_id] - 1
         return self._do(df, by="nb_transfer", value=PF, aggfunc="sum", percent=True, **kwargs)
 
     @cache
@@ -487,7 +488,7 @@ class Run:
             foreach = kwargs["foreach"]
             if foreach is not None:
                 columns += foreach
-        df = df.groupby(JOURNEY_ID)[columns].min()
+        df = df.groupby(trip_id)[columns].min()
 
         return self._do(df, by=by, value=PF, aggfunc="sum", **kwargs)
 
