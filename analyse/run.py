@@ -417,7 +417,9 @@ class Run:
         if self.route_merged:
             return df
         try:
+            n = len(df)
             df = df.merge(right=self.get_route_attributes(), how="left", left_on="route", right_on="route_id")
+            assert n == len(df), "Size of DF changed"
             self.route_merged = True
         except KeyError as e:
             logging.warn(e)
