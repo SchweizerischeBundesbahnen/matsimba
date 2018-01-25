@@ -72,8 +72,8 @@ analyse.plot.set_matplotlib_params()
 
 dtypes = {u'activity_id': str,
           u'person_id': str,
-          u'trip_id': str,
-          u'journey_id': int,
+          TRIP_ID: int,
+          JOURNEY_ID: int,
           u'boarding_stop': float,
           u'alighting_stop': float,
           u'alighting': str,
