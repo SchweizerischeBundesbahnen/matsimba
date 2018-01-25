@@ -118,7 +118,7 @@ class Run:
 
     def get_legs(self):
         df = self._get("legs")
-        #assert np.any(df.duplicated([trip_id, leg_id])) is False
+        assert np.any(df.duplicated([trip_id, leg_id])) is False
         return df
 
     def get_pt_legs(self):
@@ -150,7 +150,8 @@ class Run:
             if IS_SIMBA not in cols_:
                 cols_.append(IS_SIMBA)
 
-            #assert np.any(df.duplicated([trip_id, leg_id])) is False
+            assert
+            assert np.any(df.duplicated([trip_id, leg_id])) is False
             self.data["pt_legs"] = df
 
         return pd.DataFrame(self.data["pt_legs"])
