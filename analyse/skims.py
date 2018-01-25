@@ -18,32 +18,45 @@ def set_is_simba_leg(df_legs):
     return df_legs
 
 
+
+def get_first_last(df, last=False):
+    agg = "min"
+    re_start_time = "start_time_first_stop"
+    re_stop = "first_stop"
+
+    if last:
+        agg = "max"
+        re_start_time = "end_time_last_stop"
+        re_stop = "last_stop"
+
+    first_leg = df[[JOURNEY_ID, TRIP_ID]].groupby(JOURNEY_ID).agg(agg)
+    first_leg = first_leg.reset_index().set_index([JOURNEY_ID, TRIP_ID], verify_integrity=True)
+    first_leg = first_leg.merge(df, left_index=True, right_on=[JOURNEY_ID, TRIP_ID], how="left")
+    first_leg = first_leg.set_index([JOURNEY_ID, TRIP_ID], verify_integrity=True)
+    first_leg = first_leg[[BOARDING_STOP, START_TIME]]
+    first_leg.rename(columns={BOARDING_STOP: re_stop, START_TIME: re_start_time}, inplace=True)
+    return first_leg
+
+
 def set_binnenverkehr_attributes(df_legs, stops_in_perimeter):
     # get information of first leg per journey
+    # http://www.datadan.io/python-pandas-pitfalls-hard-lessons-learned-over-time/
     stops_in_perimeter = set(stops_in_perimeter)
     logging.info("setting binnernverkehr attributes")
-    df_legs_filtered = df_legs[df_legs[IS_SIMBA]]
-    first_leg = df_legs_filtered[[JOURNEY_ID, TRIP_ID]].groupby(JOURNEY_ID).min().reset_index()
-    first_leg.columns = [JOURNEY_ID, "start_id"]
-    first_leg = first_leg.merge(df_legs_filtered, left_on=[JOURNEY_ID, "start_id"], right_on=[JOURNEY_ID, TRIP_ID], how="left")
-    first_leg = first_leg[[JOURNEY_ID, "start_id", BOARDING_STOP, START_TIME]]
-    first_leg.columns = [JOURNEY_ID, "start_id", "first_stop", "start_time_first_stop"]
 
-    logging.info("get information of last leg per journey")
-    # get information of last leg per journey
-    last_leg = df_legs_filtered[[JOURNEY_ID, TRIP_ID]].groupby(JOURNEY_ID).max().reset_index()
-    last_leg.columns = [JOURNEY_ID, "last_id"]
-    last_leg = last_leg.merge(df_legs_filtered, left_on=[JOURNEY_ID, "last_id"], right_on=[JOURNEY_ID, TRIP_ID], how="left")
-    last_leg = last_leg[[JOURNEY_ID, "last_id", ALIGHTING_STOP, END_TIME]]
-    last_leg.columns = [JOURNEY_ID, "last_id", "last_stop", "end_time_last_stop"]
+    df_legs_filtered = df_legs[df_legs[IS_SIMBA]]
+
+    first_leg = get_first_last(df_legs_filtered, last=False)
+    last_leg = get_first_last(df_legs_filtered, last=True)
 
     logging.info("combine information on first and last leg per journey")
     # combine information on first and last leg per journey
-    first_last_leg_info = first_leg.merge(last_leg, on=JOURNEY_ID, how="inner")
+    first_last_leg_info = first_leg.merge(last_leg, left_index=True, right_index=True, how="inner")
     first_last_leg_info["start_simba_stop_in_perimeter"] = first_last_leg_info["first_stop"].isin(stops_in_perimeter)
     first_last_leg_info["last_simba_stop_in_perimeter"] = first_last_leg_info["last_stop"].isin(stops_in_perimeter)
     nb_legs_before = len(df_legs)
-    df_legs = df_legs.merge(first_last_leg_info, on=JOURNEY_ID, how="left") # TODO: merge possible with inplace? => DM
+
+    df_legs = df_legs.merge(first_last_leg_info.reset_index(), on=JOURNEY_ID, how="left") # TODO: merge possible with inplace? => DM
     df_legs["start_simba_stop_in_perimeter"].fillna(False, inplace=True)
     df_legs["last_simba_stop_in_perimeter"].fillna(False, inplace=True)
     if len(df_legs) != nb_legs_before:
