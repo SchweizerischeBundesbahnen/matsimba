@@ -117,7 +117,9 @@ class Run:
         return self._get("journeys")
 
     def get_legs(self):
-        return self._get("legs")
+        df = self._get("legs")
+        assert np.any(df.duplicated([JOURNEY_ID, TRIP_ID]) )  == False
+        return df
 
     def get_pt_legs(self):
         df = self.get_legs()
