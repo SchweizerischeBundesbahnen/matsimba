@@ -155,8 +155,6 @@ class Run:
             assert n == len(df)
             #assert np.any(df.duplicated([trip_id, leg_id])) is False
 
-            assert
-            assert np.any(df.duplicated([trip_id, leg_id])) is False
             self.data["pt_legs"] = df
 
         return pd.DataFrame(self.data["pt_legs"])
