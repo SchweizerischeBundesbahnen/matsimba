@@ -18,7 +18,6 @@ def set_is_simba_leg(df_legs):
     return df_legs
 
 
-
 def get_first_last(df, last=False):
     agg = "min"
     re_start_time = "start_time_first_stop"
@@ -29,10 +28,10 @@ def get_first_last(df, last=False):
         re_start_time = "end_time_last_stop"
         re_stop = "last_stop"
 
-    first_leg = df[[JOURNEY_ID, TRIP_ID]].groupby(JOURNEY_ID).agg(agg)
-    first_leg = first_leg.reset_index().set_index([JOURNEY_ID, TRIP_ID], verify_integrity=True)
-    first_leg = first_leg.merge(df, left_index=True, right_on=[JOURNEY_ID, TRIP_ID], how="left")
-    first_leg = first_leg.set_index([JOURNEY_ID, TRIP_ID], verify_integrity=True)
+    first_leg = df[[trip_id, leg_id]].groupby(trip_id).agg(agg)
+    first_leg = first_leg.reset_index().set_index([trip_id, leg_id], verify_integrity=True)
+    first_leg = first_leg.merge(df, left_index=True, right_on=[trip_id, leg_id], how="left")
+    first_leg = first_leg.set_index([trip_id, leg_id], verify_integrity=True)
     first_leg = first_leg[[BOARDING_STOP, START_TIME]]
     first_leg.rename(columns={BOARDING_STOP: re_stop, START_TIME: re_start_time}, inplace=True)
     return first_leg
@@ -56,7 +55,7 @@ def set_binnenverkehr_attributes(df_legs, stops_in_perimeter):
     first_last_leg_info["last_simba_stop_in_perimeter"] = first_last_leg_info["last_stop"].isin(stops_in_perimeter)
     nb_legs_before = len(df_legs)
 
-    df_legs = df_legs.merge(first_last_leg_info.reset_index(), on=JOURNEY_ID, how="left") # TODO: merge possible with inplace? => DM
+    df_legs = df_legs.merge(first_last_leg_info.reset_index(), on=trip_id, how="left") # TODO: merge possible with inplace? => DM
     df_legs["start_simba_stop_in_perimeter"].fillna(False, inplace=True)
     df_legs["last_simba_stop_in_perimeter"].fillna(False, inplace=True)
     if len(df_legs) != nb_legs_before:
@@ -73,11 +72,11 @@ def set_is_fq_journey(df_legs, defining_stop_ids):
     df_legs_filered = df_legs[df_legs[IS_SIMBA] & df_legs["is_binnenverkehr_simba"]]
     df_legs_filered["leg_is_fq"] = df_legs_filered[BOARDING_STOP].isin(defining_stop_ids) & \
                                    df_legs_filered[ALIGHTING_STOP].isin(defining_stop_ids)
-    has_fq_leg = (df_legs_filered[[JOURNEY_ID, "leg_is_fq"]]).groupby(JOURNEY_ID).max()
+    has_fq_leg = (df_legs_filered[[trip_id, "leg_is_fq"]]).groupby(trip_id).max()
     has_fq_leg = has_fq_leg.reset_index()
-    has_fq_leg.columns = [JOURNEY_ID, "journey_has_fq_leg"]
+    has_fq_leg.columns = [trip_id, "journey_has_fq_leg"]
     nb_legs_before = len(df_legs)
-    df_legs = df_legs.merge(has_fq_leg, on=JOURNEY_ID, how="left")
+    df_legs = df_legs.merge(has_fq_leg, on=trip_id, how="left")
     df_legs["journey_has_fq_leg"] = df_legs["journey_has_fq_leg"].fillna(False)
     if len(df_legs) != nb_legs_before:
         raise ValueError(
@@ -87,7 +86,7 @@ def set_is_fq_journey(df_legs, defining_stop_ids):
 
 
 def set_simba_binnenverkehr_fq_attributes(df_legs, stop_ids_perimeter, stop_ids_fq):
-    df_legs.sort_values([JOURNEY_ID, TRIP_ID], inplace=True)
+    df_legs.sort_values([trip_id, leg_id], inplace=True)
     df_legs_simba = set_is_simba_leg(df_legs)
     df_legs_simba_binnenverkehr = set_binnenverkehr_attributes(df_legs_simba, stop_ids_perimeter)
     df = set_is_fq_journey(df_legs_simba_binnenverkehr, stop_ids_fq)
@@ -95,37 +94,37 @@ def set_simba_binnenverkehr_fq_attributes(df_legs, stop_ids_perimeter, stop_ids_
 
 
 def get_station_to_station_skims(df_legs):
-    start_time_per_journey = df_legs[[JOURNEY_ID, "start_time_first_stop"]].groupby(JOURNEY_ID).min()
+    start_time_per_journey = df_legs[[trip_id, "start_time_first_stop"]].groupby(trip_id).min()
     start_time_per_journey = start_time_per_journey.reset_index()
-    end_time_per_journey = df_legs[[JOURNEY_ID, "end_time_last_stop"]].groupby(JOURNEY_ID).max()
+    end_time_per_journey = df_legs[[trip_id, "end_time_last_stop"]].groupby(trip_id).max()
     end_time_per_journey = end_time_per_journey.reset_index()
 
-    skim_per_journey = start_time_per_journey.merge(end_time_per_journey, on=JOURNEY_ID)
+    skim_per_journey = start_time_per_journey.merge(end_time_per_journey, on=trip_id)
     skim_per_journey["bz"] = skim_per_journey["end_time_last_stop"] - skim_per_journey["start_time_first_stop"]
     skim_per_journey["bz"] = skim_per_journey["bz"].apply(lambda x: x if x >= 0 else x + 24 * 60 * 60)
 
-    uh_per_journey = df_legs[[JOURNEY_ID, "start_time"]].groupby(JOURNEY_ID).count()
+    uh_per_journey = df_legs[[trip_id, "start_time"]].groupby(trip_id).count()
     uh_per_journey = uh_per_journey.reset_index()
-    uh_per_journey.columns = [JOURNEY_ID, "uh"]
+    uh_per_journey.columns = [trip_id, "uh"]
     uh_per_journey["uh"] -= 1.0
-    skim_per_journey = skim_per_journey.merge(uh_per_journey, on=JOURNEY_ID)
+    skim_per_journey = skim_per_journey.merge(uh_per_journey, on=trip_id)
 
-    pf_per_journey = df_legs[[JOURNEY_ID, PF]].groupby(JOURNEY_ID).min()
+    pf_per_journey = df_legs[[trip_id, PF]].groupby(trip_id).min()
     pf_per_journey = pf_per_journey.reset_index()
-    skim_per_journey = skim_per_journey.merge(pf_per_journey, on=JOURNEY_ID)
+    skim_per_journey = skim_per_journey.merge(pf_per_journey, on=trip_id)
 
-    distance_per_journey = df_legs[[JOURNEY_ID, DISTANCE]].groupby(JOURNEY_ID).sum()
+    distance_per_journey = df_legs[[trip_id, DISTANCE]].groupby(trip_id).sum()
     distance_per_journey = distance_per_journey.reset_index()
-    skim_per_journey = skim_per_journey.merge(distance_per_journey, on=JOURNEY_ID)
+    skim_per_journey = skim_per_journey.merge(distance_per_journey, on=trip_id)
 
     skim_per_journey["weighted_bz"] = skim_per_journey[PF] * skim_per_journey["bz"]
     skim_per_journey["weighted_uh"] = skim_per_journey[PF] * skim_per_journey["uh"]
     skim_per_journey["weighted_distance"] = skim_per_journey[PF] * skim_per_journey[DISTANCE]
 
-    first_last_stop_per_journey = df_legs[[JOURNEY_ID, "first_stop", "last_stop"]].groupby(
-        JOURNEY_ID).min()
+    first_last_stop_per_journey = df_legs[[trip_id, "first_stop", "last_stop"]].groupby(
+        trip_id).min()
     first_last_stop_per_journey = first_last_stop_per_journey.reset_index()
-    skim_per_journey = skim_per_journey.merge(first_last_stop_per_journey, on=JOURNEY_ID)
+    skim_per_journey = skim_per_journey.merge(first_last_stop_per_journey, on=trip_id)
 
     skim_per_station_to_station = skim_per_journey[
         ["first_stop", "last_stop", PF, "weighted_bz", "weighted_uh", "weighted_distance"]].groupby(
