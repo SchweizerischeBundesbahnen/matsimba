@@ -242,7 +242,7 @@ def get_datas(runs, ref):
 
     try:
         title = r"Bahn Wege - Distanz Verteilung - Pro Abo"
-        df, fig = runs.plot_pt_dist_distr_trips(simba_only=True, ref_run=ref.get_pt_run(),  foreach=[SUBPOPULATION, SEASON_TICKET],  rotate=True, title=title)
+        df, fig = runs.plot_pt_dist_distr_trips(simba_only=True, foreach=[SUBPOPULATION, SEASON_TICKET],  rotate=True, title=title)
         datas.append(SheetData(df, fig, title))
     except Exception as e:
         logging.exception(e)
