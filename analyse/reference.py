@@ -132,6 +132,7 @@ class Reference:
         teilwege["mode"] = "pt"
         teilwege[IS_SIMBA] = True
         teilwege[SUBPOPULATION] = self.subpopulation
+        teilwege[SEASON_TICKET] = None
 
         pt_run = analyse.run.Run(name=name)
         pt_run.data["legs"] = teilwege
