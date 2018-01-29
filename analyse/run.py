@@ -164,8 +164,8 @@ class Run:
 
     def get_skims_simba(self, **kwargs):
         df = self.filter_to_simba_binnenverkehr_fq_legs()
-        skims = get_station_to_station_skims(df)
-        skims.set_index(["first_stop", "last_stop"], inplace=True)
+        skims = get_station_to_station_skims(df, self.get_stop_attributes())
+        skims.set_index(["first_stop_code", "last_stop_code"], inplace=True)
         return skims
 
     def get_skim_simba(self, name, **kwargs):

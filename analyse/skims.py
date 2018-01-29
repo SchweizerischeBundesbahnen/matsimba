@@ -101,7 +101,18 @@ def set_simba_binnenverkehr_fq_attributes(df_legs, stop_ids_perimeter, stop_ids_
     return df
 
 
-def get_station_to_station_skims(df_legs):
+def get_station_to_station_skims(df_legs, stop_attributes):
+
+    stop_code_att = "03_Stop_Code"
+    stop_attributes = stop_attributes[[STOP_ID, stop_code_att]]
+    stop_attributes.set_index(STOP_ID, inplace=True)
+
+    df_legs = df_legs.merge(stop_attributes, left_on="first_stop", right_index=True)
+    df_legs.rename(columns={stop_code_att: "first_stop_code"}, inplace=True)
+
+    df_legs = df_legs.merge(stop_attributes, left_on="last_stop", right_index=True)
+    df_legs.rename(columns={stop_code_att: "last_stop_code"}, inplace=True)
+
     start_time_per_journey = df_legs[[trip_id, "start_time_first_stop"]].groupby(trip_id).min()
     start_time_per_journey = start_time_per_journey.reset_index()
     end_time_per_journey = df_legs[[trip_id, "end_time_last_stop"]].groupby(trip_id).max()
@@ -129,14 +140,14 @@ def get_station_to_station_skims(df_legs):
     skim_per_journey["weighted_uh"] = skim_per_journey[PF] * skim_per_journey["uh"]
     skim_per_journey["weighted_distance"] = skim_per_journey[PF] * skim_per_journey[DISTANCE]
 
-    first_last_stop_per_journey = df_legs[[trip_id, "first_stop", "last_stop"]].groupby(
+    first_last_stop_per_journey = df_legs[[trip_id, "first_stop_code", "last_stop_code"]].groupby(
         trip_id).min()
     first_last_stop_per_journey = first_last_stop_per_journey.reset_index()
     skim_per_journey = skim_per_journey.merge(first_last_stop_per_journey, on=trip_id)
 
     skim_per_station_to_station = skim_per_journey[
-        ["first_stop", "last_stop", PF, "weighted_bz", "weighted_uh", "weighted_distance"]].groupby(
-        ["first_stop", "last_stop"]).sum()
+        ["first_stop_code", "last_stop_code", PF, "weighted_bz", "weighted_uh", "weighted_distance"]].groupby(
+        ["first_stop_code", "last_stop_code"]).sum()
     skim_per_station_to_station["bz"] = (skim_per_station_to_station["weighted_bz"] / \
                                         skim_per_station_to_station[
                                             PF]).apply(float)
@@ -149,7 +160,7 @@ def get_station_to_station_skims(df_legs):
     skim_per_station_to_station["distance"] /= 1000.0
     skim_per_station_to_station = skim_per_station_to_station.reset_index()
     skim_per_station_to_station = skim_per_station_to_station.sort_values(PF, ascending=False)
-    cols_out = ["first_stop", "last_stop", PF, "bz", "bz_hhmmss", "uh", "distance"]
+    cols_out = ["first_stop_code", "last_stop_code", PF, "bz", "bz_hhmmss", "uh", "distance"]
     return skim_per_station_to_station[cols_out]
 
 
