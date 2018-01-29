@@ -71,6 +71,9 @@ def set_is_fq_journey(df_legs, defining_stop_ids):
     logging.info("setting fq journey attributes")
     defining_stop_ids = set(defining_stop_ids)
     df_legs_filered = df_legs[df_legs[IS_SIMBA] & df_legs["is_binnenverkehr_simba"]]
+    #TODO this is not really properly yet (i.e. stops between Fribourg-Murten-Neuchatel are declared as FQ-stop,
+    # but not all trains are FQ there (TPF). A good solution would be to add here the condition that the Betreiber
+    # is FQ as well
     df_legs_filered["leg_is_fq"] = df_legs_filered[BOARDING_STOP].isin(defining_stop_ids) & \
                                    df_legs_filered[ALIGHTING_STOP].isin(defining_stop_ids)
     has_fq_leg = (df_legs_filered[[trip_id, "leg_is_fq"]]).groupby(trip_id).max()
