@@ -20,20 +20,24 @@ def set_is_simba_leg(df_legs):
 
 def get_first_last(df, last=False):
     agg = "min"
-    re_start_time = "start_time_first_stop"
+    re_time = "start_time_first_stop"
+    att_stop = BOARDING_STOP
+    att_time = START_TIME
     re_stop = "first_stop"
 
     if last:
         agg = "max"
-        re_start_time = "end_time_last_stop"
+        re_time = "end_time_last_stop"
+        att_stop = ALIGHTING_STOP
         re_stop = "last_stop"
+        att_time = END_TIME
 
     first_leg = df[[trip_id, leg_id]].groupby(trip_id).agg(agg)
     first_leg = first_leg.reset_index().set_index([trip_id, leg_id], verify_integrity=True)
     first_leg = first_leg.merge(df, left_index=True, right_on=[trip_id, leg_id], how="left")
     first_leg = first_leg.set_index(trip_id, verify_integrity=True)
-    first_leg = first_leg[[BOARDING_STOP, START_TIME]]
-    first_leg.rename(columns={BOARDING_STOP: re_stop, START_TIME: re_start_time}, inplace=True)
+    first_leg = first_leg[[att_stop, att_time]]
+    first_leg.rename(columns={att_stop: re_stop, att_time: re_time}, inplace=True)
     return first_leg
 
 
