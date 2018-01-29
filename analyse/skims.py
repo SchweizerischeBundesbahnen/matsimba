@@ -70,7 +70,7 @@ def set_binnenverkehr_attributes(df_legs, stops_in_perimeter):
 def set_is_fq_journey(df_legs, defining_stop_ids):
     logging.info("setting fq journey attributes")
     defining_stop_ids = set(defining_stop_ids)
-    df_legs_filered = df_legs[df_legs[IS_SIMBA] & df_legs["is_binnenverkehr_simba"]]
+    df_legs_filered = df_legs[df_legs[IS_SIMBA]]
     #TODO this is not really properly yet (i.e. stops between Fribourg-Murten-Neuchatel are declared as FQ-stop,
     # but not all trains are FQ there (TPF)). A good solution would be to add here the condition that the Betreiber
     # is FQ as well
