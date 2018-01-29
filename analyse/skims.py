@@ -145,8 +145,7 @@ def get_station_to_station_skims(df_legs, stop_attributes):
     skim_per_journey["weighted_distance"] = skim_per_journey[PF] * skim_per_journey[DISTANCE]
     logging.info("calculated weighted skims per trip")
 
-    first_last_stop_per_journey = df_legs[[trip_id, "first_stop_code", "last_stop_code"]].groupby(
-        trip_id).min()
+    first_last_stop_per_journey = df_legs[[trip_id, "first_stop_code", "last_stop_code"]].drop_duplicates()
     first_last_stop_per_journey = first_last_stop_per_journey.reset_index()
     skim_per_journey = skim_per_journey.merge(first_last_stop_per_journey, on=trip_id)
     logging.info("aggregated to stations")
