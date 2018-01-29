@@ -7,6 +7,7 @@ import json
 import time
 import numpy as np
 import analyse.skims
+from analyse.skims import set_simba_binnenverkehr_fq_attributes, get_station_to_station_skims
 from variable import *
 import gc
 
@@ -71,8 +72,10 @@ analyse.plot.set_matplotlib_params()
 
 dtypes = {u'activity_id': str,
           u'person_id': str,
-          u'trip_id': str,
-          u'boarding_stop': str,
+          trip_id: int,
+          leg_id: int,
+          u'boarding_stop': float,
+          u'alighting_stop': float,
           u'alighting': str,
           u'link_id': str,
           u'work': str,
@@ -87,7 +90,8 @@ dtypes = {u'activity_id': str,
 
 
 class Run:
-    def __init__(self, path=None, name=None, runId=None, scale_factor=1.0):
+    def __init__(self, path=None, name=None, runId=None, scale_factor=1.0, perimeter_attribute="08_SIMBA_CH_Perimeter",
+                 datenherkunft_attribute="SBB_Simba.CH_2016"):
         self.path = path
         self.name = name
         self.scale_factor = scale_factor
@@ -97,7 +101,11 @@ class Run:
 
         self.trip_persons_merged = False
         self.legs_persons_merged = False
+        self.route_merged = False
         self.link_merged = False
+        self.name_perimeter_attribute = perimeter_attribute
+        self.name_datenherkunft_attribute = datenherkunft_attribute
+        self.sample = None
 
     def get_persons(self):
         return self._get("persons")
@@ -109,13 +117,61 @@ class Run:
         return self._get("journeys")
 
     def get_legs(self):
-        return self._get("legs")
+        df = self._get("legs")
+        assert np.any(df.duplicated(leg_id)) == False
+        return df
 
     def get_pt_legs(self):
         df = self.get_legs()
-        if "boarding_stop" in df.columns:
-            df = pd.DataFrame(df[df.boarding_stop.notnull()])
-        return df
+
+        if "pt_legs" not in self.data:
+
+            cols = list(df.columns)
+
+            df = pd.DataFrame(df[df[BOARDING_STOP].notnull() & df[ALIGHTING_STOP].notnull()])
+
+            n = len(df)
+
+            df[START_TIME] = df[START_TIME].apply(int)
+            df[END_TIME] = df[END_TIME].apply(int)
+            df[BOARDING_STOP] = df[BOARDING_STOP].apply(float)
+            df[ALIGHTING_STOP] = df[ALIGHTING_STOP].apply(float)
+
+            stop_attributes = self.get_stop_attributes()
+            stops_in_perimeter = stop_attributes[stop_attributes[self.name_perimeter_attribute] == "1"][STOP_ID].map(float).unique()
+            stops_in_fq = stop_attributes[stop_attributes[FQ_RELEVANT] == "1"][STOP_ID].map(float).unique()
+
+            if IS_SIMBA not in df.columns:
+                df = self.merge_route(df)
+
+                df[IS_SIMBA_ROUTE] = False
+                df.loc[df["01_Datenherkunft"] == self.name_datenherkunft_attribute, IS_SIMBA_ROUTE] = True
+
+            df = set_simba_binnenverkehr_fq_attributes(df, stops_in_perimeter, stops_in_fq)
+            cols_ = cols+["is_binnenverkehr_simba", "journey_has_fq_leg",
+                                            "start_time_first_stop", "end_time_last_stop", "first_stop", "last_stop"]
+            if IS_SIMBA not in cols_:
+                cols_.append(IS_SIMBA)
+            assert n == len(df)
+            assert np.any(df.duplicated(leg_id)) == False
+            self.data["pt_legs"] = df
+
+        return pd.DataFrame(self.data["pt_legs"])
+
+    def filter_to_simba_binnenverkehr_fq_legs(self):
+        df = self.get_pt_legs()
+        return df[df[IS_SIMBA] & df.is_binnenverkehr_simba & df.journey_has_fq_leg]
+
+    def get_skims_simba(self, **kwargs):
+        if "skims" not in self.data:
+            df = self.filter_to_simba_binnenverkehr_fq_legs()
+            skims = get_station_to_station_skims(df, self.get_stop_attributes())
+            skims.set_index(["first_stop_code", "last_stop_code"], inplace=True)
+            self.data["skims"] = skims
+        return self.data["skims"]
+
+    def get_skim_simba(self, name, **kwargs):
+        return self.get_skims_simba()[[name]]
 
     def get_vehjourneys(self):
         return self._get("vehjourneys")
@@ -146,10 +202,15 @@ class Run:
 
     def _get(self, name, reload_data=False):
         self._load_data(name, reload_data=reload_data)
-        return self.data[name]
+        df = self.data[name]
+        if self.sample is not None:
+            df = df.sample(self.sample, axis=0, replace=True)
+        return df
 
     def load_stop_attributes(self, path):
-        self.data["stop_attributes"] = analyse.reader.get_attributes(path)
+        df = analyse.reader.get_attributes(path)
+        df[STOP_ID] = df[STOP_ID].map(float)
+        self.data["stop_attributes"] = df
 
     def load_route_attributes(self, path):
         self.data["route_attributes"] = analyse.reader.get_attributes(path, "route_id")
@@ -170,7 +231,8 @@ class Run:
                 filename = self.runId+"."+filename
             path = os.path.join(self.path, filename)
             logging.info("Starting loading data %s: %s " % (name, path))
-            self.data[name] = pd.read_csv(path, sep=sep, encoding="utf-8", dtype=dtypes).reset_index(drop=True)
+            df = pd.read_csv(path, sep=sep, encoding="utf-8", dtype=dtypes).reset_index(drop=True)
+            self.data[name] = df
             logging.info("%s loaded in %i seconds" % (name, time.time() - time1))
         except Exception as e:
             logging.error(e.message)
@@ -190,15 +252,15 @@ class Run:
 
     def _set_dummy_pf(self):
         df = self.get_legs()
-        df[PF] = 1.0
-        df[PKM] = df[DISTANCE]
+        df[PF] = self.scale_factor
+        df[PKM] = df[DISTANCE]*df[PF]
 
         df = self.get_trips()
-        df[PF] = 1.0
-        df[PKM] = df[DISTANCE]
+        df[PF] = self.scale_factor
+        df[PKM] = df[DISTANCE]*df[PF]
 
-    def prepare(self, stop_ids_perimeter=None, defining_stop_ids=None, ref=None, persons=None, stop_attribute_path=None, route_attribute_path=None):
-        self.unload_data()
+    def prepare(self, ref=None, persons=None, stop_attribute_path=None, route_attribute_path=None):
+        #self.unload_data()
 
         if stop_attribute_path is not None:
             self.load_stop_attributes(stop_attribute_path)
@@ -220,56 +282,10 @@ class Run:
 
         self._set_dummy_pf()
 
-        if stop_ids_perimeter is not None and defining_stop_ids is not None:
-            df = self.get_legs()
-            df = df[df.line.notnull()]
-            fq_legs = analyse.skims.filter_legs_to_binnenverkehr_fq_legs(df, stop_ids_perimeter=stop_ids_perimeter,
-                                                                         defining_stop_ids=defining_stop_ids)
-            df = self.get_legs()
-            df[IS_SIMBA_FQ] = False
-            df.loc[df.trip_id.isin(fq_legs.trip_id), IS_SIMBA_FQ] = True
-
-            self.journey_has_transfer()
-            self.journey_is_simba()
-            self.journey_has_simba_transfer()
-        else:
-            logging.info("Without stop_ids_perimeter oder defining_stop_ids, I cannot accurately campute is_simba_fq")
-
         df = self.merge_trips_persons()
         df = self.merge_legs_persons()
 
         self.create_starttime_class_for_legs()
-        if ref is not None:
-            #self.merge_link_id_to_name(ref.get_count_stations()[["link_id", "name"]])
-            pass
-        else:
-            logging.info("Without ref_run, I cannot merge the link_ids to the names")
-
-    def journey_has_simba_transfer(self):
-        df = self.get_legs()
-        df = df[(df["mode"] == "pt") & (df[IS_SIMBA_FQ])].groupby(["journey_id"])[["trip_id"]].count()
-        j_ids = df[df.trip_id > 1].index
-
-        df = self.get_trips()
-        df["hasSIMBATransfer"] = False
-        df.loc[df.journey_id.isin(j_ids), "hasSIMBATransfer"] = True
-
-    def journey_has_transfer(self):
-        df = self.get_legs()
-        df = df[(df["mode"] == "pt")].groupby(["journey_id"])[["trip_id"]].count()
-        j_ids = df[df.trip_id > 1].index
-
-        df = self.get_trips()
-        df["hasTransfer"] = False
-        df.loc[df.journey_id.isin(j_ids), "hasTransfer"] = True
-
-    def journey_is_simba(self):
-        df = self.get_legs()
-        j_ids = df[df[IS_SIMBA_FQ]].journey_id.unique()
-
-        df = self.get_trips()
-        df[IS_SIMBA_FQ] = False
-        df.loc[df.journey_id.isin(j_ids), IS_SIMBA_FQ] = True
 
     def merge_trips_persons(self):
         if not self.trip_persons_merged:
@@ -320,14 +336,15 @@ class Run:
         check_variable(foreach)
 
         if foreach is not None:
-            df = df.pivot_table(index=by, columns=foreach, values=value, aggfunc=aggfunc) * self.scale_factor
+            df = df.pivot_table(index=by, columns=foreach, values=value, aggfunc=aggfunc)
         else:
-            df = df.groupby(by).agg({value: aggfunc}) * self.scale_factor
+            df = df.groupby(by).agg({value: aggfunc})
 
         if percent:
             df = make_percent(df)
 
-        return df.fillna(0)
+        df = df.fillna(0)
+        return df
 
     @cache
     def calc_nb_trips(self, by=mode_trip, **kwargs):
@@ -391,34 +408,61 @@ class Run:
         return df
 
     @cache
-    def calc_pt_pkm(self, indices, **kwargs):
-        df = self.get_pt_legs()
-        try:
-            df = df.merge(right=self.get_route_attributes(), how="left", left_on="route", right_on="route_id")
-        except KeyError as e:
-            logging.warn(e)
+    def calc_pt_pkm(self, simba_only=False, **kwargs):
+        if simba_only:
+            df = self.filter_to_simba_binnenverkehr_fq_legs()
+        else:
+            df = self.get_pt_legs()
 
-        df = self._do(df, value=PKM, aggfunc="sum",  **kwargs)
-        df = df.loc[indices]
+        df = self.merge_route(df)
+
+        df = self._do(df, value=PKM, aggfunc="sum", **kwargs)
 
         gc.collect()
         return df
 
-    @cache
-    def calc_dist_distr_pt_legs(self, inverse_percent_axis=False, rotate=True, **kwargs):
-        self.create_distance_class_for_legs()
-        df = self.get_pt_legs()
+    def merge_route(self, df):
+        if self.route_merged:
+            return df
         try:
+            n = len(df)
             df = df.merge(right=self.get_route_attributes(), how="left", left_on="route", right_on="route_id")
+            assert n == len(df), "Size of DF changed"
+            self.route_merged = True
         except KeyError as e:
             logging.warn(e)
+        return df
+
+    @cache
+    def calc_dist_distr_pt_legs(self, inverse_percent_axis=False, rotate=True, **kwargs):
+        df = self.get_pt_legs()
+        self._create_distance_class(df)
+
+        df = self.merge_route(df)
 
         df = self._do(df, by=CAT_DIST, value=PF, aggfunc="sum", rotate=rotate,
                       inverse_percent_axis=inverse_percent_axis, **kwargs)
-        if inverse_percent_axis:
-            return df
+        return df
+
+    @cache
+    def calc_pt_dist_distr_trips(self, simba_only=False, **kwargs):
+        if simba_only:
+            df = self.filter_to_simba_binnenverkehr_fq_legs()
         else:
-            return df.cumsum()
+            df = self.get_pt_legs()
+
+        agg_dict = {PF: "first", DISTANCE: "sum"}
+        if "foreach" in kwargs:
+            foreach = kwargs["foreach"]
+            if foreach is not None:
+                for a in foreach:
+                    agg_dict[a] = "first"
+
+        df = df.groupby("journey_id").agg(agg_dict)
+
+        self._create_distance_class(df)
+
+        return self._do(df, by=CAT_DIST, value=PF, aggfunc="sum", **kwargs)
 
     @cache
     def calc_vehicles(self, names=None, **kwargs):
@@ -427,6 +471,31 @@ class Run:
         if names is not None:
             df = df.loc[names]
         return df
+
+    @cache
+    def calc_pt_uh(self, simba_only=False, **kwargs):
+        if simba_only:
+            df = self.filter_to_simba_binnenverkehr_fq_legs()
+        else:
+            df = self.get_pt_legs()
+        df = df.groupby(trip_id).agg({leg_id: "count", PF: "first"})
+        df["nb_transfer"] = df[leg_id] - 1
+        return self._do(df, by="nb_transfer", value=PF, aggfunc="sum", percent=True, **kwargs)
+
+    @cache
+    def calc_pt_nb_trips(self, simba_only=False, by="mode", **kwargs):
+        if simba_only:
+            df = self.filter_to_simba_binnenverkehr_fq_legs()
+        else:
+            df = self.get_pt_legs()
+        columns = [PF, by]
+        if "foreach" in kwargs:
+            foreach = kwargs["foreach"]
+            if foreach is not None:
+                columns += foreach
+        df = df.groupby(trip_id)[columns].min()
+
+        return self._do(df, by=by, value=PF, aggfunc="sum", **kwargs)
 
     @staticmethod
     def _create_distance_class(df, column=DISTANCE, category_column=CAT_DIST):

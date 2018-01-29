@@ -5,13 +5,41 @@ import analyse.run
 path_count_linkvolumes = r"/opt/sbb/hdd/u222223/MATSim/simulations/CH/zaehldaten/link_count_data_astra15.csv"
 path_mikro = r"/opt/sbb/hdd/u222223/MATSim/mikrozensus/2015/20171212_Input_MZMV_Kalibrationsvergleich.csv"
 path_count_ea = r"/opt/sbb/hdd/u222223/MATSim/simulations/CH/zaehldaten/stop_count_data_fqkal+14_alles.csv"
+import math
+
+
+def make_journey_id(df):
+    digits_z = int(math.log10(df.ZBEZNR.max())) + 1
+    digits_i = int(math.log10(df.WEGIND.max())) + 1
+
+    def to_int(q, z, i):
+        return q * (10 ** (digits_i + digits_z)) + z * (10 ** digits_i) + i
+
+    a = df.QBEZNR.apply(lambda x: to_int(x, 0, 0))
+    b = df.ZBEZNR.apply(lambda x: to_int(0, x, 0))
+    c = df.WEGIND.apply(lambda x: to_int(0, 0, x))
+    df[trip_id] = a + b + c
+    return df
+
+
+def make_leg_id(df):
+    digits_j = int(math.log10(df.journey_id.max())) + 1
+    digits_tw = int(math.log10(df.TWEGIND.max())) + 1
+
+    def to_int(j, tw):
+        return j * (10 ** (digits_tw)) + tw
+
+    a = df[trip_id].apply(lambda x: to_int(x, 0))
+    b = df.TWEGIND.apply(lambda x: to_int(0, x))
+    df[leg_id] = a + b
+    return df
 
 
 class Reference:
     pt_run = None
     mzmv_run = None
 
-    def __init__(self, path_astra, path_mikro, path_pt_legs, is_cnb=True, pt_run_name="SIMBA.Bahn.16"):
+    def __init__(self, path_astra=None, path_mikro=None, path_pt_legs=None, is_cnb=True, pt_run_name="SIMBA.Bahn.16"):
         self.is_cnb = is_cnb
         self.subpopulation = "regular"
         if is_cnb:
@@ -50,14 +78,17 @@ class Reference:
 
         self.operators = ["SBB-FV", "SBB-RV", r"Thurbo", r"Lyria", "Region Alps"]
 
-        self.load_mzmv_run()
-        self.load_pt_run(pt_run_name)
+        if self.path_mikro:
+            self.load_mzmv_run()
+        if self.path_pt_legs:
+            self.load_pt_run(pt_run_name)
 
     def load_mzmv_run(self):
         df = pd.read_csv(self.path_mikro, sep=",", dtype={"link_id": str})
         df[SUBPOPULATION] = self.subpopulation
         df = df.rename(columns={u'Weglaenge': "distance"})
         df = df.rename(columns={u'Pkm': "PKM"})
+        df = df.rename(columns={ u"Profession": r"work: employment status" })
         df.distance = df.distance * 1000.0
 
         if self.is_cnb:
@@ -75,31 +106,37 @@ class Reference:
     def load_pt_run(self, name):
         teilwege = pd.read_csv(self.path_pt_legs, sep=";",
                                skiprows=12)
-
         teilwege.rename(columns={"$OEVTEILWEG:QBEZNR": "QBEZNR",
                                  "PFAHRT": PF,
                                  "ZEIT": "duration",
-                                 "ABFAHRT": "start_time",
-                                 "ANKUNFT": "end_time",
-                                 "WEITE": "distance",
+                                 "ABFAHRT": START_TIME,
+                                 "ANKUNFT": END_TIME,
+                                 "WEITE": DISTANCE,
+                                 "VONHPUNKTNR": BOARDING_STOP,
+                                 "NACHHPUNKTNR": ALIGHTING_STOP,
                                  r"OEVVSYS\NAME": r"08_TSysName",
                                  "FAHRZEITPROFIL\LINIENROUTE\LINIE\BETREIBER\NAME": "06_OperatorName",
-                                 "STARTFZPELEM\LINIENROUTENELEMENT\HALTEPUNKT\HALTESTELLENBEREICH\HALTESTELLE\CODE": "03_Stop_Code_boarding",
-                                 "ENDFZPELEM\LINIENROUTENELEMENT\HALTEPUNKT\HALTESTELLENBEREICH\HALTESTELLE\CODE": "03_Stop_Code_alighting"
+                                 #"STARTFZPELEM\LINIENROUTENELEMENT\HALTEPUNKT\HALTESTELLENBEREICH\HALTESTELLE\CODE": "03_Stop_Code_boarding",
+                                 #"ENDFZPELEM\LINIENROUTENELEMENT\HALTEPUNKT\HALTESTELLENBEREICH\HALTESTELLE\CODE": "03_Stop_Code_alighting"
                                  }, inplace=True)
 
-        teilwege = teilwege[teilwege.VONHPUNKTNR.notnull()]
-        teilwege[trip_id] = teilwege.QBEZNR.map(str) + "_" + teilwege.ZBEZNR.map(str) + "_" + teilwege.WEGIND.map(str)
-        teilwege[leg_id] = teilwege[trip_id] + "_" + teilwege.TWEGIND.map(str)
+        teilwege = teilwege[teilwege.boarding_stop.notnull()]
+
+        teilwege[BOARDING_STOP] = teilwege[BOARDING_STOP].map(float)
+        teilwege[ALIGHTING_STOP] = teilwege[ALIGHTING_STOP].map(float)
+
+        make_journey_id(teilwege)
+        make_leg_id(teilwege)
 
         teilwege[PKM] = teilwege[PF] * teilwege.distance
         teilwege["mode"] = "pt"
+        teilwege[IS_SIMBA] = True
         teilwege[SUBPOPULATION] = self.subpopulation
 
         pt_run = analyse.run.Run(name=name)
         pt_run.data["legs"] = teilwege
+        pt_run.create_starttime_class_for_legs()
         self.pt_run = pt_run
-        analyse.run.Run._create_starttime_class(self.pt_run.get_legs())
 
     def get_pt_run(self):
         return self.pt_run

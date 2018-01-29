@@ -66,21 +66,22 @@ class RunsList(list):
             df = pd.concat([_df, df], axis=1)
             columns = _df.columns.tolist() + columns
 
-        return df[columns].sort_index()
+        df = df[columns].sort_index()
+        return df
 
     def get_nb_trips(self, **kwargs):
         return self._get(analyse.run.Run.calc_nb_trips, **kwargs)
 
     def plot_nb_trips(self, **kwargs):
         df = self.get_nb_trips(**kwargs)
-        return self._plot(df=df, title="#trips pro %s und runs" % kwargs["by"], **kwargs)
+        return self._plot(df=df, **kwargs)
 
     def get_pkm_trips(self, **kwargs):
         return self._get(analyse.run.Run.calc_dist_trips, **kwargs)
 
     def plot_pkm_trips(self, **kwargs):
         df = self.get_pkm_trips(**kwargs)
-        return self._plot(df=df, title="pkm trips pro %s und runs" % kwargs["by"], **kwargs)
+        return self._plot(df=df, **kwargs)
 
     def get_nb_legs(self, **kwargs):
         return self._get(analyse.run.Run.calc_nb_legs, **kwargs)
@@ -91,52 +92,89 @@ class RunsList(list):
     def get_pkm_distr_trips(self, **kwargs):
         return self._get(analyse.run.Run.calc_dist_distr_trips, **kwargs)
 
-    def get_pt_pkm_distr_legs(self, **kwargs):
-        return self._get(analyse.run.Run.calc_dist_distr_pt_legs, **kwargs)
-
     def plot_pkm_distr_legs(self, **kwargs):
         df = self.get_pkm_distr_legs(**kwargs)
-        return self._plot(df=df, kind="line", title="", xs_index=analyse.run.distance_labels, **kwargs)
+        return self._plot(df=df, kind="line", xs_index=analyse.run.distance_labels, **kwargs)
 
     def plot_pkm_distr_trips(self, **kwargs):
         df = self.get_pkm_distr_trips(**kwargs)
-        return self._plot(df=df, kind="line", title="", xs_index=analyse.run.distance_labels, **kwargs)
-
-    def plot_pt_pkm_distr_legs(self, **kwargs):
-        df = self.get_pt_pkm_distr_legs(**kwargs)
-        return self._plot(df=df, kind="line", title="", xs_index=analyse.run.distance_labels, **kwargs)
+        return self._plot(df=df, kind="line", xs_index=analyse.run.distance_labels, **kwargs)
 
     def plot_nb_legs(self, **kwargs):
         df = self.get_nb_legs(**kwargs)
-        return self._plot(df=df, title="#legs pro %s und runs" % kwargs["by"], **kwargs)
+        return self._plot(df=df, **kwargs)
 
     def get_pkm_legs(self, **kwargs):
         return self._get(analyse.run.Run.calc_dist_legs, **kwargs)
 
     def plot_pkm_legs(self, **kwargs):
         df = self.get_pkm_legs(**kwargs)
-        return self._plot(df=df, title="pkm legs pro %s und runs" % kwargs["by"], **kwargs)
+        return self._plot(df=df, **kwargs)
 
     def get_einsteiger(self, **kwargs):
         return self._get(analyse.run.Run.calc_einsteiger, **kwargs)
 
     def plot_einsteiger(self, **kwargs):
         df = self.get_einsteiger(**kwargs)
-        return self._plot(df=df, title="Einsteiger pro CODE", **kwargs)
+        return self._plot(df=df, **kwargs)
 
     def get_vehicles(self, **kwargs):
         return self._get(analyse.run.Run.calc_vehicles, **kwargs)
 
     def plot_vehicles(self, **kwargs):
         df = self.get_vehicles(**kwargs)
-        return self._plot(df=df, title="Fahrzeuge", **kwargs)
+        return self._plot(df=df, **kwargs)
 
     def get_pt_pkm(self, **kwargs):
         return self._get(analyse.run.Run.calc_pt_pkm, **kwargs)
 
     def plot_pt_pkm(self, **kwargs):
         df = self.get_pt_pkm(**kwargs)
-        return self._plot(df=df, title="", **kwargs)
+        return self._plot(df=df, **kwargs)
+
+    def plot_pt_dist_distr_trips(self, **kwargs):
+        df = self._get(analyse.run.Run.calc_pt_dist_distr_trips, **kwargs)
+        return self._plot(df=df, kind="line", xs_index=analyse.run.distance_labels, **kwargs)
+
+    def plot_pt_pkm_distr_legs(self, **kwargs):
+        df = self._get(analyse.run.Run.calc_dist_distr_pt_legs, **kwargs)
+        return self._plot(df=df, kind="line", xs_index=analyse.run.distance_labels, **kwargs)
+
+    def plot_pt_nb_trips(self, **kwargs):
+        df = self._get(analyse.run.Run.calc_pt_nb_trips, **kwargs)
+        return self._plot(df=df, **kwargs)
+
+    def plot_pt_uh(self, **kwargs):
+        df = self._get(analyse.run.Run.calc_pt_uh, **kwargs)
+        return self._plot(df=df, **kwargs)
+
+    def plot_pt_skims(self, name, pt_run, **kwargs):
+        df = self._get(analyse.run.Run.get_skim_simba, name=name, ref_run=pt_run, **kwargs)
+        fig = analyse.plot.plot_scatter(df=df, ref_name=pt_run.name, **kwargs)
+        return df, fig
+
+    def plot_boarding_scatter(self, pt_run, **kwargs):
+        df = self._get(analyse.run.Run.calc_einsteiger, ref_run=pt_run, **kwargs)
+        fig = analyse.plot.plot_scatter(df=df, ref_name=pt_run.name, **kwargs)
+        return df, fig
+
+    def get_pt_table(self, pt_run, **kwargs):
+        df = self.get_pt_pkm(by="mode", simba_only=True, ref_run=pt_run)
+        df.index = ["Anzahl Personenkilometer"]
+
+        _df = self._get(analyse.run.Run.calc_pt_nb_trips, by="mode", simba_only=True, ref_run=pt_run)
+        _df.index = ["Anzahl Personenfahrten"]
+        df = df.append(_df)
+
+        _df = self._get(analyse.run.Run.calc_pt_uh, simba_only=True, ref_run=pt_run)
+        _df = _df.reset_index()
+        _df.loc[_df.nb_transfer > 0, "umstieg"] = "Anteil Bahnreisen mit Umsteigen"
+        _df.loc[_df.nb_transfer == 0, "umstieg"] = "Anteil direkte Bahnreisen"
+        _df = _df.groupby("umstieg").sum() * 100
+        _df.drop("nb_transfer", axis=1, inplace=True)
+
+        df = df.append(_df)
+        return df
 
     def prepare(self, **kwargs):
         for run in self:
