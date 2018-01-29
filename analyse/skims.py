@@ -56,7 +56,7 @@ def set_binnenverkehr_attributes(df_legs, stops_in_perimeter):
     nb_legs_before = len(df_legs)
 
     first_last_leg_info = first_last_leg_info.reset_index()
-    df_legs = df_legs.merge(first_last_leg_info, on=trip_id, how="left") # TODO: merge possible with inplace? => DM
+    df_legs = df_legs.merge(first_last_leg_info, on=trip_id, how="left")
     df_legs["start_simba_stop_in_perimeter"].fillna(False, inplace=True)
     df_legs["last_simba_stop_in_perimeter"].fillna(False, inplace=True)
     if len(df_legs) != nb_legs_before:
