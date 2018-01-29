@@ -163,10 +163,12 @@ class Run:
         return df[df[IS_SIMBA] & df.is_binnenverkehr_simba & df.journey_has_fq_leg]
 
     def get_skims_simba(self, **kwargs):
-        df = self.filter_to_simba_binnenverkehr_fq_legs()
-        skims = get_station_to_station_skims(df, self.get_stop_attributes())
-        skims.set_index(["first_stop_code", "last_stop_code"], inplace=True)
-        return skims
+        if "skims" not in self.data:
+            df = self.filter_to_simba_binnenverkehr_fq_legs()
+            skims = get_station_to_station_skims(df, self.get_stop_attributes())
+            skims.set_index(["first_stop_code", "last_stop_code"], inplace=True)
+            self.data["skims"] = skims
+        return self.data["skims"]
 
     def get_skim_simba(self, name, **kwargs):
         return self.get_skims_simba()[[name]]
