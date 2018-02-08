@@ -41,7 +41,7 @@ def _make_report(datas, filename):
         link = data.sheet
         if data.fig is None:
             link += "_data"
-        worksheet.write_url(i + 1, 1, url="internal:'%s'!A1" % data.sheet, string=data.name)
+        worksheet.write_url(i + 1, 1, url="internal:'%s'!A1" % link, string=data.name)
 
     for data in datas:
         df = data.df
@@ -288,6 +288,5 @@ def get_datas(runs, ref):
         datas.append(SheetData(df, None, title))
     except Exception as e:
         logging.exception(e)
-
 
     return datas
