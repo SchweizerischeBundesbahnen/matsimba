@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import os
@@ -8,7 +9,6 @@ import datetime
 import analyse.compare
 from itertools import product
 import math
-from __future__ import unicode_literals
 
 
 sbb_colors = [(22, 24, 63)  # 0 dunkelstes SBB Blau
