@@ -121,9 +121,10 @@ class RunsList(list):
     def get_vehicles(self, **kwargs):
         return self._get(analyse.run.Run.calc_vehicles, **kwargs)
 
-    def plot_vehicles(self, **kwargs):
-        df = self.get_vehicles(**kwargs)
-        return self._plot(df=df, **kwargs)
+    def plot_vehicles(self, ref_run, **kwargs):
+        df = self.get_vehicles(ref_run=ref_run, **kwargs)
+        fig = analyse.plot.plot_scatter(df=df, ref_name=ref_run.name, **kwargs)
+        return df, fig
 
     def get_pt_pkm(self, **kwargs):
         return self._get(analyse.run.Run.calc_pt_pkm, **kwargs)
