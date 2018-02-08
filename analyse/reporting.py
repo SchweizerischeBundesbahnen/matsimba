@@ -51,7 +51,7 @@ def _make_report(datas, filename):
             buf = get_buffer(data.fig)
             sheet = writer.book.add_worksheet(data.sheet)
             sheet.insert_image('A1', "aa", {'image_data': buf})
-        df.to_excel(writer, sheet_name=data.sheet + "_data", startrow=1, startcol=1, merge_cells=False)
+        df.to_excel(writer, sheet_name=data.sheet + "_data", startrow=1, startcol=1, merge_cells=False, encoding="utf-8")
 
     writer.save()
 
