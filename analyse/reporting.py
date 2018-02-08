@@ -6,6 +6,7 @@ import logging
 
 class SheetData:
     def __init__(self, df, fig, name):
+        logging.info("Making %s" % name)
         self.df = df
         self.fig = fig
         self.name = name
@@ -17,6 +18,7 @@ def make_report(runs, filename, ref=None):
 
 
 def _make_report(datas, filename):
+    logging.info("Writing report")
     buffers = []
 
     def get_buffer(fig):
@@ -55,6 +57,8 @@ def _make_report(datas, filename):
 
     for buf in buffers:
         buf.close()
+
+    logging.info("Done writing file")
 
 
 def get_datas(runs, ref):
