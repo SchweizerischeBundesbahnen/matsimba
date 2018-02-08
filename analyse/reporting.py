@@ -28,7 +28,7 @@ def _make_report(datas, filename):
         buffers.append(buf)
         return buf
 
-    writer = pd.ExcelWriter(filename, engine='xlsxwriter')
+    writer = pd.ExcelWriter(filename, engine='xlsxwriter', encoding='utf-8')
 
     worksheet = writer.book.add_worksheet("TableOfContents")
     _sheets = {}
