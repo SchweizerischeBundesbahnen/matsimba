@@ -155,7 +155,7 @@ class Reference:
         self.astra_run = astra_run
 
     def get_count_stations(self):
-        ref_astra = pd.read_csv(self.path_astra, sep=";", dtype={"link_id": str}, encoding="utf-8")
+        ref_astra = pd.read_csv(self.path_astra, sep=";", dtype={"link_id": str}, encoding="latin1")
         ref_astra.rename(columns={"zaehlstellen_bezeichnung": "name"}, inplace=True)
         ref_astra = ref_astra[[LINK_ID, "name"]].set_index(LINK_ID)
         ref_astra = ref_astra[ref_astra.name.notnull()]
