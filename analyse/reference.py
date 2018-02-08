@@ -143,7 +143,7 @@ class Reference:
     def get_pt_run(self):
         return self.pt_run
 
-    def get_atra_run(self):
+    def get_astra_run(self):
         return self.astra_run
 
     def load_astra_run(self):

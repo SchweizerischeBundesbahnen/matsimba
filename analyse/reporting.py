@@ -199,12 +199,11 @@ def get_datas(runs, ref):
     except Exception as e:
         logging.exception(e)
 
-    #try:
-    #    df, fig = runs.plot_vehicles(by="name", names=ref.get_count_stations().name.unique().tolist(),
-    #                                 ref_df=ref.get_count_stations_volume())
-    #    datas.append(SheetData(df, fig, "Link counts"))
-    #except Exception as e:
-    #    logging.exception(e)
+    try:
+        df, fig = runs.plot_vehicles(ref_run=ref.get_astra_run())
+        datas.append(SheetData(df, fig, "ASTRA Messstellen"))
+    except Exception as e:
+        logging.exception(e)
 
    # try:
    #     df, fig = runs.plot_pt_pkm(by="06_OperatorName", indices=ref.operators, ref_run=ref.get_pt_run())
