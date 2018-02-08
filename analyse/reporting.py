@@ -77,6 +77,13 @@ def get_datas(runs, ref):
         logging.exception(e)
 
     try:
+        title = "Modal Split PF pro Subpopulation (Absolut)"
+        df, ax = runs.plot_nb_trips(by=MAIN_MODE, foreach=SUBPOPULATION, ref_run=mzmv, percent=False, title=title)
+        datas.append(SheetData(df, ax,title ))
+    except Exception as e:
+        logging.exception(e)
+
+    try:
         title =  "Modal Split PF pro Subpopulation und PW-Verfuergbarkeit"
         df, fig = runs.plot_nb_trips(by=MAIN_MODE, foreach=[SUBPOPULATION, CARAVAIL], ref_run=mzmv, percent=True, title=title)
         datas.append(SheetData(df, fig, title))
@@ -123,6 +130,14 @@ def get_datas(runs, ref):
         datas.append(SheetData(df, ax, "Modal Split PKM pro Subpopulation"))
     except Exception as e:
         logging.exception(e)
+
+    try:
+        title = "Modal Split PKM pro Subpopulation (Absolut)"
+        df, ax = runs.plot_pkm_trips(by=MAIN_MODE, foreach=SUBPOPULATION, ref_run=mzmv, percent=False, title=title)
+        datas.append(SheetData(df, ax, title))
+    except Exception as e:
+        logging.exception(e)
+
 
     try:
         df, fig = runs.plot_pkm_trips(by=MAIN_MODE, foreach=[SUBPOPULATION, CARAVAIL], ref_run=mzmv, percent=True)
