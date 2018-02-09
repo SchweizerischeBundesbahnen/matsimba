@@ -86,7 +86,7 @@ class Reference:
             self.load_astra_run()
 
     def load_mzmv_run(self):
-        df = pd.read_csv(self.path_mikro, sep=",", dtype={"link_id": str})
+        df = pd.read_csv(self.path_mikro, sep=",", dtype={"link_id": str}, encoding="utf-8")
         df[SUBPOPULATION] = self.subpopulation
         df = df.rename(columns={u'Weglaenge': "distance"})
         df = df.rename(columns={u'Pkm': "PKM"})
