@@ -107,7 +107,7 @@ class Reference:
 
     def load_pt_run(self, name):
         teilwege = pd.read_csv(self.path_pt_legs, sep=";",
-                               skiprows=12)
+                               skiprows=12, encoding="utf-8")
         teilwege.rename(columns={"$OEVTEILWEG:QBEZNR": "QBEZNR",
                                  "PFAHRT": PF,
                                  "ZEIT": "duration",
