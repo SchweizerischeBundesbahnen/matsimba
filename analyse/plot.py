@@ -241,7 +241,7 @@ def plot_plans(planelements, end_time=35 * 60 * 60):
     return ax, pd.DataFrame(text)
 
 
-def plot_multi(df, cols=2.0, stacked=False, kind="bar", rotate=False, xs_index=None, **kwargs):
+def plot_multi(df, cols=2.0, stacked=False, kind="bar", rotate=False, xs_index=None, share_y=True, **kwargs):
     #df.sort_index(inplace=True)
 
     def has_label(df, label):
@@ -304,15 +304,16 @@ def plot_multi(df, cols=2.0, stacked=False, kind="bar", rotate=False, xs_index=N
             for ax in _ax:
                 if_last_move_legend(ax)
 
-    min_y = np.inf
-    max_y = -np.inf
-    for ax in fig.get_axes():
-        lim = ax.get_ylim()
-        min_y = min(min_y, lim[0])
-        max_y = max(max_y, lim[1])
+    if share_y:
+        min_y = np.inf
+        max_y = -np.inf
+        for ax in fig.get_axes():
+            lim = ax.get_ylim()
+            min_y = min(min_y, lim[0])
+            max_y = max(max_y, lim[1])
 
-    for ax in fig.get_axes():
-        ax.set_ylim([min_y, max_y])
+        for ax in fig.get_axes():
+            ax.set_ylim([min_y, max_y])
 
     fig.tight_layout()
     return fig, axs
