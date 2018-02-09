@@ -249,7 +249,7 @@ def plot_multi(df, cols=2.0, stacked=False, kind="bar", rotate=False, xs_index=N
 
     def if_last_move_legend(ax):
         title = ax.title
-        if title.get_text() == "":
+        if title.get_text() == u"":
             fig.delaxes(ax)
 
     n_levels = len(df.index.levels)
@@ -273,7 +273,7 @@ def plot_multi(df, cols=2.0, stacked=False, kind="bar", rotate=False, xs_index=N
         else:
             ax = axs[i // int(cols), i % int(cols)]
 
-        title = "\n".join(["%s=%s" % (df.index.names[i], l) for i, l in enumerate(label)])
+        title = u"\n".join(["%s=%s" % (df.index.names[i], l) for i, l in enumerate(label)])
 
         ax.set_title(title)
         _df = df.loc[label]
