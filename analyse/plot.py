@@ -280,7 +280,6 @@ def plot_multi(df, cols=2.0, stacked=False, kind="bar", rotate=False, xs_index=N
         if xs_index is None:
             xs_index = _df.index
         ax = _df.loc[xs_index].plot(kind=kind, stacked=stacked, ax=ax, legend=False)
-        #ax.set_xticklabels(xs_index)
 
         if rotate:
             for tick in ax.get_xticklabels():
