@@ -219,7 +219,7 @@ def get_datas(runs, ref):
         logging.exception(e)
 
     try:
-        df, fig = runs.plot_vehicles(ref_run=ref.get_astra_run())
+        df, fig = runs.plot_vehicles(ref_run=ref.get_astra_run(), title="ASTRA Messstellen")
         datas.append(SheetData(df, fig, "ASTRA Messstellen"))
     except Exception as e:
         logging.exception(e)
