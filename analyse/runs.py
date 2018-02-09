@@ -2,6 +2,7 @@ import analyse.compare
 import analyse.plot
 import pandas as pd
 import analyse.run
+import logging
 
 
 class RunsList(list):
@@ -162,10 +163,12 @@ class RunsList(list):
     def get_pt_table(self, pt_run, **kwargs):
         df = self.get_pt_pkm(by="mode", simba_only=True, ref_run=pt_run)
         df.index = ["Anzahl Personenkilometer"]
+        logging.info("PT_Table: PKM")
 
         _df = self._get(analyse.run.Run.calc_pt_nb_trips, by="mode", simba_only=True, ref_run=pt_run)
         _df.index = ["Anzahl Personenfahrten"]
         df = df.append(_df)
+        logging.info("PT_Table: PF")
 
         _df = self._get(analyse.run.Run.calc_pt_uh, simba_only=True, ref_run=pt_run)
         _df = _df.reset_index()
@@ -173,6 +176,8 @@ class RunsList(list):
         _df.loc[_df.nb_transfer == 0, "umstieg"] = "Anteil direkte Bahnreisen"
         _df = _df.groupby("umstieg").sum() * 100
         _df.drop("nb_transfer", axis=1, inplace=True)
+        logging.info("PT_Table: NB_transfers")
+
 
         df = df.append(_df)
         return df
