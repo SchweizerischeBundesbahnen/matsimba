@@ -166,7 +166,7 @@ class RunsList(list):
         logging.info("PT_Table: PKM")
 
         _df, fig = self.plot_pt_skims(name="PF", pt_run=pt_run, title="")
-        _df = _df.sum()
+        _df = pd.DataFrame(_df.sum())
         _df = _df.swapaxes(0, 1)
         _df.index = ["Anzahl Personenfahrten"]
         df = df.append(_df)
