@@ -147,7 +147,7 @@ class Reference:
         return self.astra_run
 
     def load_astra_run(self):
-        ref_astra = pd.read_csv(self.path_astra, sep=";", dtype={"link_id": str})
+        ref_astra = pd.read_csv(self.path_astra, sep=";", dtype={"link_id": str}, encoding="utf-8")
         ref_astra.rename(columns={"zaehlstellen_bezeichnung": "name"}, inplace=True)
 
         astra_run = analyse.run.Run(name="ASTRA")
