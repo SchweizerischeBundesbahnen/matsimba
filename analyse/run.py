@@ -317,7 +317,7 @@ class Run:
         logging.info("merging links")
         if not self.link_merged:
             df = self.get_linkvolumes()
-            df = df.merge(stations, how="right", left_on=LINK_ID, right_index=True)
+            df = df.merge(stations[[NAME]], how="right", left_on=LINK_ID, right_index=True)
             self.data["linkvolumes"] = df
             self.link_merged = True
         logging.info("done merging links")
