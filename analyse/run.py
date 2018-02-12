@@ -190,7 +190,7 @@ class Run:
         id = LINK_ID
         if NAME in df.columns:
             id = NAME
-        df = pd.DataFrame(df.groupby(id)[VOLUME].sum()).reset_index()
+        df = pd.DataFrame(df.groupby([id, "mode"])[VOLUME].sum()).reset_index()
         self.data["linkvolumes"] = df
         return df
 
