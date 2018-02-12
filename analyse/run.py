@@ -187,8 +187,6 @@ class Run:
 
     def get_linkvolumes(self):
         df = self._get("linkvolumes")
-        #fix because of error in matsim-sbb
-        df = df[df["mode"]=="car"]
         id = LINK_ID
         if NAME in df.columns:
             id = NAME
@@ -317,7 +315,9 @@ class Run:
         logging.info("merging links")
         if not self.link_merged:
             df = self.get_linkvolumes()
-            df = df.merge(stations[[NAME]], how="right", left_on=LINK_ID, right_index=True)
+            #fix because of error in matsim-sbb
+            df = df[df["mode"]=="car"]
+            df = df.merge(stations, how="right", left_on=LINK_ID, right_index=True)
             self.data["linkvolumes"] = df
             self.link_merged = True
         logging.info("done merging links")
