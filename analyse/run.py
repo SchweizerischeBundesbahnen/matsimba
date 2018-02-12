@@ -187,6 +187,8 @@ class Run:
 
     def get_linkvolumes(self):
         df = self._get("linkvolumes")
+        #fix because of error in matsim-sbb
+        df = df[df["mode"]=="car"]
         id = LINK_ID
         if NAME in df.columns:
             id = NAME

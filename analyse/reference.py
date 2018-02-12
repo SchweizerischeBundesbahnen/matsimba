@@ -150,6 +150,7 @@ class Reference:
         ref_astra = pd.read_csv(self.path_astra, sep=";", dtype={"link_id": str}, encoding="utf-8")
         ref_astra.rename(columns={"zaehlstellen_bezeichnung": "name"}, inplace=True)
 
+        ref_astra["mode"] = "car"
         astra_run = analyse.run.Run(name="ASTRA")
         astra_run.data["linkvolumes"] = ref_astra
         self.astra_run = astra_run
