@@ -139,7 +139,8 @@ class Run:
             df[ALIGHTING_STOP] = df[ALIGHTING_STOP].apply(float)
 
             stop_attributes = self.get_stop_attributes()
-            stops_in_perimeter = stop_attributes[stop_attributes[self.name_perimeter_attribute] == "1"][STOP_ID].map(float).unique()
+            stops_in_perimeter = stop_attributes[stop_attributes[self.name_perimeter_attribute] == "1"][STOP_ID].map(
+                float).unique()
             stops_in_fq = stop_attributes[stop_attributes[FQ_RELEVANT] == "1"][STOP_ID].map(float).unique()
 
             if IS_SIMBA not in df.columns:
@@ -149,8 +150,8 @@ class Run:
                 df.loc[df["01_Datenherkunft"] == self.name_datenherkunft_attribute, IS_SIMBA_ROUTE] = True
 
             df = set_simba_binnenverkehr_fq_attributes(df, stops_in_perimeter, stops_in_fq)
-            cols_ = cols+["is_binnenverkehr_simba", "journey_has_fq_leg",
-                                            "start_time_first_stop", "end_time_last_stop", "first_stop", "last_stop"]
+            cols_ = cols + ["is_binnenverkehr_simba", "journey_has_fq_leg",
+                            "start_time_first_stop", "end_time_last_stop", "first_stop", "last_stop"]
             if IS_SIMBA not in cols_:
                 cols_.append(IS_SIMBA)
             assert n == len(df)
@@ -235,7 +236,7 @@ class Run:
             sep = keys[name]["sep"]
             filename = keys[name]["path"]
             if self.runId is not None:
-                filename = self.runId+"."+filename
+                filename = self.runId + "." + filename
             path = os.path.join(self.path, filename)
             logging.info("Starting loading data %s: %s " % (name, path))
             df = pd.read_csv(path, sep=sep, encoding="utf-8", dtype=dtypes).reset_index(drop=True)
@@ -260,14 +261,15 @@ class Run:
     def _set_dummy_pf(self):
         df = self.get_legs()
         df[PF] = self.scale_factor
-        df[PKM] = df[DISTANCE]*df[PF]
+        df[PKM] = df[DISTANCE] * df[PF]
 
         df = self.get_trips()
         df[PF] = self.scale_factor
-        df[PKM] = df[DISTANCE]*df[PF]
+        df[PKM] = df[DISTANCE] * df[PF]
 
-    def prepare(self, ref=None, persons=None, stop_attribute_path=None, route_attribute_path=None, shapefile_attributes=None, zone_attribute=None):
-        #self.unload_data()
+    def prepare(self, ref=None, persons=None, stop_attribute_path=None, route_attribute_path=None,
+                shapefile_attributes=None, zone_attribute="N_Gem", zone_merge_attribute="ID_ALL"):
+        # self.unload_data()
 
         if stop_attribute_path is not None:
             self.load_stop_attributes(stop_attribute_path)
@@ -299,7 +301,7 @@ class Run:
             self.merge_link_id_to_name(stations)
 
         if shapefile_attributes is not None and zone_attribute is not None:
-            self.merge_trips_zone(shapefile_attributes, zone_attribute)
+            self.merge_trips_zone(shapefile_attributes, zone_attribute, zone_merge_attribute)
 
     def merge_activities_to_zone(self, attirbutes_path, zone_attribute="N_Gem", merge_attribute="ID_ALL"):
         zones = pd.read_csv(attirbutes_path, sep=",", encoding="utf-8")
@@ -344,8 +346,8 @@ class Run:
         logging.info("merging links")
         if not self.link_merged:
             df = self.get_linkvolumes()
-            #fix because of error in matsim-sbb
-            df = df[df["mode"]=="car"]
+            # fix because of error in matsim-sbb
+            df = df[df["mode"] == "car"]
             df = df.merge(stations, how="right", left_on=LINK_ID, right_index=True)
             self.data["linkvolumes"] = df
             self.link_merged = True
@@ -445,7 +447,6 @@ class Run:
         df = self._do(df, value=PF, aggfunc="sum", **kwargs)
 
         if codes is not None:
-
             df = df.loc[codes]
 
         gc.collect()
@@ -511,7 +512,7 @@ class Run:
     @cache
     def calc_vehicles(self, **kwargs):
         df = self.get_linkvolumes()
-        df = self._do(df, value=VOLUME, aggfunc="sum", by=NAME, **kwargs)*self.scale_factor
+        df = self._do(df, value=VOLUME, aggfunc="sum", by=NAME, **kwargs) * self.scale_factor
         return df
 
     @cache
@@ -555,15 +556,13 @@ class Run:
     @staticmethod
     def _create_starttime_class(df):
         logging.info("creating start_time category")
-        df[CAT_START_TIME] = df[START_TIME] // (60*60)
+        df[CAT_START_TIME] = df[START_TIME] // (60 * 60)
 
     def create_starttime_class_for_legs(self):
         self._create_starttime_class(self.get_legs())
 
     def create_starttime_class_for_trips(self):
         self._create_starttime_class(self.get_trips())
-
-
 
 
 distance_classes = np.array([-1, 0, 2, 4, 6, 8, 10, 15, 20, 25, 30, 40, 50, 100, 150, 200, 250, 300, np.inf]) * 1000.0
