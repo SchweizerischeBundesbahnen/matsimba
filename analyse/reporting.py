@@ -3,6 +3,8 @@ import io
 from variable import *
 import logging
 import analyse.run
+import analyse.runs
+import analyse.compare
 
 
 class SheetData:
@@ -25,6 +27,7 @@ def _make_report(datas, filename):
     def get_buffer(fig):
         buf = io.BytesIO()
         fig.savefig(buf, format='png', dpi=100, bbox_inches='tight')
+        fig.clf()
         buf.seek(0)
         buffers.append(buf)
         return buf
@@ -52,7 +55,8 @@ def _make_report(datas, filename):
             buf = get_buffer(data.fig)
             sheet = writer.book.add_worksheet(data.sheet)
             sheet.insert_image('A1', "aa", {'image_data': buf})
-        df.to_excel(writer, sheet_name=data.sheet + "_data", startrow=1, startcol=1, merge_cells=False, encoding="utf-8")
+        df.to_excel(writer, sheet_name=data.sheet + "_data", startrow=1, startcol=1, merge_cells=False,
+                    encoding="utf-8")
 
     writer.save()
 
@@ -69,110 +73,172 @@ def get_datas(runs, ref):
 
     try:
         title = "Modal Split PF"
-        df, ax = runs.plot_nb_trips(by=MAIN_MODE, ref_run=mzmv, percent=True, title=title)
+
+        kwargs = {"by": MAIN_MODE, "ref_run": mzmv, "percent": True, "title": title}
+        df, ax = runs.plot_nb_trips(**kwargs)
+        kwargs["percent"] = False
+        _df = runs.get_nb_trips(**kwargs)
+        df = analyse.compare.merge_absolute([df, _df])
+
         datas.append(SheetData(df, ax, title))
     except Exception as e:
         logging.exception(e)
 
     try:
         title = "Modal Split PF pro Subpopulation"
-        df, ax = runs.plot_nb_trips(by=MAIN_MODE, foreach=SUBPOPULATION, ref_run=mzmv, percent=True, title=title)
-        datas.append(SheetData(df, ax,title ))
+        kwargs = {"by": MAIN_MODE, "ref_run": mzmv, "percent": True, "title": title, "foreach": SUBPOPULATION}
+        df, ax = runs.plot_nb_trips(**kwargs)
+        kwargs["percent"] = False
+        _df = runs.get_nb_trips(**kwargs)
+        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), ax, title))
     except Exception as e:
         logging.exception(e)
 
     try:
-        title = "Modal Split PF pro Subpopulation (Absolut)"
-        df, ax = runs.plot_nb_trips(by=MAIN_MODE, foreach=SUBPOPULATION, ref_run=mzmv, percent=False, title=title)
-        datas.append(SheetData(df, ax,title ))
-    except Exception as e:
-        logging.exception(e)
-
-    try:
-        title =  "Modal Split PF pro Subpopulation und PW-Verfuergbarkeit"
-        df, fig = runs.plot_nb_trips(by=MAIN_MODE, foreach=[SUBPOPULATION, CARAVAIL], ref_run=mzmv, percent=True, title=title)
-        datas.append(SheetData(df, fig, title))
+        title = "Modal Split PF pro Subpopulation und PW-Verfuergbarkeit"
+        kwargs = {"by": MAIN_MODE, "ref_run": mzmv, "percent": True, "title": title,
+                  "foreach": [SUBPOPULATION, CARAVAIL]}
+        df, fig = runs.plot_nb_trips(**kwargs)
+        kwargs["percent"] = False
+        _df = runs.get_nb_trips(**kwargs)
+        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), fig, title))
     except Exception as e:
         logging.exception(e)
 
     try:
         title = "Modal Split PF pro Subpopulation und OV-Abonnement"
-        df, fig = runs.plot_nb_trips(by=MAIN_MODE, foreach=[SUBPOPULATION, SEASON_TICKET], ref_run=mzmv, percent=True, title=title)
-        datas.append(SheetData(df, fig, title))
+        kwargs = {"by": MAIN_MODE, "ref_run": mzmv, "percent": True, "title": title,
+                  "foreach": [SUBPOPULATION, SEASON_TICKET]}
+        df, fig = runs.plot_nb_trips(**kwargs)
+
+        kwargs["percent"] = False
+        _df = runs.get_nb_trips(**kwargs)
+
+        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), fig, title))
     except Exception as e:
         logging.exception(e)
 
     try:
         title = "Modal Split PF pro Subpopulation und Raumtyp"
-        df, fig = runs.plot_nb_trips(by=MAIN_MODE, foreach=[SUBPOPULATION, RAUMTYP], ref_run=mzmv, percent=True, title=title)
-        datas.append(SheetData(df, fig, title))
+        kwargs = {"by": MAIN_MODE, "ref_run": mzmv, "percent": True, "title": title,
+                  "foreach": [SUBPOPULATION, RAUMTYP]}
+        df, fig = runs.plot_nb_trips(**kwargs)
+
+        kwargs["percent"] = False
+        _df = runs.get_nb_trips(**kwargs)
+
+        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), fig, title))
     except Exception as e:
         logging.exception(e)
 
     try:
-        df, fig = runs.plot_nb_trips(by=MAIN_MODE, foreach=[SUBPOPULATION, "work: employment status"], ref_run=mzmv,
-                                     percent=True)
-        datas.append(SheetData(df, fig, "Modal Split PF pro Subpopulation und professionelle Gruppe"))
+        kwargs = {"by": MAIN_MODE, "ref_run": mzmv, "percent": True, "title": title,
+                  "foreach": [SUBPOPULATION, "work: employment status"]}
+        df, fig = runs.plot_nb_trips(**kwargs)
+
+        kwargs["percent"] = False
+        _df = runs.get_nb_trips(**kwargs)
+
+        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), fig,
+                               "Modal Split PF pro Subpopulation und professionelle Gruppe"))
     except Exception as e:
         logging.exception(e)
 
     try:
-        df, fig = runs.plot_nb_trips(by=MAIN_MODE, foreach=[SUBPOPULATION, CARAVAIL, SEASON_TICKET], ref_run=mzmv,
-                                     percent=True)
-        datas.append(SheetData(df, fig, "Modal Split PF pro Subpopulation, PK-Verfuergbarkeit und OV-Abonnement"))
+        title = "Modal Split PF pro Subpopulation, PK-Verfuergbarkeit und OV-Abonnement"
+        kwargs = {"by": MAIN_MODE, "ref_run": mzmv, "percent": True, "title": title,
+                  "foreach": [SUBPOPULATION, CARAVAIL, SEASON_TICKET]}
+        df, fig = runs.plot_nb_trips(**kwargs)
+
+        kwargs["percent"] = False
+        _df = runs.get_nb_trips(**kwargs)
+
+        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), fig, title))
     except Exception as e:
         logging.exception(e)
 
     # PKM
     try:
-        df, ax = runs.plot_pkm_trips(by=MAIN_MODE, ref_run=mzmv, percent=True)
-        datas.append(SheetData(df, ax, "Modal Split PKM"))
+        title = "Modal Split PKM"
+        kwargs = {"by": MAIN_MODE, "ref_run": mzmv, "percent": True, "title": title}
+        df, ax = runs.plot_pkm_trips(**kwargs)
+
+        kwargs["percent"] = False
+        _df = runs.get_pkm_trips(**kwargs)
+
+        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), ax, title))
     except Exception as e:
         logging.exception(e)
 
     try:
-        df, ax = runs.plot_pkm_trips(by=MAIN_MODE, foreach=SUBPOPULATION, ref_run=mzmv, percent=True)
-        datas.append(SheetData(df, ax, "Modal Split PKM pro Subpopulation"))
+        title = "Modal Split PKM pro Subpopulation"
+        kwargs = {"by": MAIN_MODE, "foreach": SUBPOPULATION, "ref_run": mzmv, "percent": True, "title": title}
+        df, ax = runs.plot_pkm_trips(**kwargs)
+
+        kwargs["percent"] = False
+        _df = runs.get_pkm_trips(**kwargs)
+
+        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), ax, title))
     except Exception as e:
         logging.exception(e)
 
     try:
-        title = "Modal Split PKM pro Subpopulation (Absolut)"
-        df, ax = runs.plot_pkm_trips(by=MAIN_MODE, foreach=SUBPOPULATION, ref_run=mzmv, percent=False, title=title)
-        datas.append(SheetData(df, ax, title))
-    except Exception as e:
-        logging.exception(e)
+        title = "Modal Split PKM pro Subpopulation und PW-Verfuergbarkeit"
+        kwargs = {"by": MAIN_MODE, "foreach": [SUBPOPULATION, CARAVAIL], "ref_run": mzmv, "percent": True, "title": title}
+        df, fig = runs.plot_pkm_trips(**kwargs)
 
+        kwargs["percent"] = False
+        _df = runs.get_pkm_trips(**kwargs)
 
-    try:
-        df, fig = runs.plot_pkm_trips(by=MAIN_MODE, foreach=[SUBPOPULATION, CARAVAIL], ref_run=mzmv, percent=True)
-        datas.append(SheetData(df, fig, "Modal Split PKM pro Subpopulation und PW-Verfuergbarkeit"))
-    except Exception as e:
-        logging.exception(e)
-
-    try:
-        df, fig = runs.plot_pkm_trips(by=MAIN_MODE, foreach=[SUBPOPULATION, SEASON_TICKET], ref_run=mzmv, percent=True)
-        datas.append(SheetData(df, fig, "Modal Split PKM pro Subpopulation und OV-Abonnement"))
+        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), fig, title))
     except Exception as e:
         logging.exception(e)
 
     try:
-        df, fig = runs.plot_pkm_trips(by=MAIN_MODE, foreach=[SUBPOPULATION, RAUMTYP], ref_run=mzmv, percent=True)
-        datas.append(SheetData(df, fig, "Modal Split PKM pro Subpopulation und Raumtyp"))
+        title = "Modal Split PKM pro Subpopulation und OV-Abonnement"
+        kwargs = {"by": MAIN_MODE, "foreach": [SUBPOPULATION, SEASON_TICKET], "ref_run": mzmv, "percent": True, "title": title}
+        df, fig = runs.plot_pkm_trips(**kwargs)
+
+        kwargs["percent"] = False
+        _df = runs.get_pkm_trips(**kwargs)
+
+        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), fig, title))
     except Exception as e:
         logging.exception(e)
 
     try:
-        df, fig = runs.plot_pkm_trips(by=MAIN_MODE, foreach=[SUBPOPULATION, "work: employment status"], ref_run=mzmv,
-                                      percent=True)
-        datas.append(SheetData(df, fig, "Modal Split PKM pro Subpopulation und professionelle Gruppe"))
+        title = "Modal Split PKM pro Subpopulation und Raumtyp"
+        kwargs = {"by": MAIN_MODE, "foreach": [SUBPOPULATION, RAUMTYP], "ref_run": mzmv, "percent": True, "title": title}
+        df, fig = runs.plot_pkm_trips(**kwargs)
+
+        kwargs["percent"] = False
+        _df = runs.get_pkm_trips(**kwargs)
+
+        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), fig, title))
     except Exception as e:
         logging.exception(e)
 
     try:
-        df, fig = runs.plot_pkm_trips(by=MAIN_MODE, foreach=[SUBPOPULATION, CARAVAIL, SEASON_TICKET], ref_run=mzmv,
-                                      percent=True)
-        datas.append(SheetData(df, fig, "Modal Split PKM pro Subpopulation, PW-Verfuergbarkeit und OV-Abonnement"))
+        title = "Modal Split PKM pro Subpopulation und professionelle Gruppe"
+        kwargs = {"by": MAIN_MODE, "foreach": [SUBPOPULATION, "work: employment status"], "ref_run": mzmv, "percent": True, "title": title}
+        df, fig = runs.plot_pkm_trips(**kwargs)
+
+        kwargs["percent"] = False
+        _df = runs.get_pkm_trips(**kwargs)
+
+        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), fig, title))
+    except Exception as e:
+        logging.exception(e)
+
+    try:
+        title = "Modal Split PKM pro Subpopulation, PW-Verfuergbarkeit und OV-Abonnement"
+        kwargs = {"by": MAIN_MODE, "foreach": [SUBPOPULATION, CARAVAIL, SEASON_TICKET], "ref_run": mzmv, "percent": True, "title": title}
+        df, fig = runs.plot_pkm_trips(**kwargs)
+
+        kwargs["percent"] = False
+        _df = runs.get_pkm_trips(**kwargs)
+
+        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), fig, title))
     except Exception as e:
         logging.exception(e)
 
@@ -180,34 +246,53 @@ def get_datas(runs, ref):
 
     try:
         title = "Modal Split pro Distanzklasse"
-        df, fig = runs.plot_pkm_distr_trips(foreach=[MAIN_MODE], percent=True, rotate=True, ref_run=mzmv, title=title,
-                                            inverse_percent_axis=True)
-        datas.append(SheetData(df, fig, title))
+        kwargs = {"foreach": [MAIN_MODE], "percent": True, "rotate": True, "ref_run": mzmv, "title": title, "inverse_percent_axis": True}
+        df, fig = runs.plot_pkm_distr_trips(**kwargs)
+
+        kwargs["percent"] = False
+        _df = runs.plot_pkm_distr_trips(**kwargs)
+
+        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), fig, title))
     except Exception as e:
         logging.exception(e)
 
     try:
         title = "Modal Split pro Distanzklasse und Subpopulation"
-        df, fig = runs.plot_pkm_distr_trips(foreach=[SUBPOPULATION, MAIN_MODE], percent=True, rotate=True, ref_run=mzmv,
-                                            inverse_percent_axis=True, title=title,
-                                            percent_level=[SUBPOPULATION])
-        datas.append(SheetData(df, fig, title))
+        kwargs = {"foreach": [SUBPOPULATION, MAIN_MODE], "percent": True, "rotate": True, "ref_run": mzmv, "title": title, "inverse_percent_axis": True, "percent_level": [SUBPOPULATION]}
+        df, fig = runs.plot_pkm_distr_trips(**kwargs)
+
+        kwargs["percent"] = False
+        _df = runs.plot_pkm_distr_trips(**kwargs)
+
+        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), fig, title))
     except Exception as e:
         logging.exception(e)
 
     try:
         title = "Modal Split pro Distanzklasse, Subpopulation, PW-Verfuergbarkeit und OV-Abonnement"
-        df, fig = runs.plot_pkm_distr_trips(foreach=[SUBPOPULATION, CARAVAIL, SEASON_TICKET, MAIN_MODE], percent=True,
-                                            rotate=True, ref_run=mzmv, title=title,
-                                            inverse_percent_axis=True,
-                                            percent_level=[SUBPOPULATION, CARAVAIL, SEASON_TICKET])
-        datas.append(SheetData(df, fig, title))
+
+        kwargs = {"foreach": [SUBPOPULATION, CARAVAIL, SEASON_TICKET, MAIN_MODE], "percent": True, "rotate": True, "ref_run": mzmv, "title": title, "inverse_percent_axis": True, "percent_level": [SUBPOPULATION]}
+        df, fig = runs.plot_pkm_distr_trips(**kwargs)
+
+        kwargs["percent"] = False
+        _df = runs.plot_pkm_distr_trips(**kwargs)
+
+        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), fig, title))
+
+    except Exception as e:
+        logging.exception(e)
+
+    try:
+        title = "Aggregierte Strome"
+        df = runs.get_nb_trips(by=[SUBPOPULATION, "from_zone", "to_zone", MAIN_MODE])
+        datas.append(SheetData(df, None, title))
     except Exception as e:
         logging.exception(e)
 
     try:
         title = "Bahnhof Einsteiger - Auswahl"
-        df, fig = runs.plot_einsteiger(by="03_Stop_Code_boarding", codes=ref.stations, ref_run=ref.get_pt_run(), title=title)
+        df, fig = runs.plot_einsteiger(by="03_Stop_Code_boarding", codes=ref.stations, ref_run=ref.get_pt_run(),
+                                       title=title)
         datas.append(SheetData(df, fig, title))
     except Exception as e:
         logging.exception(e)
@@ -226,11 +311,11 @@ def get_datas(runs, ref):
     except Exception as e:
         logging.exception(e)
 
-    #try:
+    # try:
     #    df, fig = runs.plot_vehicles(by="name", names=ref.get_count_stations().name.unique().tolist(),
     #                                 ref_df=ref.get_count_stations_volume())
     #    datas.append(SheetData(df, fig, "Link counts"))
-    #except Exception as e:
+    # except Exception as e:
     #    logging.exception(e)
     try:
         df, fig = runs.plot_vehicles(ref_run=ref.get_astra_run(), title="ASTRA Messstellen")
@@ -253,14 +338,16 @@ def get_datas(runs, ref):
 
     try:
         title = r"OEV Teilwege pro VSys und Distanzklasse"
-        df, fig = runs.plot_pt_pkm_distr_legs(ref_run=ref.get_pt_run(), foreach=["08_TSysName"], rotate=True, percent=False, title=title, share_y=False )
+        df, fig = runs.plot_pt_pkm_distr_legs(ref_run=ref.get_pt_run(), foreach=["08_TSysName"], rotate=True,
+                                              percent=False, title=title, share_y=False)
         datas.append(SheetData(df, fig, title))
     except Exception as e:
         logging.exception(e)
 
     try:
         title = r"OEV Teilwege Tagesganglinie"
-        df, fig = runs.plot_nb_legs(by=CAT_START_TIME, foreach="mode", kind="line", ref_run=ref.get_pt_run(), title=title)
+        df, fig = runs.plot_nb_legs(by=CAT_START_TIME, foreach="mode", kind="line", ref_run=ref.get_pt_run(),
+                                    title=title)
         datas.append(SheetData(df, fig, title))
     except Exception as e:
         logging.exception(e)
@@ -274,7 +361,8 @@ def get_datas(runs, ref):
 
     try:
         title = r"Bahn Wege - Distanz Verteilung - Pro Abo"
-        df, fig = runs.plot_pt_dist_distr_trips(simba_only=True, foreach=[SUBPOPULATION, SEASON_TICKET],  rotate=True, title=title)
+        df, fig = runs.plot_pt_dist_distr_trips(simba_only=True, foreach=[SUBPOPULATION, SEASON_TICKET], rotate=True,
+                                                title=title)
         datas.append(SheetData(df, fig, title))
     except Exception as e:
         logging.exception(e)

@@ -1,6 +1,13 @@
 import pandas as pd
 
 
+def merge_absolute(dfs, names=["prozentual", "absolut"]):
+    _df = concat(dfs, names=names)
+    _df.columns.levels[0].name = ""
+    _df = _df.swaplevel(0, 1, axis=1).stack()
+    return _df
+
+
 def concat(dfs, names=None):
     _dfs = []
     if names is None:
