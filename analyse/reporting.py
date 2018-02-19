@@ -2,6 +2,7 @@ import pandas as pd
 import io
 from variable import *
 import logging
+import analyse.run
 
 
 class SheetData:
@@ -196,6 +197,14 @@ def get_datas(runs, ref):
         title = "Bahnhof Einsteiger - Alle"
         df, fig = runs.plot_boarding_scatter(by="03_Stop_Code_boarding", pt_run=ref.get_pt_run(), title=title)
         datas.append(SheetData(df, fig, title))
+    except Exception as e:
+        logging.exception(e)
+
+
+    try:
+        title = "Bahnhof Einsteiger - Alle - Subpopulation"
+        df = runs._get(analyse.run.Run.calc_einsteiger, by="03_Stop_Code_boarding", foreach="subpopulation")
+        datas.append(SheetData(df, None, title))
     except Exception as e:
         logging.exception(e)
 
