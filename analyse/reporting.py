@@ -97,7 +97,7 @@ def get_datas(runs, ref):
 
     try:
         title = "Modal Split PF pro Subpopulation und OV-Abonnement"
-        df, ax = runs.plot_nb_trips(by=MAIN_MODE, foreach=[SUBPOPULATION, SEASON_TICKET], ref_run=mzmv, percent=True, title=title)
+        df, fig = runs.plot_nb_trips(by=MAIN_MODE, foreach=[SUBPOPULATION, SEASON_TICKET], ref_run=mzmv, percent=True, title=title)
         datas.append(SheetData(df, fig, title))
     except Exception as e:
         logging.exception(e)
@@ -151,7 +151,7 @@ def get_datas(runs, ref):
         logging.exception(e)
 
     try:
-        df, ax = runs.plot_pkm_trips(by=MAIN_MODE, foreach=[SUBPOPULATION, SEASON_TICKET], ref_run=mzmv, percent=True)
+        df, fig = runs.plot_pkm_trips(by=MAIN_MODE, foreach=[SUBPOPULATION, SEASON_TICKET], ref_run=mzmv, percent=True)
         datas.append(SheetData(df, fig, "Modal Split PKM pro Subpopulation und OV-Abonnement"))
     except Exception as e:
         logging.exception(e)
