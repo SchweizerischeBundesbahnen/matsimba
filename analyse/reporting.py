@@ -219,8 +219,6 @@ def get_datas(runs, ref):
     except Exception as e:
         logging.exception(e)
 
-<<<<<<< HEAD
-
     try:
         title = "Bahnhof Einsteiger - Alle - Subpopulation"
         df = runs._get(analyse.run.Run.calc_einsteiger, by="03_Stop_Code_boarding", foreach="subpopulation")
@@ -234,13 +232,11 @@ def get_datas(runs, ref):
     #    datas.append(SheetData(df, fig, "Link counts"))
     #except Exception as e:
     #    logging.exception(e)
-=======
     try:
         df, fig = runs.plot_vehicles(ref_run=ref.get_astra_run(), title="ASTRA Messstellen")
         datas.append(SheetData(df, fig, "ASTRA Messstellen"))
     except Exception as e:
         logging.exception(e)
->>>>>>> fab8092898379971a350a1d654ab6aef4a2d1d9d
 
     try:
         df, fig = runs.plot_pt_pkm(by="06_OperatorName", ref_run=ref.get_pt_run())
