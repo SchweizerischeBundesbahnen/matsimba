@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import os
@@ -8,6 +9,7 @@ import datetime
 import analyse.compare
 from itertools import product
 import math
+
 
 sbb_colors = [(22, 24, 63)  # 0 dunkelstes SBB Blau
     , (34, 37, 94)  # 1
@@ -239,7 +241,7 @@ def plot_plans(planelements, end_time=35 * 60 * 60):
     return ax, pd.DataFrame(text)
 
 
-def plot_multi(df, cols=2.0, stacked=False, kind="bar", rotate=False, xs_index=None, **kwargs):
+def plot_multi(df, cols=2.0, stacked=False, kind="bar", rotate=False, xs_index=None, share_y=True, **kwargs):
     #df.sort_index(inplace=True)
 
     def has_label(df, label):
@@ -247,7 +249,7 @@ def plot_multi(df, cols=2.0, stacked=False, kind="bar", rotate=False, xs_index=N
 
     def if_last_move_legend(ax):
         title = ax.title
-        if title.get_text() == "":
+        if title.get_text() == u"":
             fig.delaxes(ax)
 
     n_levels = len(df.index.levels)
@@ -271,14 +273,13 @@ def plot_multi(df, cols=2.0, stacked=False, kind="bar", rotate=False, xs_index=N
         else:
             ax = axs[i // int(cols), i % int(cols)]
 
-        title = "\n".join(["%s=%s" % (df.index.names[i], l) for i, l in enumerate(label)])
+        title = u"\n".join(["%s=%s" % (df.index.names[i], l) for i, l in enumerate(label)])
 
         ax.set_title(title)
         _df = df.loc[label]
         if xs_index is None:
             xs_index = _df.index
         ax = _df.loc[xs_index].plot(kind=kind, stacked=stacked, ax=ax, legend=False)
-        #ax.set_xticklabels(xs_index)
 
         if rotate:
             for tick in ax.get_xticklabels():
@@ -302,15 +303,16 @@ def plot_multi(df, cols=2.0, stacked=False, kind="bar", rotate=False, xs_index=N
             for ax in _ax:
                 if_last_move_legend(ax)
 
-    min_y = np.inf
-    max_y = -np.inf
-    for ax in fig.get_axes():
-        lim = ax.get_ylim()
-        min_y = min(min_y, lim[0])
-        max_y = max(max_y, lim[1])
+    if share_y:
+        min_y = np.inf
+        max_y = -np.inf
+        for ax in fig.get_axes():
+            lim = ax.get_ylim()
+            min_y = min(min_y, lim[0])
+            max_y = max(max_y, lim[1])
 
-    for ax in fig.get_axes():
-        ax.set_ylim([min_y, max_y])
+        for ax in fig.get_axes():
+            ax.set_ylim([min_y, max_y])
 
     fig.tight_layout()
     return fig, axs

@@ -102,7 +102,7 @@ def set_simba_binnenverkehr_fq_attributes(df_legs, stop_ids_perimeter, stop_ids_
 
 
 def get_station_to_station_skims(df_legs, stop_attributes):
-
+    logging.info("getting station-to-station-skims")
     stop_code_att = "03_Stop_Code"
     stop_attributes = stop_attributes[[STOP_ID, stop_code_att]]
     stop_attributes.set_index(STOP_ID, inplace=True)
@@ -112,21 +112,25 @@ def get_station_to_station_skims(df_legs, stop_attributes):
 
     df_legs = df_legs.merge(stop_attributes, left_on="last_stop", right_index=True)
     df_legs.rename(columns={stop_code_att: "last_stop_code"}, inplace=True)
+    logging.info("replaced stop_id by haltestellen-code")
 
     start_time_per_journey = df_legs[[trip_id, "start_time_first_stop"]].groupby(trip_id).min()
     start_time_per_journey = start_time_per_journey.reset_index()
     end_time_per_journey = df_legs[[trip_id, "end_time_last_stop"]].groupby(trip_id).max()
     end_time_per_journey = end_time_per_journey.reset_index()
+    logging.info("calculated start- and end-times per trip")
 
     skim_per_journey = start_time_per_journey.merge(end_time_per_journey, on=trip_id)
     skim_per_journey["bz"] = skim_per_journey["end_time_last_stop"] - skim_per_journey["start_time_first_stop"]
     skim_per_journey["bz"] = skim_per_journey["bz"].apply(lambda x: x if x >= 0 else x + 24 * 60 * 60)
+    logging.info("calculated bz per trip")
 
     uh_per_journey = df_legs[[trip_id, "start_time"]].groupby(trip_id).count()
     uh_per_journey = uh_per_journey.reset_index()
     uh_per_journey.columns = [trip_id, "uh"]
     uh_per_journey["uh"] -= 1.0
     skim_per_journey = skim_per_journey.merge(uh_per_journey, on=trip_id)
+    logging.info("calculated uh per trip")
 
     pf_per_journey = df_legs[[trip_id, PF]].groupby(trip_id).min()
     pf_per_journey = pf_per_journey.reset_index()
@@ -139,11 +143,12 @@ def get_station_to_station_skims(df_legs, stop_attributes):
     skim_per_journey["weighted_bz"] = skim_per_journey[PF] * skim_per_journey["bz"]
     skim_per_journey["weighted_uh"] = skim_per_journey[PF] * skim_per_journey["uh"]
     skim_per_journey["weighted_distance"] = skim_per_journey[PF] * skim_per_journey[DISTANCE]
+    logging.info("calculated weighted skims per trip")
 
-    first_last_stop_per_journey = df_legs[[trip_id, "first_stop_code", "last_stop_code"]].groupby(
-        trip_id).min()
+    first_last_stop_per_journey = df_legs[[trip_id, "first_stop_code", "last_stop_code"]].drop_duplicates()
     first_last_stop_per_journey = first_last_stop_per_journey.reset_index()
     skim_per_journey = skim_per_journey.merge(first_last_stop_per_journey, on=trip_id)
+    logging.info("aggregated to stations")
 
     skim_per_station_to_station = skim_per_journey[
         ["first_stop_code", "last_stop_code", PF, "weighted_bz", "weighted_uh", "weighted_distance"]].groupby(
@@ -161,6 +166,7 @@ def get_station_to_station_skims(df_legs, stop_attributes):
     skim_per_station_to_station = skim_per_station_to_station.reset_index()
     skim_per_station_to_station = skim_per_station_to_station.sort_values(PF, ascending=False)
     cols_out = ["first_stop_code", "last_stop_code", PF, "bz", "bz_hhmmss", "uh", "distance"]
+    logging.info("done station-to-station-skims")
     return skim_per_station_to_station[cols_out]
 
 

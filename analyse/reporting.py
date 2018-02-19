@@ -7,6 +7,7 @@ import analyse.run
 
 class SheetData:
     def __init__(self, df, fig, name):
+        logging.info("Making %s" % name)
         self.df = df
         self.fig = fig
         self.name = name
@@ -18,6 +19,7 @@ def make_report(runs, filename, ref=None):
 
 
 def _make_report(datas, filename):
+    logging.info("Writing report")
     buffers = []
 
     def get_buffer(fig):
@@ -42,7 +44,7 @@ def _make_report(datas, filename):
         link = data.sheet
         if data.fig is None:
             link += "_data"
-        worksheet.write_url(i + 1, 1, url="internal:'%s'!A1" % data.sheet, string=data.name)
+        worksheet.write_url(i + 1, 1, url="internal:'%s'!A1" % link, string=data.name)
 
     for data in datas:
         df = data.df
@@ -50,12 +52,14 @@ def _make_report(datas, filename):
             buf = get_buffer(data.fig)
             sheet = writer.book.add_worksheet(data.sheet)
             sheet.insert_image('A1', "aa", {'image_data': buf})
-        df.to_excel(writer, sheet_name=data.sheet + "_data", startrow=1, startcol=1, merge_cells=False)
+        df.to_excel(writer, sheet_name=data.sheet + "_data", startrow=1, startcol=1, merge_cells=False, encoding="utf-8")
 
     writer.save()
 
     for buf in buffers:
         buf.close()
+
+    logging.info("Done writing file")
 
 
 def get_datas(runs, ref):
@@ -73,6 +77,13 @@ def get_datas(runs, ref):
     try:
         title = "Modal Split PF pro Subpopulation"
         df, ax = runs.plot_nb_trips(by=MAIN_MODE, foreach=SUBPOPULATION, ref_run=mzmv, percent=True, title=title)
+        datas.append(SheetData(df, ax,title ))
+    except Exception as e:
+        logging.exception(e)
+
+    try:
+        title = "Modal Split PF pro Subpopulation (Absolut)"
+        df, ax = runs.plot_nb_trips(by=MAIN_MODE, foreach=SUBPOPULATION, ref_run=mzmv, percent=False, title=title)
         datas.append(SheetData(df, ax,title ))
     except Exception as e:
         logging.exception(e)
@@ -124,6 +135,14 @@ def get_datas(runs, ref):
         datas.append(SheetData(df, ax, "Modal Split PKM pro Subpopulation"))
     except Exception as e:
         logging.exception(e)
+
+    try:
+        title = "Modal Split PKM pro Subpopulation (Absolut)"
+        df, ax = runs.plot_pkm_trips(by=MAIN_MODE, foreach=SUBPOPULATION, ref_run=mzmv, percent=False, title=title)
+        datas.append(SheetData(df, ax, title))
+    except Exception as e:
+        logging.exception(e)
+
 
     try:
         df, fig = runs.plot_pkm_trips(by=MAIN_MODE, foreach=[SUBPOPULATION, CARAVAIL], ref_run=mzmv, percent=True)
@@ -200,6 +219,7 @@ def get_datas(runs, ref):
     except Exception as e:
         logging.exception(e)
 
+<<<<<<< HEAD
 
     try:
         title = "Bahnhof Einsteiger - Alle - Subpopulation"
@@ -214,12 +234,19 @@ def get_datas(runs, ref):
     #    datas.append(SheetData(df, fig, "Link counts"))
     #except Exception as e:
     #    logging.exception(e)
+=======
+    try:
+        df, fig = runs.plot_vehicles(ref_run=ref.get_astra_run(), title="ASTRA Messstellen")
+        datas.append(SheetData(df, fig, "ASTRA Messstellen"))
+    except Exception as e:
+        logging.exception(e)
+>>>>>>> fab8092898379971a350a1d654ab6aef4a2d1d9d
 
-   # try:
-   #     df, fig = runs.plot_pt_pkm(by="06_OperatorName", indices=ref.operators, ref_run=ref.get_pt_run())
-   #     datas.append(SheetData(df, fig, "OV PKM pro Betreiber"))
-   # except Exception as e:
-   #     logging.exception(e)
+    try:
+        df, fig = runs.plot_pt_pkm(by="06_OperatorName", ref_run=ref.get_pt_run())
+        datas.append(SheetData(df, fig, "OV PKM pro Betreiber"))
+    except Exception as e:
+        logging.exception(e)
 
     try:
         title = r"OEV PKM pro VSys"
@@ -230,7 +257,7 @@ def get_datas(runs, ref):
 
     try:
         title = r"OEV Teilwege pro VSys und Distanzklasse"
-        df, fig = runs.plot_pt_pkm_distr_legs(ref_run=ref.get_pt_run(), foreach=["08_TSysName"], rotate=True, percent=True, title=title)
+        df, fig = runs.plot_pt_pkm_distr_legs(ref_run=ref.get_pt_run(), foreach=["08_TSysName"], rotate=True, percent=False, title=title, share_y=False )
         datas.append(SheetData(df, fig, title))
     except Exception as e:
         logging.exception(e)
@@ -297,6 +324,5 @@ def get_datas(runs, ref):
         datas.append(SheetData(df, None, title))
     except Exception as e:
         logging.exception(e)
-
 
     return datas

@@ -186,7 +186,13 @@ class Run:
         return self.get_boarding_alighting()
 
     def get_linkvolumes(self):
-        return self._get("linkvolumes")
+        df = self._get("linkvolumes")
+        id = LINK_ID
+        if NAME in df.columns:
+            id = NAME
+        df = pd.DataFrame(df.groupby([id, "mode"])[VOLUME].sum()).reset_index()
+        self.data["linkvolumes"] = df
+        return df
 
     def get_planelements(self):
         return self._get("planelements")
@@ -287,6 +293,10 @@ class Run:
 
         self.create_starttime_class_for_legs()
 
+        if ref is not None:
+            stations = ref.get_count_stations()
+            self.merge_link_id_to_name(stations)
+
     def merge_trips_persons(self):
         if not self.trip_persons_merged:
             trips = self.get_trips().merge(self.get_persons(), on=person_id, how="left", suffixes=("", "_p"))
@@ -301,11 +311,16 @@ class Run:
             self.data["legs"] = legs
         return self.get_legs()
 
-    def merge_link_id_to_name(self, link_id_to_name):
+    def merge_link_id_to_name(self, stations):
+        logging.info("merging links")
         if not self.link_merged:
             df = self.get_linkvolumes()
-            self.data["linkvolumes"] = df.merge(link_id_to_name, on="link_id", how="left")
+            #fix because of error in matsim-sbb
+            df = df[df["mode"]=="car"]
+            df = df.merge(stations, how="right", left_on=LINK_ID, right_index=True)
+            self.data["linkvolumes"] = df
             self.link_merged = True
+        logging.info("done merging links")
         return self.get_linkvolumes()
 
     def _do(self, df, by, value, foreach=None, aggfunc="count", percent=None, inverse_percent_axis=False,
@@ -465,11 +480,9 @@ class Run:
         return self._do(df, by=CAT_DIST, value=PF, aggfunc="sum", **kwargs)
 
     @cache
-    def calc_vehicles(self, names=None, **kwargs):
+    def calc_vehicles(self, **kwargs):
         df = self.get_linkvolumes()
-        df = self._do(df, value=VOLUME, aggfunc="sum", **kwargs)
-        if names is not None:
-            df = df.loc[names]
+        df = self._do(df, value=VOLUME, aggfunc="sum", by=NAME, **kwargs)*self.scale_factor
         return df
 
     @cache

@@ -82,9 +82,11 @@ class Reference:
             self.load_mzmv_run()
         if self.path_pt_legs:
             self.load_pt_run(pt_run_name)
+        if self.path_astra:
+            self.load_astra_run()
 
     def load_mzmv_run(self):
-        df = pd.read_csv(self.path_mikro, sep=",", dtype={"link_id": str})
+        df = pd.read_csv(self.path_mikro, sep=",", dtype={"link_id": str}, encoding="utf-8")
         df[SUBPOPULATION] = self.subpopulation
         df = df.rename(columns={u'Weglaenge': "distance"})
         df = df.rename(columns={u'Pkm': "PKM"})
@@ -105,7 +107,7 @@ class Reference:
 
     def load_pt_run(self, name):
         teilwege = pd.read_csv(self.path_pt_legs, sep=";",
-                               skiprows=12)
+                               skiprows=12, encoding="utf-8")
         teilwege.rename(columns={"$OEVTEILWEG:QBEZNR": "QBEZNR",
                                  "PFAHRT": PF,
                                  "ZEIT": "duration",
@@ -141,11 +143,21 @@ class Reference:
     def get_pt_run(self):
         return self.pt_run
 
-    def get_count_stations(self):
-        ref_astra = pd.read_csv(self.path_astra, sep=";", dtype={"link_id": str})
-        ref_astra.rename(columns={"zaehlstellen_bezeichnung": "name"}, inplace=True)
-        return ref_astra[ref_astra.name.isin(self.count_stations)]
+    def get_astra_run(self):
+        return self.astra_run
 
-    def get_count_stations_volume(self):
-        df = self.get_count_stations().groupby("name").sum()[["volume"]] / 2.0
-        return df.rename(columns={"volume": "ASTRA"})
+    def load_astra_run(self):
+        ref_astra = pd.read_csv(self.path_astra, sep=";", dtype={"link_id": str}, encoding="utf-8")
+        ref_astra.rename(columns={"zaehlstellen_bezeichnung": "name"}, inplace=True)
+
+        ref_astra["mode"] = "car"
+        astra_run = analyse.run.Run(name="ASTRA")
+        astra_run.data["linkvolumes"] = ref_astra
+        self.astra_run = astra_run
+
+    def get_count_stations(self):
+        ref_astra = pd.read_csv(self.path_astra, sep=";", dtype={"link_id": str}, encoding="utf-8")
+        ref_astra.rename(columns={"zaehlstellen_bezeichnung": "name"}, inplace=True)
+        ref_astra = ref_astra[[LINK_ID, "name"]].set_index(LINK_ID)
+        ref_astra = ref_astra[ref_astra.name.notnull()]
+        return ref_astra
