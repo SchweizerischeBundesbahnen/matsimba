@@ -268,7 +268,7 @@ class Run:
         df[PKM] = df[DISTANCE] * df[PF]
 
     def prepare(self, ref=None, persons=None, stop_attribute_path=None, route_attribute_path=None,
-                shapefile_attributes=None, zone_attributes=["N_Gem"], zone_merge_attribute"ID_ALL"):
+                shapefile_attributes=None, zone_attributes=["N_Gem"], zone_merge_attribute="ID_ALL"):
         # self.unload_data()
 
         if stop_attribute_path is not None:
