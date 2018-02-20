@@ -256,7 +256,7 @@ def get_datas(runs, ref):
         df, fig = runs.plot_pkm_distr_trips(**kwargs)
 
         kwargs["percent"] = False
-        _df = runs.plot_pkm_distr_trips(**kwargs)
+        _df, _= runs.plot_pkm_distr_trips(**kwargs)
 
         datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), fig, title))
     except Exception as e:
@@ -269,7 +269,7 @@ def get_datas(runs, ref):
         df, fig = runs.plot_pkm_distr_trips(**kwargs)
 
         kwargs["percent"] = False
-        _df = runs.plot_pkm_distr_trips(**kwargs)
+        _df, _ = runs.plot_pkm_distr_trips(**kwargs)
 
         datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), fig, title))
     except Exception as e:
