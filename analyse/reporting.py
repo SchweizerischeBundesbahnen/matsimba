@@ -330,6 +330,16 @@ def get_datas(runs, ref):
     except Exception as e:
         logging.exception(e)
 
+
+    try:
+        title = "Bahnhof Einsteiger - Alle (SBF)"
+        df, fig = runs.plot_boarding_scatter(by="03_Stop_Code_boarding", pt_run=ref.get_pt_run(), title=title, ref_df=ref.get_bahnhof_boarding(), simba_only=True)
+        datas.append(SheetData(df, fig, title))
+    except Exception as e:
+        logging.exception(e)
+
+
+
     try:
         title = "Bahnhof Einsteiger - Alle - Subpopulation"
         df = runs._get(analyse.run.Run.calc_einsteiger, by="03_Stop_Code_boarding", foreach="subpopulation")
@@ -379,14 +389,14 @@ def get_datas(runs, ref):
         logging.exception(e)
 
     try:
-        title = r"Bahn Wege - Distanz Verteilung"
+        title = r"Bahn Wege - Distanz Verteilung (SBF)"
         df, fig = runs.plot_pt_dist_distr_trips(simba_only=True, ref_run=ref.get_pt_run(), rotate=True, title=title)
         datas.append(SheetData(df, fig, title))
     except Exception as e:
         logging.exception(e)
 
     try:
-        title = r"Bahn Wege - Distanz Verteilung - Pro Abo"
+        title = r"Bahn Wege - Distanz Verteilung - Pro Abo (SBF)"
         df, fig = runs.plot_pt_dist_distr_trips(simba_only=True, foreach=[SUBPOPULATION, SEASON_TICKET], rotate=True,
                                                 title=title)
         datas.append(SheetData(df, fig, title))
@@ -394,35 +404,35 @@ def get_datas(runs, ref):
         logging.exception(e)
 
     try:
-        title = "Bahn Wege - UH Verteilung"
+        title = "Bahn Wege - UH Verteilung (SBF)"
         df, fig = runs.plot_pt_uh(simba_only=True, ref_run=ref.get_pt_run(), title=title)
         datas.append(SheetData(df, fig, title))
     except Exception as e:
         logging.exception(e)
 
     try:
-        title = "Bahn Wege - PF - Bhf-Bhf"
+        title = "Bahn Wege - PF - Bhf-Bhf (SBF)"
         df, fig = runs.plot_pt_skims(name="PF", pt_run=ref.get_pt_run(), title=title)
         datas.append(SheetData(df, fig, title))
     except Exception as e:
         logging.exception(e)
 
     try:
-        title = "Bahn Wege - UH - Bhf-Bhf"
+        title = "Bahn Wege - UH - Bhf-Bhf (SBF)"
         df, fig = runs.plot_pt_skims(name="uh", pt_run=ref.get_pt_run(), title=title)
         datas.append(SheetData(df, fig, title))
     except Exception as e:
         logging.exception(e)
 
     try:
-        title = "Bahn Wege - BZ - Bhf-Bhf"
+        title = "Bahn Wege - BZ - Bhf-Bhf (SBF)"
         df, fig = runs.plot_pt_skims(name="bz", pt_run=ref.get_pt_run(), title=title)
         datas.append(SheetData(df, fig, title))
     except Exception as e:
         logging.exception(e)
 
     try:
-        title = "Bahn Wege - Distanz - Bhf-Bhf"
+        title = "Bahn Wege - Distanz - Bhf-Bhf (SBF)"
         df, fig = runs.plot_pt_skims(name="distance", pt_run=ref.get_pt_run(), title=title)
         datas.append(SheetData(df, fig, title))
     except Exception as e:
