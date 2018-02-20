@@ -314,7 +314,7 @@ def get_datas(runs, ref):
     try:
         title = "Bahnhof Einsteiger - Auswahl"
         df, fig = runs.plot_einsteiger(by="03_Stop_Code_boarding", codes=ref.stations, ref_run=ref.get_pt_run(),
-                                       title=title, ref_df=ref.get_bahnhof_boarding())
+                                       title=title, ref_df=ref.get_bahnhof_boarding().loc[ref.stations])
         datas.append(SheetData(df, fig, title))
     except Exception as e:
         logging.exception(e)
