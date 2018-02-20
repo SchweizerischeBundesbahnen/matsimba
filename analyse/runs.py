@@ -159,9 +159,12 @@ class RunsList(list):
         fig = analyse.plot.plot_scatter(df=df, ref_name=pt_run.name, **kwargs)
         return df, fig
 
-    def plot_boarding_scatter(self, pt_run, ref_df, **kwargs):
+    def plot_boarding_scatter(self, pt_run, ref_df=None, **kwargs):
+        ref_name = pt_run.name
+        if ref_df is not None:
+            ref_name = ref_name.columns[0]
         df = self._get(analyse.run.Run.calc_einsteiger, ref_run=pt_run, ref_df=ref_df, **kwargs)
-        fig = analyse.plot.plot_scatter(df=df, ref_name=ref_df.columns[0], **kwargs)
+        fig = analyse.plot.plot_scatter(df=df, ref_name=ref_name, **kwargs)
         return df, fig
 
     def get_pt_table(self, pt_run, **kwargs):

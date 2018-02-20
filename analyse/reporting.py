@@ -60,8 +60,8 @@ def _make_report(datas, filename):
         startcol = 1
         for df in dfs:
             df.to_excel(writer, sheet_name=data.sheet + "_data", startrow=1, startcol=startcol, merge_cells=False,
-                    encoding="utf-8")
-            startcol+= 3 + len(df.columns)+df.index.nlevels
+                        encoding="utf-8")
+            startcol += 3 + len(df.columns) + df.index.nlevels
 
     writer.save()
 
@@ -260,7 +260,7 @@ def get_datas(runs, ref):
         df, fig = runs.plot_pkm_distr_trips(**kwargs)
 
         kwargs["percent"] = False
-        _df, _= runs.plot_pkm_distr_trips(**kwargs)
+        _df, _ = runs.plot_pkm_distr_trips(**kwargs)
 
         datas.append(SheetData([df, _df], fig, title))
     except Exception as e:
@@ -324,21 +324,29 @@ def get_datas(runs, ref):
         logging.exception(e)
 
     try:
-        title = "Bahnhof Einsteiger - Alle"
-        df, fig = runs.plot_boarding_scatter(by="03_Stop_Code_boarding", pt_run=ref.get_pt_run(), title=title, ref_df=ref.get_bahnhof_boarding())
+        title = "Bahnhof Einsteiger - Auswahl (SBF)"
+        df, fig = runs.plot_einsteiger(by="03_Stop_Code_boarding", codes=ref.stations, ref_run=ref.get_pt_run(),
+                                       title=title, ref_df=ref.get_bahnhof_boarding().loc[ref.stations],
+                                       simba_only=True)
         datas.append(SheetData(df, fig, title))
     except Exception as e:
         logging.exception(e)
 
+    try:
+        title = "Bahnhof Einsteiger - Alle"
+        df, fig = runs.plot_boarding_scatter(by="03_Stop_Code_boarding", pt_run=ref.get_pt_run(), title=title,
+                                             ref_df=ref.get_bahnhof_boarding())
+        datas.append(SheetData(df, fig, title))
+    except Exception as e:
+        logging.exception(e)
 
     try:
         title = "Bahnhof Einsteiger - Alle (SBF)"
-        df, fig = runs.plot_boarding_scatter(by="03_Stop_Code_boarding", pt_run=ref.get_pt_run(), title=title, ref_df=ref.get_bahnhof_boarding(), simba_only=True)
+        df, fig = runs.plot_boarding_scatter(by="03_Stop_Code_boarding", pt_run=ref.get_pt_run(), title=title,
+                                             simba_only=True)
         datas.append(SheetData(df, fig, title))
     except Exception as e:
         logging.exception(e)
-
-
 
     try:
         title = "Bahnhof Einsteiger - Alle - Subpopulation"
