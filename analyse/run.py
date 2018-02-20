@@ -303,27 +303,30 @@ class Run:
         if shapefile_attributes is not None and zone_attribute is not None:
             self.merge_trips_zone(shapefile_attributes, zone_attribute, zone_merge_attribute)
 
-    def merge_activities_to_zone(self, attirbutes_path, zone_attribute="N_Gem", merge_attribute="ID_ALL"):
+    def merge_activities_to_zone(self, attirbutes_path, zone_attributes=["N_Gem"], merge_attribute="ID_ALL"):
         zones = pd.read_csv(attirbutes_path, sep=",", encoding="utf-8")
         df = self.get_acts()
         df.activity_id = df.activity_id.apply(int)
 
-        acts = df.merge(zones[[merge_attribute, zone_attribute]], left_on="zone", right_on=merge_attribute)
+        acts = df.merge(zones[[merge_attribute] + zone_attributes], left_on="zone", right_on=merge_attribute)
         self.data["acts"] = acts
         return self.get_acts()
 
-    def merge_trips_zone(self, attirbutes_path, zone_attribute="N_Gem", merge_attribute="ID_ALL"):
-        acts = self.merge_activities_to_zone(attirbutes_path, zone_attribute, merge_attribute)
+    def merge_trips_zone(self, attirbutes_path, zone_attributes=["N_Gem"], merge_attribute="ID_ALL"):
+        acts = self.merge_activities_to_zone(attirbutes_path, zone_attributes, merge_attribute)
         acts = acts.set_index("activity_id")
 
         trips = self.get_trips()
         trips.from_act = trips.from_act.apply(int)
         trips.to_act = trips.to_act.apply(int)
 
-        df = trips.merge(acts[[zone_attribute]], left_on="from_act", right_index=True, how="left")
-        df.rename(columns={zone_attribute: "from_zone"}, inplace=True)
-        df = df.merge(acts[[zone_attribute]], left_on="to_act", right_index=True, how="left")
-        df.rename(columns={zone_attribute: "to_zone"}, inplace=True)
+        df = trips.merge(acts[zone_attributes], left_on="from_act", right_index=True, how="left")
+
+        zone_attributes_dict = dict(zip(zone_attributes, ["from_"+a for a in zone_attributes]))
+        df.rename(columns=zone_attributes_dict, inplace=True)
+        df = df.merge(acts[zone_attributes], left_on="to_act", right_index=True, how="left")
+        zone_attributes_dict = dict(zip(zone_attributes, ["to_"+a for a in zone_attributes]))
+        df.rename(columns=zone_attributes_dict, inplace=True)
 
         self.data["journeys"] = df
         return self.get_trips()
@@ -435,8 +438,12 @@ class Run:
         analyse.plot.plot_score([self.path])
 
     @cache
-    def calc_einsteiger(self, codes=None, **kwargs):
-        df = self.get_pt_legs()
+    def calc_einsteiger(self, simba_only=False, codes=None, **kwargs):
+        if simba_only:
+            df = self.filter_to_simba_binnenverkehr_fq_legs()
+        else:
+            df = self.get_pt_legs()
+
 
         try:
             df = df.merge(right=self.get_stop_attributes(), how="left", left_on="boarding_stop", right_on="stop_id")
@@ -462,6 +469,19 @@ class Run:
         df = self.merge_route(df)
 
         df = self._do(df, value=PKM, aggfunc="sum", **kwargs)
+
+        gc.collect()
+        return df
+
+    @cache
+    def calc_pt_pf(self, simba_only=False, **kwargs):
+        if simba_only:
+            df = self.filter_to_simba_binnenverkehr_fq_legs()
+        else:
+            df = self.get_pt_legs()
+
+        df = self.merge_route(df)
+        df = self._do(df, value=PF, aggfunc="sum", **kwargs)
 
         gc.collect()
         return df
@@ -508,6 +528,13 @@ class Run:
         self._create_distance_class(df)
 
         return self._do(df, by=CAT_DIST, value=PF, aggfunc="sum", **kwargs)
+
+    @cache
+    def calc_duration_trips(self, **kwargs):
+        df = self.get_trips()
+        df["duration"] = (df.end_time - df.start_time)//(60*10)
+        df = self._do(df, value=PF, aggfunc="sum", by=DURATION, **kwargs)
+        return df
 
     @cache
     def calc_vehicles(self, **kwargs):

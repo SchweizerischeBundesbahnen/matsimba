@@ -184,7 +184,8 @@ def get_datas(runs, ref):
 
     try:
         title = "Modal Split PKM pro Subpopulation und PW-Verfuergbarkeit"
-        kwargs = {"by": MAIN_MODE, "foreach": [SUBPOPULATION, CARAVAIL], "ref_run": mzmv, "percent": True, "title": title}
+        kwargs = {"by": MAIN_MODE, "foreach": [SUBPOPULATION, CARAVAIL], "ref_run": mzmv, "percent": True,
+                  "title": title}
         df, fig = runs.plot_pkm_trips(**kwargs)
 
         kwargs["percent"] = False
@@ -196,7 +197,8 @@ def get_datas(runs, ref):
 
     try:
         title = "Modal Split PKM pro Subpopulation und OV-Abonnement"
-        kwargs = {"by": MAIN_MODE, "foreach": [SUBPOPULATION, SEASON_TICKET], "ref_run": mzmv, "percent": True, "title": title}
+        kwargs = {"by": MAIN_MODE, "foreach": [SUBPOPULATION, SEASON_TICKET], "ref_run": mzmv, "percent": True,
+                  "title": title}
         df, fig = runs.plot_pkm_trips(**kwargs)
 
         kwargs["percent"] = False
@@ -208,7 +210,8 @@ def get_datas(runs, ref):
 
     try:
         title = "Modal Split PKM pro Subpopulation und Raumtyp"
-        kwargs = {"by": MAIN_MODE, "foreach": [SUBPOPULATION, RAUMTYP], "ref_run": mzmv, "percent": True, "title": title}
+        kwargs = {"by": MAIN_MODE, "foreach": [SUBPOPULATION, RAUMTYP], "ref_run": mzmv, "percent": True,
+                  "title": title}
         df, fig = runs.plot_pkm_trips(**kwargs)
 
         kwargs["percent"] = False
@@ -220,7 +223,8 @@ def get_datas(runs, ref):
 
     try:
         title = "Modal Split PKM pro Subpopulation und professionelle Gruppe"
-        kwargs = {"by": MAIN_MODE, "foreach": [SUBPOPULATION, "work: employment status"], "ref_run": mzmv, "percent": True, "title": title}
+        kwargs = {"by": MAIN_MODE, "foreach": [SUBPOPULATION, "work: employment status"], "ref_run": mzmv,
+                  "percent": True, "title": title}
         df, fig = runs.plot_pkm_trips(**kwargs)
 
         kwargs["percent"] = False
@@ -232,7 +236,8 @@ def get_datas(runs, ref):
 
     try:
         title = "Modal Split PKM pro Subpopulation, PW-Verfuergbarkeit und OV-Abonnement"
-        kwargs = {"by": MAIN_MODE, "foreach": [SUBPOPULATION, CARAVAIL, SEASON_TICKET], "ref_run": mzmv, "percent": True, "title": title}
+        kwargs = {"by": MAIN_MODE, "foreach": [SUBPOPULATION, CARAVAIL, SEASON_TICKET], "ref_run": mzmv,
+                  "percent": True, "title": title}
         df, fig = runs.plot_pkm_trips(**kwargs)
 
         kwargs["percent"] = False
@@ -246,7 +251,8 @@ def get_datas(runs, ref):
 
     try:
         title = "Modal Split pro Distanzklasse"
-        kwargs = {"foreach": [MAIN_MODE], "percent": True, "rotate": True, "ref_run": mzmv, "title": title, "inverse_percent_axis": True}
+        kwargs = {"foreach": [MAIN_MODE], "percent": True, "rotate": True, "ref_run": mzmv, "title": title,
+                  "inverse_percent_axis": True}
         df, fig = runs.plot_pkm_distr_trips(**kwargs)
 
         kwargs["percent"] = False
@@ -258,7 +264,8 @@ def get_datas(runs, ref):
 
     try:
         title = "Modal Split pro Distanzklasse und Subpopulation"
-        kwargs = {"foreach": [SUBPOPULATION, MAIN_MODE], "percent": True, "rotate": True, "ref_run": mzmv, "title": title, "inverse_percent_axis": True, "percent_level": [SUBPOPULATION]}
+        kwargs = {"foreach": [SUBPOPULATION, MAIN_MODE], "percent": True, "rotate": True, "ref_run": mzmv,
+                  "title": title, "inverse_percent_axis": True, "percent_level": [SUBPOPULATION]}
         df, fig = runs.plot_pkm_distr_trips(**kwargs)
 
         kwargs["percent"] = False
@@ -271,7 +278,8 @@ def get_datas(runs, ref):
     try:
         title = "Modal Split pro Distanzklasse, Subpopulation, PW-Verfuergbarkeit und OV-Abonnement"
 
-        kwargs = {"foreach": [SUBPOPULATION, CARAVAIL, SEASON_TICKET, MAIN_MODE], "percent": True, "rotate": True, "ref_run": mzmv, "title": title, "inverse_percent_axis": True, "percent_level": [SUBPOPULATION]}
+        kwargs = {"foreach": [SUBPOPULATION, CARAVAIL, SEASON_TICKET, MAIN_MODE], "percent": True, "rotate": True,
+                  "ref_run": mzmv, "title": title, "inverse_percent_axis": True, "percent_level": [SUBPOPULATION]}
         df, fig = runs.plot_pkm_distr_trips(**kwargs)
 
         kwargs["percent"] = False
@@ -283,8 +291,22 @@ def get_datas(runs, ref):
         logging.exception(e)
 
     try:
+        title = "Reisezeit pro Subpopulation und Verkehrsmittel"
+
+        kwargs = {"foreach": [SUBPOPULATION, MAIN_MODE], "percent": True, "rotate": True, "title": title}
+        df, fig = runs.plot_duration_trips(**kwargs)
+
+        kwargs["percent"] = False
+        _df, _ = runs.plot_duration_trips(**kwargs)
+
+        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), fig, title))
+
+    except Exception as e:
+        logging.exception(e)
+
+    try:
         title = "Aggregierte Strome"
-        df = runs.get_nb_trips(by=[SUBPOPULATION, "from_zone", "to_zone", MAIN_MODE])
+        df = runs.get_nb_trips(by=[SUBPOPULATION, "from_N_Gem", "to_N_Gem", MAIN_MODE])
         datas.append(SheetData(df, None, title))
     except Exception as e:
         logging.exception(e)
@@ -292,14 +314,15 @@ def get_datas(runs, ref):
     try:
         title = "Bahnhof Einsteiger - Auswahl"
         df, fig = runs.plot_einsteiger(by="03_Stop_Code_boarding", codes=ref.stations, ref_run=ref.get_pt_run(),
-                                       title=title)
+                                       title=title, simba_only=True)
         datas.append(SheetData(df, fig, title))
     except Exception as e:
         logging.exception(e)
 
     try:
         title = "Bahnhof Einsteiger - Alle"
-        df, fig = runs.plot_boarding_scatter(by="03_Stop_Code_boarding", pt_run=ref.get_pt_run(), title=title)
+        df, fig = runs.plot_boarding_scatter(by="03_Stop_Code_boarding", pt_run=ref.get_pt_run(), title=title,
+                                             simba_only=True)
         datas.append(SheetData(df, fig, title))
     except Exception as e:
         logging.exception(e)

@@ -34,4 +34,4 @@ STOP_ID = "stop_id"
 IS_SIMBA = "is_simba"
 IS_SIMBA_ROUTE = "is_simba_route"
 NAME="name"
-
+DURATION="duration"

@@ -134,6 +134,10 @@ class RunsList(list):
         df = self.get_pt_pkm(**kwargs)
         return self._plot(df=df, **kwargs)
 
+    def plot_duration_trips(self, **kwargs):
+        df = self._get(analyse.run.Run.calc_duration_trips, **kwargs)
+        return self._plot(df=df, kind="line", **kwargs)
+
     def plot_pt_dist_distr_trips(self, **kwargs):
         df = self._get(analyse.run.Run.calc_pt_dist_distr_trips, **kwargs)
         return self._plot(df=df, kind="bar", xs_index=analyse.run.distance_labels, **kwargs)
