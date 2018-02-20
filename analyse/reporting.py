@@ -10,7 +10,9 @@ import analyse.compare
 class SheetData:
     def __init__(self, df, fig, name):
         logging.info("Making %s" % name)
-        self.df = df
+        if not isinstance(df, list):
+            df = [df]
+        self.dfs = df
         self.fig = fig
         self.name = name
 
@@ -50,13 +52,16 @@ def _make_report(datas, filename):
         worksheet.write_url(i + 1, 1, url="internal:'%s'!A1" % link, string=data.name)
 
     for data in datas:
-        df = data.df
+        dfs = data.dfs
         if data.fig is not None:
             buf = get_buffer(data.fig)
             sheet = writer.book.add_worksheet(data.sheet)
             sheet.insert_image('A1', "aa", {'image_data': buf})
-        df.to_excel(writer, sheet_name=data.sheet + "_data", startrow=1, startcol=1, merge_cells=False,
+        startcol = 1
+        for df in dfs:
+            df.to_excel(writer, sheet_name=data.sheet + "_data", startrow=1, startcol=startcol, merge_cells=False,
                     encoding="utf-8")
+            startcol+= 3 + len(df.columns)+df.index.nlevels
 
     writer.save()
 
@@ -78,9 +83,8 @@ def get_datas(runs, ref):
         df, ax = runs.plot_nb_trips(**kwargs)
         kwargs["percent"] = False
         _df = runs.get_nb_trips(**kwargs)
-        df = analyse.compare.merge_absolute([df, _df])
 
-        datas.append(SheetData(df, ax, title))
+        datas.append(SheetData([df, _df], ax, title))
     except Exception as e:
         logging.exception(e)
 
@@ -90,7 +94,7 @@ def get_datas(runs, ref):
         df, ax = runs.plot_nb_trips(**kwargs)
         kwargs["percent"] = False
         _df = runs.get_nb_trips(**kwargs)
-        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), ax, title))
+        datas.append(SheetData([df, _df], ax, title))
     except Exception as e:
         logging.exception(e)
 
@@ -101,7 +105,7 @@ def get_datas(runs, ref):
         df, fig = runs.plot_nb_trips(**kwargs)
         kwargs["percent"] = False
         _df = runs.get_nb_trips(**kwargs)
-        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), fig, title))
+        datas.append(SheetData([df, _df], fig, title))
     except Exception as e:
         logging.exception(e)
 
@@ -114,7 +118,7 @@ def get_datas(runs, ref):
         kwargs["percent"] = False
         _df = runs.get_nb_trips(**kwargs)
 
-        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), fig, title))
+        datas.append(SheetData([df, _df], fig, title))
     except Exception as e:
         logging.exception(e)
 
@@ -127,11 +131,12 @@ def get_datas(runs, ref):
         kwargs["percent"] = False
         _df = runs.get_nb_trips(**kwargs)
 
-        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), fig, title))
+        datas.append(SheetData([df, _df], fig, title))
     except Exception as e:
         logging.exception(e)
 
     try:
+        title = "Modal Split PF pro Subpopulation und professionelle Gruppe"
         kwargs = {"by": MAIN_MODE, "ref_run": mzmv, "percent": True, "title": title,
                   "foreach": [SUBPOPULATION, "work: employment status"]}
         df, fig = runs.plot_nb_trips(**kwargs)
@@ -139,8 +144,7 @@ def get_datas(runs, ref):
         kwargs["percent"] = False
         _df = runs.get_nb_trips(**kwargs)
 
-        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), fig,
-                               "Modal Split PF pro Subpopulation und professionelle Gruppe"))
+        datas.append(SheetData([df, _df], fig, title))
     except Exception as e:
         logging.exception(e)
 
@@ -153,7 +157,7 @@ def get_datas(runs, ref):
         kwargs["percent"] = False
         _df = runs.get_nb_trips(**kwargs)
 
-        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), fig, title))
+        datas.append(SheetData([df, _df], fig, title))
     except Exception as e:
         logging.exception(e)
 
@@ -166,7 +170,7 @@ def get_datas(runs, ref):
         kwargs["percent"] = False
         _df = runs.get_pkm_trips(**kwargs)
 
-        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), ax, title))
+        datas.append(SheetData([df, _df], ax, title))
     except Exception as e:
         logging.exception(e)
 
@@ -178,7 +182,7 @@ def get_datas(runs, ref):
         kwargs["percent"] = False
         _df = runs.get_pkm_trips(**kwargs)
 
-        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), ax, title))
+        datas.append(SheetData([df, _df], ax, title))
     except Exception as e:
         logging.exception(e)
 
@@ -191,7 +195,7 @@ def get_datas(runs, ref):
         kwargs["percent"] = False
         _df = runs.get_pkm_trips(**kwargs)
 
-        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), fig, title))
+        datas.append(SheetData([df, _df], fig, title))
     except Exception as e:
         logging.exception(e)
 
@@ -204,7 +208,7 @@ def get_datas(runs, ref):
         kwargs["percent"] = False
         _df = runs.get_pkm_trips(**kwargs)
 
-        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), fig, title))
+        datas.append(SheetData([df, _df], fig, title))
     except Exception as e:
         logging.exception(e)
 
@@ -217,7 +221,7 @@ def get_datas(runs, ref):
         kwargs["percent"] = False
         _df = runs.get_pkm_trips(**kwargs)
 
-        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), fig, title))
+        datas.append(SheetData([df, _df], fig, title))
     except Exception as e:
         logging.exception(e)
 
@@ -230,7 +234,7 @@ def get_datas(runs, ref):
         kwargs["percent"] = False
         _df = runs.get_pkm_trips(**kwargs)
 
-        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), fig, title))
+        datas.append(SheetData([df, _df], fig, title))
     except Exception as e:
         logging.exception(e)
 
@@ -243,7 +247,7 @@ def get_datas(runs, ref):
         kwargs["percent"] = False
         _df = runs.get_pkm_trips(**kwargs)
 
-        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), fig, title))
+        datas.append(SheetData([df, _df], fig, title))
     except Exception as e:
         logging.exception(e)
 
@@ -258,7 +262,7 @@ def get_datas(runs, ref):
         kwargs["percent"] = False
         _df, _= runs.plot_pkm_distr_trips(**kwargs)
 
-        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), fig, title))
+        datas.append(SheetData([df, _df], fig, title))
     except Exception as e:
         logging.exception(e)
 
@@ -271,7 +275,7 @@ def get_datas(runs, ref):
         kwargs["percent"] = False
         _df, _ = runs.plot_pkm_distr_trips(**kwargs)
 
-        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), fig, title))
+        datas.append(SheetData([df, _df], fig, title))
     except Exception as e:
         logging.exception(e)
 
@@ -285,7 +289,7 @@ def get_datas(runs, ref):
         kwargs["percent"] = False
         _df, _ = runs.plot_pkm_distr_trips(**kwargs)
 
-        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), fig, title))
+        datas.append(SheetData([df, _df], fig, title))
 
     except Exception as e:
         logging.exception(e)
@@ -299,7 +303,7 @@ def get_datas(runs, ref):
         kwargs["percent"] = False
         _df, _ = runs.plot_duration_trips(**kwargs)
 
-        datas.append(SheetData(analyse.compare.merge_absolute([df, _df]), fig, title))
+        datas.append(SheetData([df, _df], fig, title))
 
     except Exception as e:
         logging.exception(e)
