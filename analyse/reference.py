@@ -86,7 +86,7 @@ class Reference:
             self.load_astra_run()
 
         if path_bahnhof:
-            self.load_bahnhof(path_bahnhof)
+            self.load_bahnhof_boarding(path_bahnhof)
 
     def get_bahnhof_boarding(self):
         return self.bahnhof_boarding
