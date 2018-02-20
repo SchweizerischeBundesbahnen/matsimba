@@ -268,7 +268,7 @@ class Run:
         df[PKM] = df[DISTANCE] * df[PF]
 
     def prepare(self, ref=None, persons=None, stop_attribute_path=None, route_attribute_path=None,
-                shapefile_attributes=None, zone_attribute="N_Gem", zone_merge_attribute="ID_ALL"):
+                shapefile_attributes=None, zone_attributes=["N_Gem"], zone_merge_attribute"ID_ALL"):
         # self.unload_data()
 
         if stop_attribute_path is not None:
@@ -300,8 +300,8 @@ class Run:
             stations = ref.get_count_stations()
             self.merge_link_id_to_name(stations)
 
-        if shapefile_attributes is not None and zone_attribute is not None:
-            self.merge_trips_zone(shapefile_attributes, zone_attribute, zone_merge_attribute)
+        if shapefile_attributes is not None and zone_attributes is not None:
+            self.merge_trips_zone(shapefile_attributes, zone_attributes, zone_merge_attribute)
 
     def merge_activities_to_zone(self, attirbutes_path, zone_attributes=["N_Gem"], merge_attribute="ID_ALL"):
         zones = pd.read_csv(attirbutes_path, sep=",", encoding="utf-8")
