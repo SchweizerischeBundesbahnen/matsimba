@@ -162,7 +162,7 @@ class RunsList(list):
     def plot_boarding_scatter(self, pt_run, ref_df=None, **kwargs):
         ref_name = pt_run.name
         if ref_df is not None:
-            ref_name = ref_name.columns[0]
+            ref_name = ref_df.columns[0]
         df = self._get(analyse.run.Run.calc_einsteiger, ref_run=pt_run, ref_df=ref_df, **kwargs)
         fig = analyse.plot.plot_scatter(df=df, ref_name=ref_name, **kwargs)
         return df, fig
