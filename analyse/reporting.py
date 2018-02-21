@@ -309,8 +309,15 @@ def get_datas(runs, ref):
         logging.exception(e)
 
     try:
-        title = "Aggregierte Strome"
+        title = "Aggregierte Strome (Gemeinde)"
         df = runs.get_nb_trips(by=[SUBPOPULATION, "from_N_Gem", "to_N_Gem", MAIN_MODE])
+        datas.append(SheetData(df, None, title))
+    except Exception as e:
+        logging.exception(e)
+
+    try:
+        title = "Aggregierte Strome (FID_all)"
+        df = runs.get_nb_trips(by=[SUBPOPULATION, "from_FID_all", "to_FID_all", MAIN_MODE])
         datas.append(SheetData(df, None, title))
     except Exception as e:
         logging.exception(e)
