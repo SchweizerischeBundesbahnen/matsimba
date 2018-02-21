@@ -39,7 +39,7 @@ class Reference:
     pt_run = None
     mzmv_run = None
 
-    def __init__(self, path_astra=None, path_mikro=None, path_pt_legs=None, is_cnb=True, pt_run_name="SIMBA.Bahn.16"):
+    def __init__(self, path_astra=None, path_mikro=None, path_pt_legs=None, path_bahnhof=None, is_cnb=True, pt_run_name="SIMBA.Bahn.16"):
         self.is_cnb = is_cnb
         self.subpopulation = "regular"
         if is_cnb:
@@ -84,6 +84,18 @@ class Reference:
             self.load_pt_run(pt_run_name)
         if self.path_astra:
             self.load_astra_run()
+
+        if path_bahnhof:
+            self.load_bahnhof_boarding(path_bahnhof)
+
+    def get_bahnhof_boarding(self):
+        return self.bahnhof_boarding
+
+    def load_bahnhof_boarding(self, path):
+        ref_df = pd.read_csv(path, sep=";", encoding="utf-8")
+        _df = pd.DataFrame(ref_df.groupby("HS_CODE").EDWV.sum())
+        _df.columns = ["SIMBA.Bahnhof.2016"]
+        self.bahnhof_boarding = _df
 
     def load_mzmv_run(self):
         df = pd.read_csv(self.path_mikro, sep=",", dtype={"link_id": str}, encoding="utf-8")

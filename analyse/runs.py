@@ -134,6 +134,10 @@ class RunsList(list):
         df = self.get_pt_pkm(**kwargs)
         return self._plot(df=df, **kwargs)
 
+    def plot_duration_trips(self, **kwargs):
+        df = self._get(analyse.run.Run.calc_duration_trips, **kwargs)
+        return self._plot(df=df, kind="line", **kwargs)
+
     def plot_pt_dist_distr_trips(self, **kwargs):
         df = self._get(analyse.run.Run.calc_pt_dist_distr_trips, **kwargs)
         return self._plot(df=df, kind="bar", xs_index=analyse.run.distance_labels, **kwargs)
@@ -155,9 +159,12 @@ class RunsList(list):
         fig = analyse.plot.plot_scatter(df=df, ref_name=pt_run.name, **kwargs)
         return df, fig
 
-    def plot_boarding_scatter(self, pt_run, **kwargs):
-        df = self._get(analyse.run.Run.calc_einsteiger, ref_run=pt_run, **kwargs)
-        fig = analyse.plot.plot_scatter(df=df, ref_name=pt_run.name, **kwargs)
+    def plot_boarding_scatter(self, pt_run, ref_df=None, **kwargs):
+        ref_name = pt_run.name
+        if ref_df is not None:
+            ref_name = ref_df.columns[0]
+        df = self._get(analyse.run.Run.calc_einsteiger, ref_run=pt_run, ref_df=ref_df, **kwargs)
+        fig = analyse.plot.plot_scatter(df=df, ref_name=ref_name, **kwargs)
         return df, fig
 
     def get_pt_table(self, pt_run, **kwargs):
