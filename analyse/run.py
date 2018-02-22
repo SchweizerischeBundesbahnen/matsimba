@@ -322,10 +322,10 @@ class Run:
 
         df = trips.merge(acts[zone_attributes], left_on="from_act", right_index=True, how="left")
 
-        zone_attributes_dict = dict(zip(zone_attributes, ["from_"+a for a in zone_attributes]))
+        zone_attributes_dict = dict(zip(zone_attributes, ["from_" + a for a in zone_attributes]))
         df.rename(columns=zone_attributes_dict, inplace=True)
         df = df.merge(acts[zone_attributes], left_on="to_act", right_index=True, how="left")
-        zone_attributes_dict = dict(zip(zone_attributes, ["to_"+a for a in zone_attributes]))
+        zone_attributes_dict = dict(zip(zone_attributes, ["to_" + a for a in zone_attributes]))
         df.rename(columns=zone_attributes_dict, inplace=True)
 
         self.data["journeys"] = df
@@ -444,7 +444,6 @@ class Run:
         else:
             df = self.get_pt_legs()
 
-
         try:
             df = df.merge(right=self.get_stop_attributes(), how="left", left_on="boarding_stop", right_on="stop_id")
             df.rename(columns={"03_Stop_Code": "03_Stop_Code_boarding"}, inplace=True)
@@ -529,11 +528,10 @@ class Run:
 
         return self._do(df, by=CAT_DIST, value=PF, aggfunc="sum", **kwargs)
 
-
     @cache
     def calc_duration_trips(self, **kwargs):
         df = self.get_trips()
-        df["duration"] = (df.end_time - df.start_time)//(60*10)
+        df["duration"] = (df.end_time - df.start_time) // (60 * 10)
         df = self._do(df, value=PF, aggfunc="sum", by=DURATION, **kwargs)
         return df
 
@@ -637,18 +635,22 @@ distance_classes = np.array([-1, 0, 2, 4, 6, 8, 10, 15, 20, 25, 30, 40, 50, 100,
 distance_labels = ["0", "0-2", "2-4", "4-6", "6-8", "8-10", "10-15", "15-20", "20-25", "25-30", "30-40", "40-50",
                    "50-100", "100-150", "150-200", "200-250", "250-300", "300+"]
 
-
-tsys2pt = {'BUS': 'Bahn',
- 'FUN': 'OPNV',
- 'FV - ProduktA': 'Bahn',
- 'FV - ProduktB': 'OPNV',
- 'FV-RV - ProduktC': 'Bahn',
- 'IPV - HGV': 'OPNV',
- 'IPV - Konventionell': 'OPNV',
- 'KB': 'OPNV',
- 'M': 'Bahn',
- 'NFB': 'Bahn',
- 'NFO': 'Bahn',
- 'NFT': 'OPNV',
- 'RV - ProduktD': 'Bahn',
- 'T': 'OPNV'}
+tsys2pt = {'BUS': 'OPNV',
+           'FUN': 'OPNV',
+           'FV - ProduktA': 'Bahn',
+           'RV - ProduktD': 'Bahn',
+           'FV - ProduktB': 'Bahn',
+           'FV-RV - ProduktC': 'Bahn',
+           'IPV - HGV': 'Bahn',
+           'IPV - Konventionell': 'Bahn',
+           'IPV - Regionalverkehr': 'Bahn',
+           'KB': 'OPNV',
+           'M': 'OPNV',
+           "BAT": "OPNV",
+           "FAE": "OPNV",
+           'NFB': 'OPNV',
+           'NFO': 'OPNV',
+           'LB': 'OPNV',
+           'GB': 'OPNV',
+           'NFT': 'OPNV',
+           'T': 'OPNV'}

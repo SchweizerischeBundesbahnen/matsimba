@@ -90,6 +90,19 @@ class Reference:
         if path_bahnhof:
             self.load_bahnhof_boarding(path_bahnhof)
 
+    def merge_trips_mzmv_shapefile(self, shapefile_attribute_path, zone_attributes, merge_attribute="ID_ALL"):
+        zones = pd.read_csv(shapefile_attribute_path, sep=",", encoding="utf-8")
+        zones = zones.set_index(merge_attribute)
+        mzmv = self.get_mzmv_run()
+        df = mzmv.get_trips().merge(zones[zone_attributes], left_on="from_"+merge_attribute, right_index=True, how="left")
+        zone_attributes_dict = dict(zip(zone_attributes, ["from_" + a for a in zone_attributes]))
+        df.rename(columns=zone_attributes_dict, inplace=True)
+
+        df = df.merge(zones[zone_attributes], left_on="to_"+merge_attribute, right_index=True, how="left")
+        zone_attributes_dict = dict(zip(zone_attributes, ["to_" + a for a in zone_attributes]))
+        df.rename(columns=zone_attributes_dict, inplace=True)
+        mzmv.data["journeys"] = df
+
     def get_bahnhof_boarding(self):
         return self.bahnhof_boarding
 
