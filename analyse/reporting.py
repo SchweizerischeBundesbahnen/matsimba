@@ -310,7 +310,7 @@ def get_datas(runs, ref):
 
     try:
         title = "Aggregierte Strome (Gemeinde)"
-        df = runs.get_nb_trips(by=[SUBPOPULATION, "from_N_Gem", "to_N_Gem", MAIN_MODE])
+        df = runs.get_nb_trips(by=[SUBPOPULATION, "from_N_Gem", "to_N_Gem", MAIN_MODE], ref_run=ref.get_mzmv_run())
         datas.append(SheetData(df, None, title))
     except Exception as e:
         logging.exception(e)
@@ -318,7 +318,7 @@ def get_datas(runs, ref):
     try:
         title = "Aggregierte Strome (Oberbezirke)"
         att = "FID_to_Names_OBERBEZIRK_NAME"
-        df = runs.get_nb_trips(by=[SUBPOPULATION, "from_"+att, "to_"+att, MAIN_MODE])
+        df = runs.get_nb_trips(by=[SUBPOPULATION, "from_"+att, "to_"+att, MAIN_MODE], ref_run=ref.get_mzmv_run())
         datas.append(SheetData(df, None, title))
     except Exception as e:
         logging.exception(e)
