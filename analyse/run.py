@@ -529,6 +529,7 @@ class Run:
 
         return self._do(df, by=CAT_DIST, value=PF, aggfunc="sum", **kwargs)
 
+
     @cache
     def calc_duration_trips(self, **kwargs):
         df = self.get_trips()
@@ -541,6 +542,46 @@ class Run:
         df = self.get_linkvolumes()
         df = self._do(df, value=VOLUME, aggfunc="sum", by=NAME, **kwargs) * self.scale_factor
         return df
+
+    def get_umstiege(self):
+        def get_count(data):
+            def get_umstieg(_data, name):
+                if len(_data) <= 1:
+                    return "%s_direkt" % name
+                elif len(_data) == 2:
+                    return "%i_Umstieg_%s" % (len(_data) - 1, name)
+                elif len(_data) < 6:
+                    return "%i_Umstiege_%s" % (len(_data) - 1, name)
+                else:
+                    return ">4_Umstiege_%s" % name
+
+            _data = data.values
+            # Only Bahn
+            if "Bahn" in _data and "OPNV" not in _data:
+                return get_umstieg(_data, "Bahn")
+            # Only OPNV
+            elif "Bahn" not in _data and "OPNV" in _data:
+                return get_umstieg(_data, "OPNV")
+            # OeV
+            else:
+                return get_umstieg(_data, "OeV")
+
+        df = self.get_pt_legs()
+
+        df["Umstieg"] = df["08_TSysName"].apply(lambda x: tsys2pt[x])
+        return self._do(df, by=trip_id, value="Umstieg", aggfunc=get_count)
+
+    @cache
+    def calc_pt_umstiege(self, only_train=False, **kwargs):
+        UMSTIEG = "Umstieg"
+        df = self.get_trips()
+        if UMSTIEG not in df.columns:
+            df_trips = self.get_umstiege()
+            df = df.merge(df_trips, left_on=trip_id, right_index=True, how="right")
+
+        if only_train:
+            df = df[df[UMSTIEG].str.contains("Bahn")]
+        return self._do(df, by=UMSTIEG, aggfunc="sum", **kwargs)
 
     @cache
     def calc_pt_uh(self, simba_only=False, **kwargs):
@@ -595,3 +636,19 @@ class Run:
 distance_classes = np.array([-1, 0, 2, 4, 6, 8, 10, 15, 20, 25, 30, 40, 50, 100, 150, 200, 250, 300, np.inf]) * 1000.0
 distance_labels = ["0", "0-2", "2-4", "4-6", "6-8", "8-10", "10-15", "15-20", "20-25", "25-30", "30-40", "40-50",
                    "50-100", "100-150", "150-200", "200-250", "250-300", "300+"]
+
+
+tsys2pt = {'BUS': 'Bahn',
+ 'FUN': 'OPNV',
+ 'FV - ProduktA': 'Bahn',
+ 'FV - ProduktB': 'OPNV',
+ 'FV-RV - ProduktC': 'Bahn',
+ 'IPV - HGV': 'OPNV',
+ 'IPV - Konventionell': 'OPNV',
+ 'KB': 'OPNV',
+ 'M': 'Bahn',
+ 'NFB': 'Bahn',
+ 'NFO': 'Bahn',
+ 'NFT': 'OPNV',
+ 'RV - ProduktD': 'Bahn',
+ 'T': 'OPNV'}
