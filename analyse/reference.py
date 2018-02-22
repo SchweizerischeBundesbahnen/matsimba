@@ -94,7 +94,10 @@ class Reference:
         zones = pd.read_csv(shapefile_attribute_path, sep=",", encoding="utf-8")
         zones = zones.set_index(merge_attribute)
         mzmv = self.get_mzmv_run()
-        df = mzmv.get_trips().merge(zones[zone_attributes], left_on="from_"+merge_attribute, right_index=True, how="left")
+        df = mzmv.get_trips()
+        df["from_"+merge_attribute] = df["from_"+merge_attribute].apply(int)
+        df["to_"+merge_attribute] = df["to_"+merge_attribute].apply(int)
+        df = df.merge(zones[zone_attributes], left_on="from_"+merge_attribute, right_index=True, how="left")
         zone_attributes_dict = dict(zip(zone_attributes, ["from_" + a for a in zone_attributes]))
         df.rename(columns=zone_attributes_dict, inplace=True)
 
