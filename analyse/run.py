@@ -573,6 +573,7 @@ class Run:
     def calc_pt_umstiege(self, only_train=False, **kwargs):
         UMSTIEG = "Umstieg"
         df = self.get_trips()
+        df = df[df[MAIN_MODE] == "pt"]
         if UMSTIEG not in df.columns:
             df_trips = self.get_umstiege()
             df = df.merge(df_trips, left_on=trip_id, right_index=True, how="right")
