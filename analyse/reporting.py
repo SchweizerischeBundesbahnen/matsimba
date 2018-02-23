@@ -318,7 +318,7 @@ def get_datas(runs, ref):
     try:
         title = "Aggregierte Strome (Oberbezirke)"
         att = "FID_to_Names_OBERBEZIRK_NAME"
-        df = runs.get_nb_trips(by=[SUBPOPULATION, "from_"+att, "to_"+att, MAIN_MODE], ref_run=ref.get_mzmv_run())
+        df = runs.get_nb_trips(by=[SUBPOPULATION, "from_" + att, "to_" + att, MAIN_MODE], ref_run=ref.get_mzmv_run())
         datas.append(SheetData(df, None, title))
     except Exception as e:
         logging.exception(e)
@@ -406,32 +406,35 @@ def get_datas(runs, ref):
 
     try:
         title = r"OEV Umsteigehaufigkeit - PF"
-        df, fig = runs.plot_pt_umstiege(value=PF, percent=True, only_train=False, ref_run=ref.get_mzmv_run(), title=title)
+        df, fig = runs.plot_pt_umstiege(value=PF, percent=True, only_train=False, ref_run=ref.get_mzmv_run(),
+                                        title=title, foreach=[SUBPOPULATION])
         datas.append(SheetData(df, fig, title))
     except Exception as e:
         logging.exception(e)
 
     try:
         title = r"OEV Umsteigehaufigkeit - PKM"
-        df, fig = runs.plot_pt_umstiege(value=PKM, percent=True, only_train=False, ref_run=ref.get_mzmv_run(), title=title)
+        df, fig = runs.plot_pt_umstiege(value=PKM, percent=True, only_train=False, ref_run=ref.get_mzmv_run(),
+                                        title=title, foreach=[SUBPOPULATION])
         datas.append(SheetData(df, fig, title))
     except Exception as e:
         logging.exception(e)
 
     try:
         title = r"Bahn Umsteigehaufigkeit - PF"
-        df, fig = runs.plot_pt_umstiege(value=PF, percent=True, only_train=True, ref_run=ref.get_mzmv_run(), title=title)
+        df, fig = runs.plot_pt_umstiege(value=PF, percent=True, only_train=True, ref_run=ref.get_mzmv_run(),
+                                        title=title, foreach=[SUBPOPULATION])
         datas.append(SheetData(df, fig, title))
     except Exception as e:
         logging.exception(e)
 
     try:
         title = r"Bahn Umsteigehaufigkeit - PKM"
-        df, fig = runs.plot_pt_umstiege(value=PKM, percent=True, only_train=True, ref_run=ref.get_mzmv_run(), title=title)
+        df, fig = runs.plot_pt_umstiege(value=PKM, percent=True, only_train=True, ref_run=ref.get_mzmv_run(),
+                                        title=title, foreach=[SUBPOPULATION])
         datas.append(SheetData(df, fig, title))
     except Exception as e:
         logging.exception(e)
-
 
     try:
         title = r"Bahn Wege - Distanz Verteilung (SBF)"
