@@ -541,7 +541,7 @@ class Run:
         df = self._do(df, value=VOLUME, aggfunc="sum", by=NAME, **kwargs) * self.scale_factor
         return df
 
-    def get_umstiege(self):
+    def get_umstiege(self, only_train=False, var=UMSTIEG):
         def get_count(data):
             def get_umstieg(_data, name):
                 if len(_data) <= 1:
@@ -564,23 +564,49 @@ class Run:
             else:
                 return get_umstieg(_data, "OeV")
 
-        df = self.get_pt_legs()
+        def get_count_train(data):
+            _data = data.values
+            # Only Bahn
+            name = "Bahn"
+            if "Bahn" in _data:
+                n = list(_data).count("Bahn")
+                if n <= 1:
+                    return "%s_direkt" % name
+                elif n == 2:
+                    return "%i_Umstieg_%s" % (n - 1, name)
+                elif n < 6:
+                    return "%i_Umstiege_%s" % (n - 1, name)
+                else:
+                    return ">4_Umstiege_%s" % name
+            else:
+                return "keine_Bahnetappe"
 
-        df["Umstieg"] = df["08_TSysName"].apply(lambda x: tsys2pt[x])
-        return self._do(df, by=trip_id, value="Umstieg", aggfunc=get_count)
+        df = self.get_pt_legs()
+        df[var] = df["08_TSysName"].apply(lambda x: tsys2pt[x])
+
+        if only_train:
+            return self._do(df, by=trip_id, value=var, aggfunc=get_count_train)
+        else:
+            return self._do(df, by=trip_id, value=var, aggfunc=get_count)
 
     @cache
     def calc_pt_umstiege(self, only_train=False, **kwargs):
-        UMSTIEG = "Umstieg"
         df = self.get_trips()
         df = df[df[MAIN_MODE] == "pt"]
-        if UMSTIEG not in df.columns:
-            df_trips = self.get_umstiege()
+        var = UMSTIEG
+        if not only_train and UMSTIEG not in df.columns:
+            df_trips = self.get_umstiege(only_train=False, var=UMSTIEG)
+            df = df.merge(df_trips, left_on=trip_id, right_index=True, how="right")
+
+        if only_train and UMSTIEG_BAHN not in df.columns:
+            df_trips = self.get_umstiege(only_train=True, var=UMSTIEG_BAHN)
             df = df.merge(df_trips, left_on=trip_id, right_index=True, how="right")
 
         if only_train:
-            df = df[df[UMSTIEG].str.contains("Bahn")]
-        return self._do(df, by=UMSTIEG, aggfunc="sum", **kwargs)
+            var = UMSTIEG_BAHN
+            df = df[np.logical_not(df[UMSTIEG_BAHN].str.contains("keine"))]
+
+        return self._do(df, by=var, aggfunc="sum", **kwargs)
 
     @cache
     def calc_pt_uh(self, simba_only=False, **kwargs):
