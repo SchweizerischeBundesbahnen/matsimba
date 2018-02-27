@@ -5,27 +5,34 @@
 
 pipeline {
     agent { label 'java' }
-//    tools {
-//        maven 'Apache Maven 3.3'
-//        jdk 'Oracle JDK 1.8 64-Bit'
-//    }
+    tools {
+        maven 'Apache Maven 3.3'
+        jdk 'Oracle JDK 1.8 64-Bit'
+    }
     stages {
-        stage('When on develop, Deploy Snapshot and analyze for sonar') {
+         stage('Install & Unit Tests'){
+             steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                        sh """
+                        pip install --user virtualenv
+                        $HOME/.local/bin/virtualenv ENV
+                        source ENV/bin/activate
+                        pip install -r requirements.txt -U
+                        nose2 --plugin nose2.plugins.junitxml --junit-xml
+                        """
+                }
+            }
+        }
+
+        stage('When on develop, do nothing') {
             when {
                 branch 'develop'
             }
             steps {
-                withSonarQubeEnv('Sonar SBB CFF FFS AG') {
-                    sh 'mvn -B clean deploy'
-                }
+                sh 'ls'
             }
         }
-        stage('Unit Tests') {
-            steps {
-                sh 'mvn -B clean compile test'
-                junit '**/target/surefire-reports/*.xml'
-            }
-        }
+
         stage('When on master, Release: Adapt poms, tag, deploy and push.') {
             when {
                 branch 'master'
@@ -35,4 +42,11 @@ pipeline {
             }
         }
     }
+
+        post {
+        always {
+            junit '*.xml'
+        }
+    }
+
 }

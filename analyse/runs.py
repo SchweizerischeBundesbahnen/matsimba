@@ -154,6 +154,10 @@ class RunsList(list):
         df = self._get(analyse.run.Run.calc_pt_uh, **kwargs)
         return self._plot(df=df, **kwargs)
 
+    def plot_pt_umstiege(self, **kwargs):
+        df = self._get(analyse.run.Run.calc_pt_umstiege, **kwargs)
+        return self._plot(df=df, **kwargs)
+
     def plot_pt_skims(self, name, pt_run, **kwargs):
         df = self._get(analyse.run.Run.get_skim_simba, name=name, ref_run=pt_run, **kwargs)
         fig = analyse.plot.plot_scatter(df=df, ref_name=pt_run.name, **kwargs)

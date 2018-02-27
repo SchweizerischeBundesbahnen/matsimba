@@ -39,7 +39,8 @@ class Reference:
     pt_run = None
     mzmv_run = None
 
-    def __init__(self, path_astra=None, path_mikro=None, path_pt_legs=None, path_bahnhof=None, is_cnb=True, pt_run_name="SIMBA.Bahn.16"):
+    def __init__(self, path_astra=None, path_mikro=None, path_pt_legs=None, path_bahnhof=None, is_cnb=True,
+                 pt_run_name="SIMBA.Bahn.Modell.16"):
         self.is_cnb = is_cnb
         self.subpopulation = "regular"
         if is_cnb:
@@ -80,6 +81,7 @@ class Reference:
 
         if self.path_mikro:
             self.load_mzmv_run()
+
         if self.path_pt_legs:
             self.load_pt_run(pt_run_name)
         if self.path_astra:
@@ -88,21 +90,37 @@ class Reference:
         if path_bahnhof:
             self.load_bahnhof_boarding(path_bahnhof)
 
+    def merge_trips_mzmv_shapefile(self, shapefile_attribute_path, zone_attributes, merge_attribute="ID_ALL"):
+        zones = pd.read_csv(shapefile_attribute_path, sep=",", encoding="utf-8")
+        zones = zones.set_index(merge_attribute)
+        mzmv = self.get_mzmv_run()
+        df = mzmv.get_trips()
+        df["from_"+merge_attribute] = df["from_"+merge_attribute].apply(int)
+        df["to_"+merge_attribute] = df["to_"+merge_attribute].apply(int)
+        df = df.merge(zones[zone_attributes], left_on="from_"+merge_attribute, right_index=True, how="left")
+        zone_attributes_dict = dict(zip(zone_attributes, ["from_" + a for a in zone_attributes]))
+        df.rename(columns=zone_attributes_dict, inplace=True)
+
+        df = df.merge(zones[zone_attributes], left_on="to_"+merge_attribute, right_index=True, how="left")
+        zone_attributes_dict = dict(zip(zone_attributes, ["to_" + a for a in zone_attributes]))
+        df.rename(columns=zone_attributes_dict, inplace=True)
+        mzmv.data["journeys"] = df
+
     def get_bahnhof_boarding(self):
         return self.bahnhof_boarding
 
     def load_bahnhof_boarding(self, path):
         ref_df = pd.read_csv(path, sep=";", encoding="utf-8")
         _df = pd.DataFrame(ref_df.groupby("HS_CODE").EDWV.sum())
-        _df.columns = ["SIMBA.Bahnhof.2016"]
+        _df.columns = ["SIMBA.Bahn.Bahnhof.16"]
         self.bahnhof_boarding = _df
 
     def load_mzmv_run(self):
-        df = pd.read_csv(self.path_mikro, sep=",", dtype={"link_id": str}, encoding="utf-8")
+        df = pd.read_csv(self.path_mikro, sep=";", dtype={"link_id": str}, encoding="utf-8")
         df[SUBPOPULATION] = self.subpopulation
         df = df.rename(columns={u'Weglaenge': "distance"})
         df = df.rename(columns={u'Pkm': "PKM"})
-        df = df.rename(columns={ u"Profession": r"work: employment status" })
+        df = df.rename(columns={u"Profession": r"work: employment status"})
         df.distance = df.distance * 1000.0
 
         if self.is_cnb:
@@ -112,6 +130,7 @@ class Reference:
 
         mzmv = analyse.run.Run(name="mzmv")
         mzmv.data["journeys"] = df
+
         self.mzmv = mzmv
 
     def get_mzmv_run(self):
@@ -130,8 +149,8 @@ class Reference:
                                  "NACHHPUNKTNR": ALIGHTING_STOP,
                                  r"OEVVSYS\NAME": r"08_TSysName",
                                  "FAHRZEITPROFIL\LINIENROUTE\LINIE\BETREIBER\NAME": "06_OperatorName",
-                                 #"STARTFZPELEM\LINIENROUTENELEMENT\HALTEPUNKT\HALTESTELLENBEREICH\HALTESTELLE\CODE": "03_Stop_Code_boarding",
-                                 #"ENDFZPELEM\LINIENROUTENELEMENT\HALTEPUNKT\HALTESTELLENBEREICH\HALTESTELLE\CODE": "03_Stop_Code_alighting"
+                                 # "STARTFZPELEM\LINIENROUTENELEMENT\HALTEPUNKT\HALTESTELLENBEREICH\HALTESTELLE\CODE": "03_Stop_Code_boarding",
+                                 # "ENDFZPELEM\LINIENROUTENELEMENT\HALTEPUNKT\HALTESTELLENBEREICH\HALTESTELLE\CODE": "03_Stop_Code_alighting"
                                  }, inplace=True)
 
         teilwege = teilwege[teilwege.boarding_stop.notnull()]
