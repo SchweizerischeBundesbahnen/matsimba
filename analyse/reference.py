@@ -39,11 +39,12 @@ class Reference:
     pt_run = None
     mzmv_run = None
 
-    def __init__(self, path_astra=None, path_mikro=None, path_pt_legs=None, path_bahnhof=None, is_cnb=True,
+    def __init__(self, path_astra=None, path_mikro=None, path_pt_legs=None, path_bahnhof=None, is_cnb=False, is_bbz=False,
                  pt_run_name="SIMBA.Bahn.Modell.16"):
         self.is_cnb = is_cnb
+        self.is_bbz = is_bbz
         self.subpopulation = "regular"
-        if is_cnb:
+        if is_cnb or is_bbz:
             self.subpopulation = "regular_inAct"
 
         self.path_astra = path_astra
@@ -125,6 +126,8 @@ class Reference:
 
         if self.is_cnb:
             df = pd.DataFrame(df[df.istCNB])
+        elif self.is_bbz:
+            df = pd.DataFrame(df[df.istBBZ])
         else:
             df = pd.DataFrame(df[df.istCH])
 
