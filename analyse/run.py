@@ -322,10 +322,10 @@ class Run:
 
         df = trips.merge(acts[zone_attributes], left_on="from_act", right_index=True, how="left")
 
-        zone_attributes_dict = dict(zip(zone_attributes, ["from_"+a for a in zone_attributes]))
+        zone_attributes_dict = dict(zip(zone_attributes, ["from_" + a for a in zone_attributes]))
         df.rename(columns=zone_attributes_dict, inplace=True)
         df = df.merge(acts[zone_attributes], left_on="to_act", right_index=True, how="left")
-        zone_attributes_dict = dict(zip(zone_attributes, ["to_"+a for a in zone_attributes]))
+        zone_attributes_dict = dict(zip(zone_attributes, ["to_" + a for a in zone_attributes]))
         df.rename(columns=zone_attributes_dict, inplace=True)
 
         self.data["journeys"] = df
@@ -444,7 +444,6 @@ class Run:
         else:
             df = self.get_pt_legs()
 
-
         try:
             df = df.merge(right=self.get_stop_attributes(), how="left", left_on="boarding_stop", right_on="stop_id")
             df.rename(columns={"03_Stop_Code": "03_Stop_Code_boarding"}, inplace=True)
@@ -532,7 +531,7 @@ class Run:
     @cache
     def calc_duration_trips(self, **kwargs):
         df = self.get_trips()
-        df["duration"] = (df.end_time - df.start_time)//(60*10)
+        df["duration"] = (df.end_time - df.start_time) // (60 * 10)
         df = self._do(df, value=PF, aggfunc="sum", by=DURATION, **kwargs)
         return df
 
@@ -541,6 +540,73 @@ class Run:
         df = self.get_linkvolumes()
         df = self._do(df, value=VOLUME, aggfunc="sum", by=NAME, **kwargs) * self.scale_factor
         return df
+
+    def get_umstiege(self, only_train=False, var=UMSTIEG):
+        def get_count(data):
+            def get_umstieg(_data, name):
+                if len(_data) <= 1:
+                    return "%s_direkt" % name
+                elif len(_data) == 2:
+                    return "%i_Umstieg_%s" % (len(_data) - 1, name)
+                elif len(_data) < 6:
+                    return "%i_Umstiege_%s" % (len(_data) - 1, name)
+                else:
+                    return ">4_Umstiege_%s" % name
+
+            _data = data.values
+            # Only Bahn
+            if "Bahn" in _data and "OPNV" not in _data:
+                return get_umstieg(_data, "Bahn")
+            # Only OPNV
+            elif "Bahn" not in _data and "OPNV" in _data:
+                return get_umstieg(_data, "OPNV")
+            # OeV
+            else:
+                return get_umstieg(_data, "OeV")
+
+        def get_count_train(data):
+            _data = data.values
+            # Only Bahn
+            name = "Bahn"
+            if "Bahn" in _data:
+                n = list(_data).count("Bahn")
+                if n <= 1:
+                    return "%s_direkt" % name
+                elif n == 2:
+                    return "%i_Umstieg_%s" % (n - 1, name)
+                elif n < 6:
+                    return "%i_Umstiege_%s" % (n - 1, name)
+                else:
+                    return ">4_Umstiege_%s" % name
+            else:
+                return "keine_Bahnetappe"
+
+        df = self.get_pt_legs()
+        df[var] = df["08_TSysName"].apply(lambda x: tsys2pt[x])
+
+        if only_train:
+            return self._do(df, by=trip_id, value=var, aggfunc=get_count_train)
+        else:
+            return self._do(df, by=trip_id, value=var, aggfunc=get_count)
+
+    @cache
+    def calc_pt_umstiege(self, only_train=False, **kwargs):
+        df = self.get_trips()
+        df = df[df[MAIN_MODE] == "pt"]
+        var = UMSTIEG
+        if not only_train and UMSTIEG not in df.columns:
+            df_trips = self.get_umstiege(only_train=False, var=UMSTIEG)
+            df = df.merge(df_trips, left_on=trip_id, right_index=True, how="right")
+
+        if only_train and UMSTIEG_BAHN not in df.columns:
+            df_trips = self.get_umstiege(only_train=True, var=UMSTIEG_BAHN)
+            df = df.merge(df_trips, left_on=trip_id, right_index=True, how="right")
+
+        if only_train:
+            var = UMSTIEG_BAHN
+            df = df[np.logical_not(df[UMSTIEG_BAHN].str.contains("keine"))]
+
+        return self._do(df, by=var, aggfunc="sum", **kwargs)
 
     @cache
     def calc_pt_uh(self, simba_only=False, **kwargs):
@@ -595,3 +661,23 @@ class Run:
 distance_classes = np.array([-1, 0, 2, 4, 6, 8, 10, 15, 20, 25, 30, 40, 50, 100, 150, 200, 250, 300, np.inf]) * 1000.0
 distance_labels = ["0", "0-2", "2-4", "4-6", "6-8", "8-10", "10-15", "15-20", "20-25", "25-30", "30-40", "40-50",
                    "50-100", "100-150", "150-200", "200-250", "250-300", "300+"]
+
+tsys2pt = {'BUS': 'OPNV',
+           'FUN': 'OPNV',
+           'FV - ProduktA': 'Bahn',
+           'RV - ProduktD': 'Bahn',
+           'FV - ProduktB': 'Bahn',
+           'FV-RV - ProduktC': 'Bahn',
+           'IPV - HGV': 'Bahn',
+           'IPV - Konventionell': 'Bahn',
+           'IPV - Regionalverkehr': 'Bahn',
+           'KB': 'OPNV',
+           'M': 'OPNV',
+           "BAT": "OPNV",
+           "FAE": "OPNV",
+           'NFB': 'OPNV',
+           'NFO': 'OPNV',
+           'LB': 'OPNV',
+           'GB': 'OPNV',
+           'NFT': 'OPNV',
+           'T': 'OPNV'}
