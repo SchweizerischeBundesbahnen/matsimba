@@ -62,15 +62,15 @@ def get_persons_from_xml(folder, attributes_file=None, persons_file=None):
             return pd.DataFrame.from_dict(persons)
 
 
-def get_attributes(path, index_name="stop_id"):
+def get_attributes(path, index_name):
     with gzip.open(path) as xml_file:
-        objectAttributes = etree.parse(xml_file).getroot()
+        root = etree.parse(xml_file).getroot()
         _dict = {}
-        for _object in objectAttributes:
-            stop_id = _object.attrib["id"]
-            _dict[stop_id] = {}
-            for attribute in _object:
-                _dict[stop_id][attribute.attrib["name"]] = attribute.text
+        for _object in root.iter(index_name):
+            object_id = _object.attrib["id"]
+            _dict[object_id] = {}
+            for attribute in _object.iter("attributes"):
+                _dict[object_id][attribute.attrib["name"]] = attribute.text
 
     df = pd.DataFrame.from_dict(_dict, orient="index")
     df.index.name = index_name
