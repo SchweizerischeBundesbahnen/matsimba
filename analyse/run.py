@@ -216,13 +216,12 @@ class Run:
         return df
 
     def load_stop_attributes(self, path):
-        df = analyse.reader.get_attributes(path, "stopFacility")
+        df = analyse.reader.get_attributes(path, STOP_ID, "stopFacility")
         df[STOP_ID] = df[STOP_ID].map(float)
-        print(df)
         self.data["stop_attributes"] = df
 
     def load_route_attributes(self, path):
-        self.data["route_attributes"] = analyse.reader.get_attributes(path, "transitRoute")
+        self.data["route_attributes"] = analyse.reader.get_attributes(path, ROUTE_ID, "transitRoute")
 
     def load_stop_points(self):
         self.data["stop_points"] = analyse.reader.get_stops(self.path)
