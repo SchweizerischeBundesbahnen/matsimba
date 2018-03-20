@@ -273,8 +273,6 @@ class Run:
 
         if transit_schedule is not None:
             self.load_stop_attributes(transit_schedule)
-
-        if transit_schedule is not None:
             self.load_route_attributes(transit_schedule)
 
         if persons is not None:

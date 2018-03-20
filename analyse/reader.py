@@ -69,7 +69,7 @@ def get_attributes(path, index_name):
         for _object in root.iter(index_name):
             object_id = _object.attrib["id"]
             _dict[object_id] = {}
-            for attribute in _object.iter("attributes"):
+            for attribute in _object.iter("attribute"):
                 _dict[object_id][attribute.attrib["name"]] = attribute.text
 
     df = pd.DataFrame.from_dict(_dict, orient="index")
