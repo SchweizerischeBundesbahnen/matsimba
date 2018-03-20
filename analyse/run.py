@@ -267,15 +267,15 @@ class Run:
         df[PF] = self.scale_factor
         df[PKM] = df[DISTANCE] * df[PF]
 
-    def prepare(self, ref=None, persons=None, stop_attribute_path=None, route_attribute_path=None,
+    def prepare(self, ref=None, persons=None, transitSchedule=None,
                 shapefile_attributes=None, zone_attributes=["N_Gem"], zone_merge_attribute="ID_ALL"):
         # self.unload_data()
 
-        if stop_attribute_path is not None:
-            self.load_stop_attributes(stop_attribute_path)
+        if transitSchedule is not None:
+            self.load_stop_attributes(transitSchedule)
 
-        if route_attribute_path is not None:
-            self.load_route_attributes(route_attribute_path)
+        if transitSchedule is not None:
+            self.load_route_attributes(transitSchedule)
 
         if persons is not None:
             logging.info("Using a special dataframe for persons")
