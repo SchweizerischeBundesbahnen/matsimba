@@ -71,6 +71,7 @@ def get_attributes(path, index_name):
             _dict[object_id] = {}
             for attribute in _object.iter("attribute"):
                 _dict[object_id][attribute.attrib["name"]] = attribute.text
+                print(attribute.text)
 
     df = pd.DataFrame.from_dict(_dict, orient="index")
     df.index.name = index_name
