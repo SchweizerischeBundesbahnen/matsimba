@@ -443,7 +443,7 @@ class Run:
             df = self.get_pt_legs()
 
         try:
-            df = df.merge(right=self.get_stop_attributes(), how="left", left_on="boarding_stop", right_on="stopFacility")
+            df = df.merge(right=self.get_stop_attributes(), how="left", left_on="boarding_stop", right_on=STOP_ID)
             df.rename(columns={"03_Stop_Code": "03_Stop_Code_boarding"}, inplace=True)
         except KeyError as e:
             logging.warn(e)
@@ -488,7 +488,7 @@ class Run:
             return df
         try:
             n = len(df)
-            df = df.merge(right=self.get_route_attributes(), how="left", left_on="route", right_on="transitRoute")
+            df = df.merge(right=self.get_route_attributes(), how="left", left_on="route", right_on=ROUTE_ID)
             assert n == len(df), "Size of DF changed"
             self.route_merged = True
         except KeyError as e:
