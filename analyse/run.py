@@ -139,9 +139,9 @@ class Run:
             df[ALIGHTING_STOP] = df[ALIGHTING_STOP].apply(float)
 
             stop_attributes = self.get_stop_attributes()
-            stops_in_perimeter = stop_attributes[stop_attributes[self.name_perimeter_attribute] == "1"][STOP_ID].map(
+            stops_in_perimeter = stop_attributes[stop_attributes[self.name_perimeter_attribute] == "1"][STOP_FACILITY].map(
                 float).unique()
-            stops_in_fq = stop_attributes[stop_attributes[FQ_RELEVANT] == "1"][STOP_ID].map(float).unique()
+            stops_in_fq = stop_attributes[stop_attributes[FQ_RELEVANT] == "1"][STOP_FACILITY].map(float).unique()
 
             if IS_SIMBA not in df.columns:
                 df = self.merge_route(df)
@@ -216,12 +216,12 @@ class Run:
         return df
 
     def load_stop_attributes(self, path):
-        df = analyse.reader.get_attributes(path, STOP_ID)
-        df[STOP_ID] = df[STOP_ID].map(float)
+        df = analyse.reader.get_attributes(path, STOP_FACILITY)
+        df[STOP_FACILITY] = df[STOP_FACILITY].map(float)
         self.data["stop_attributes"] = df
 
     def load_route_attributes(self, path):
-        self.data["route_attributes"] = analyse.reader.get_attributes(path, ROUTE_ID)
+        self.data["route_attributes"] = analyse.reader.get_attributes(path, TRANSIT_ROUTE)
 
     def load_stop_points(self):
         self.data["stop_points"] = analyse.reader.get_stops(self.path)
@@ -443,7 +443,7 @@ class Run:
             df = self.get_pt_legs()
 
         try:
-            df = df.merge(right=self.get_stop_attributes(), how="left", left_on="boarding_stop", right_on=STOP_ID)
+            df = df.merge(right=self.get_stop_attributes(), how="left", left_on="boarding_stop", right_on=STOP_FACILITY)
             df.rename(columns={"03_Stop_Code": "03_Stop_Code_boarding"}, inplace=True)
         except KeyError as e:
             logging.warn(e)
@@ -488,7 +488,7 @@ class Run:
             return df
         try:
             n = len(df)
-            df = df.merge(right=self.get_route_attributes(), how="left", left_on="route", right_on=ROUTE_ID)
+            df = df.merge(right=self.get_route_attributes(), how="left", left_on="route", right_on=TRANSIT_ROUTE)
             assert n == len(df), "Size of DF changed"
             self.route_merged = True
         except KeyError as e:
