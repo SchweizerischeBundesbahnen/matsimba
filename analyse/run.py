@@ -679,4 +679,4 @@ tsys2pt = {'BUS': 'OPNV',
            'GB': 'OPNV',
            'NFT': 'OPNV',
            'T': 'OPNV',
-           'NaN': 'n.a.'}
+           'nan': 'n.a.'}
