@@ -580,12 +580,13 @@ class Run:
                 return "keine_Bahnetappe"
 
         df = self.get_pt_legs()
-        df[var] = df["08_TSysName"].apply(lambda x: tsys2pt[x])
+        filtered_df = df[df["08_TSysName"].notnull()]
+        filtered_df[var] = filtered_df["08_TSysName"].apply(lambda x: tsys2pt[x])
 
         if only_train:
-            return self._do(df, by=trip_id, value=var, aggfunc=get_count_train)
+            return self._do(filtered_df, by=trip_id, value=var, aggfunc=get_count_train)
         else:
-            return self._do(df, by=trip_id, value=var, aggfunc=get_count)
+            return self._do(filtered_df, by=trip_id, value=var, aggfunc=get_count)
 
     @cache
     def calc_pt_umstiege(self, only_train=False, **kwargs):
@@ -678,5 +679,4 @@ tsys2pt = {'BUS': 'OPNV',
            'LB': 'OPNV',
            'GB': 'OPNV',
            'NFT': 'OPNV',
-           'T': 'OPNV',
-           'nan': 'n.a.'}
+           'T': 'OPNV'}
