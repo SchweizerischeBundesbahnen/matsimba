@@ -104,8 +104,8 @@ def set_simba_binnenverkehr_fq_attributes(df_legs, stop_ids_perimeter, stop_ids_
 def get_station_to_station_skims(df_legs, stop_attributes):
     logging.info("getting station-to-station-skims")
     stop_code_att = "03_Stop_Code"
-    stop_attributes = stop_attributes[[STOP_ID, stop_code_att]]
-    stop_attributes.set_index(STOP_ID, inplace=True)
+    stop_attributes = stop_attributes[[STOP_FACILITY, stop_code_att]]
+    stop_attributes.set_index(STOP_FACILITY, inplace=True)
 
     df_legs = df_legs.merge(stop_attributes, left_on="first_stop", right_index=True)
     df_legs.rename(columns={stop_code_att: "first_stop_code"}, inplace=True)

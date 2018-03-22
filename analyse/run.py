@@ -139,9 +139,9 @@ class Run:
             df[ALIGHTING_STOP] = df[ALIGHTING_STOP].apply(float)
 
             stop_attributes = self.get_stop_attributes()
-            stops_in_perimeter = stop_attributes[stop_attributes[self.name_perimeter_attribute] == "1"][STOP_ID].map(
+            stops_in_perimeter = stop_attributes[stop_attributes[self.name_perimeter_attribute] == "1"][STOP_FACILITY].map(
                 float).unique()
-            stops_in_fq = stop_attributes[stop_attributes[FQ_RELEVANT] == "1"][STOP_ID].map(float).unique()
+            stops_in_fq = stop_attributes[stop_attributes[FQ_RELEVANT] == "1"][STOP_FACILITY].map(float).unique()
 
             if IS_SIMBA not in df.columns:
                 df = self.merge_route(df)
@@ -216,12 +216,12 @@ class Run:
         return df
 
     def load_stop_attributes(self, path):
-        df = analyse.reader.get_attributes(path)
-        df[STOP_ID] = df[STOP_ID].map(float)
+        df = analyse.reader.get_attributes(path, STOP_FACILITY)
+        df[STOP_FACILITY] = df[STOP_FACILITY].map(float)
         self.data["stop_attributes"] = df
 
     def load_route_attributes(self, path):
-        self.data["route_attributes"] = analyse.reader.get_attributes(path, "route_id")
+        self.data["route_attributes"] = analyse.reader.get_attributes(path, TRANSIT_ROUTE)
 
     def load_stop_points(self):
         self.data["stop_points"] = analyse.reader.get_stops(self.path)
@@ -267,15 +267,13 @@ class Run:
         df[PF] = self.scale_factor
         df[PKM] = df[DISTANCE] * df[PF]
 
-    def prepare(self, ref=None, persons=None, stop_attribute_path=None, route_attribute_path=None,
+    def prepare(self, ref=None, persons=None, transit_schedule=None,
                 shapefile_attributes=None, zone_attributes=["N_Gem"], zone_merge_attribute="ID_ALL"):
         # self.unload_data()
 
-        if stop_attribute_path is not None:
-            self.load_stop_attributes(stop_attribute_path)
-
-        if route_attribute_path is not None:
-            self.load_route_attributes(route_attribute_path)
+        if transit_schedule is not None:
+            self.load_stop_attributes(transit_schedule)
+            self.load_route_attributes(transit_schedule)
 
         if persons is not None:
             logging.info("Using a special dataframe for persons")
@@ -445,7 +443,7 @@ class Run:
             df = self.get_pt_legs()
 
         try:
-            df = df.merge(right=self.get_stop_attributes(), how="left", left_on="boarding_stop", right_on="stop_id")
+            df = df.merge(right=self.get_stop_attributes(), how="left", left_on="boarding_stop", right_on=STOP_FACILITY)
             df.rename(columns={"03_Stop_Code": "03_Stop_Code_boarding"}, inplace=True)
         except KeyError as e:
             logging.warn(e)
@@ -490,7 +488,7 @@ class Run:
             return df
         try:
             n = len(df)
-            df = df.merge(right=self.get_route_attributes(), how="left", left_on="route", right_on="route_id")
+            df = df.merge(right=self.get_route_attributes(), how="left", left_on="route", right_on=TRANSIT_ROUTE)
             assert n == len(df), "Size of DF changed"
             self.route_merged = True
         except KeyError as e:
@@ -582,12 +580,13 @@ class Run:
                 return "keine_Bahnetappe"
 
         df = self.get_pt_legs()
-        df[var] = df["08_TSysName"].apply(lambda x: tsys2pt[x])
+        filtered_df = df[df["08_TSysName"].notnull()]
+        filtered_df[var] = filtered_df["08_TSysName"].apply(lambda x: tsys2pt[x])
 
         if only_train:
-            return self._do(df, by=trip_id, value=var, aggfunc=get_count_train)
+            return self._do(filtered_df, by=trip_id, value=var, aggfunc=get_count_train)
         else:
-            return self._do(df, by=trip_id, value=var, aggfunc=get_count)
+            return self._do(filtered_df, by=trip_id, value=var, aggfunc=get_count)
 
     @cache
     def calc_pt_umstiege(self, only_train=False, **kwargs):
