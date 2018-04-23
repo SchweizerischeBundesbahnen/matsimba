@@ -9,15 +9,18 @@ The following python libraries are provided by the [Swiss Federal Railways](http
 - [MAPY](#mapy)
 - [VIMAPY](#vimapy)
 
+<br />
 
 To use the libraries, follow these steps:
 
+<br />
 
  **Step 1**. Download and install [Python 2.7](https://www.python.org/download/releases/2.7/).
 
 
  **Step 2**. [Clone to repository](https://github.com/SchweizerischeBundesbahnen/matsim-sbb-extensions.git).
 
+<br />
 
 ## Analyse <span id="analyse" />
 
@@ -41,6 +44,7 @@ import pandas as pd
 %matplotlib inline
 ```
 
+<br />
 
 **2**. Import analyse
 
@@ -52,6 +56,7 @@ import analyse.reporting
 import analyse.variable
 ```
 
+<br />
 
 **3**. Create a new run list and append as much simulation runs as desired to the list
 
@@ -63,6 +68,7 @@ secondRun = analyse.run.Run(r"path-to-outputs", name="variant", scale_factor=10,
 runs.append(secondRun)
 ```
 
+<br />
 
 **4**. Load everything
 
@@ -70,6 +76,7 @@ runs.append(secondRun)
 runs.prepare()
 ```
 
+<br />
 
 **5**. You are now able to use the methods to analyze the runs defined in the run list. Examples:
 
@@ -96,6 +103,7 @@ df, fig = runs.plot_einsteiger(by="stop_code", codes=["CF", "NE"],
     foreach=["subpopulation"])
 ```
 
+<br />
 
 **6**. To write a standard excel report, use:
 
@@ -103,14 +111,17 @@ df, fig = runs.plot_einsteiger(by="stop_code", codes=["CF", "NE"],
 analyse.reporting.make_report(runs, r"report.xlsx")
 ```
 
+<br />
 
 ## Manager <span id="manager" />
 
+<br />
 
 ## MAPY <span id="mapy" />
 
 @deprecated
 
+<br />
 
 ## VIMAPY <span id="vimapy" />
 
